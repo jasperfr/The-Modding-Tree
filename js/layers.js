@@ -2,7 +2,7 @@ addLayer('p', {
     name: 'prestige',
     symbol: 'P',
     color: '#0394fc',
-    branches: ['m'],
+    branches: ['m', 'i'],
 
     position: 0,
     row: 0,
@@ -174,4 +174,59 @@ addLayer('m', {
         }
     }
 
+});
+
+addLayer('i', {
+    name: 'incrementy',
+    symbol: 'I',
+    color: '#ab7760',
+
+    row: 1,
+    position: 1,
+
+    startData() { return {
+        unlocked: 1,
+        points: new Decimal(0),
+        incrementyGain: new Decimal(0.001),
+        incrementyBoost: new Decimal(5),
+        ratio: new Decimal(50),
+        
+        incrementyGainPercentage: new Decimal(100),
+        incrementyBoostPercentage: new Decimal(100)
+    }},
+
+    resource: 'Incrementy',
+    baseResource: 'prestige points',
+
+    requires: new Decimal(5),
+    baseAmount() { return player.p.points },
+    type: 'normal',
+    exponent: 0.5,
+    effect() {
+        const self = player[this.layer];
+        return { 
+            incrementyGain: self.incrementyGain.times(self.ratio),
+            incrementyBoost: self.incrementyBoost.times(100 - self.ratio),
+            incrementyProduction: player[this.layer].incrementyGain.times(player[this.layer].points)
+    }},
+    effectDescription() { // Optional text to describe the effects
+        const eff = this.effect();
+        return `which is multiplying point gain by ${eff.incrementyGain} * ${eff.incrementyGain} = x${eff.incrementyBoost.toFixed(3)}.<br>
+            Each incrementy increases the multiplier by ${format(eff.incrementyGain)}/second.<br>
+            You are getting ${eff.incrementyProduction.toFixed(3)} incrementy boost per second.`
+    },
+    update(delta) {
+        let gain = player[this.layer].incrementyGain;
+        gain = gain.times(player[this.layer].points);
+        gain = gain.times(delta);
+        player[this.layer].incrementyBoost = player[this.layer].incrementyBoost.add(gain);
+    },
+
+    midsection: [
+        ["display-text", "Distribute your generation / boost ratio."],
+        ['display-text', function() {
+            return `${format(player.i.incrementyGainPercentage)}% / ${format(player.i.incrementyBoostPercentage)}%`
+        }],
+        ["slider", ["ratio", 0, 100]],
+    ]
 });

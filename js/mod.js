@@ -2,7 +2,7 @@ let modInfo = {
 	name: "The Super Tree",
 	id: "mymod",
 	author: "jasperfr",
-	pointsName: "points",
+	pointsName: "cash",
 	modFiles: ["layers.js", "tree.js"],
 	discordName: "",
 	discordLink: "",
@@ -42,15 +42,6 @@ function getPointGen() {
 		return new Decimal(0)
 
 	let gain = new Decimal(1);
-
-	if(hasUpgrade('p', 11)) gain = gain.times(2);
-	if(hasUpgrade('p', 12)) gain = gain.times(upgradeEffect('p', 12));
-	if(hasUpgrade('p', 23) && hasUpgrade('p', 22)) gain = gain.times(10);
-	if(hasUpgrade('p', 25) && hasUpgrade('p', 24)) gain = gain.times(upgradeEffect('p', 24));
-	if(hasUpgrade('p', 15)) gain = gain.pow(2);
-	if(!hasUpgrade('p', 23) && hasUpgrade('p', 22)) gain = gain.times(10);
-	if(!hasUpgrade('p', 25) && hasUpgrade('p', 24)) gain = gain.times(upgradeEffect('p', 24));
-
 	return gain
 }
 

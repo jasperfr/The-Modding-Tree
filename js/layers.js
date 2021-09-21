@@ -1,232 +1,208 @@
-addLayer('p', {
-    name: 'prestige',
-    symbol: 'P',
-    color: '#0394fc',
-    branches: ['m', 'i'],
+addLayer('h', {
 
+    name: 'Heat',
+    symbol: 'H',
     position: 0,
     row: 0,
+    color: 'red',
 
-    startData() { return {
-        unlocked: 1,
-        points: new Decimal(0)
-    }},
+    resource: 'heat',
+    baseResource: 'cash',
 
-    resource: 'Prestige Points',
-    baseResource: 'points',
-
-    requires: new Decimal(3),
-    baseAmount() { return player.points },
-    type: 'normal',
-    exponent: 0.5,
-
-    gainMult() {
-        let mult = new Decimal(1);
-        if(hasUpgrade(this.layer, 13)) mult = mult.times(upgradeEffect(this.layer, 13));
-        if(hasUpgrade(this.layer, 14)) mult = mult.times(2);
-        if(hasUpgrade(this.layer, 21)) mult = mult.times(upgradeEffect(this.layer, 21));
-        // mastery
-        if(hasUpgrade('m', 11)) mult = mult.times(upgradeEffect('m', 11));
-        return mult;
-    },
-
-    update(delta) {
-        if(hasMilestone('m', 0)) {
-            let gain = getResetGain(this.layer);
-            gain = gain.times(0.1); // 10%;
-            gain = gain.times(delta); // divide by delta
-            player[this.layer].points = player[this.layer].points.add(gain);
+    startData() {
+        return {
+            heat: new Decimal(0),
+            maxHeat: new Decimal(100),
+            heatGeneration: new Decimal(0.01)
         }
     },
 
-    upgrades: {
+    tooltip() { return `${format(player[this.layer].heat)}/${player[this.layer].maxHeat} heat` },
+
+    update(diff) {
+        const self = player[this.layer];
+        const gain = self.heatGeneration.times(diff);
+        self.heat = self.heat.plus(gain);
+        self.heat = Decimal.min(self.heat, self.maxHeat);
+    },
+
+    tabFormat: [
+        ['display-text', function() { return `
+            <h2>You have <span style="color: red; text-shadow: 0 0 2px red; font-weight:600;">${format(player[this.layer].heat)}</span><span>/${player[this.layer].maxHeat}</span> heat.</h2><br>
+            <h3>Your reactor produces <span style="color: red; text-shadow: 0 0 2px red; font-weight:600;">${player[this.layer].heatGeneration}</span> heat per second.</h3>`}],
+        'blank',
+        'h-line',
+        'blank',
+        'grid',
+        'blank',
+        'clickables'
+    ],
+
+    grid: {
+        rows: 4,
+        cols: 5,
+        getStartData(id) {
+            return 0;
+        },
+        getUnlocked(id) {
+            return true
+        },
+        getCanClick(data, id) {
+            return true
+        },
+        onClick(data, id) { 
+
+        },
+        getStyle(data, id) {
+            return {
+                'background-color': 'gray'
+            }
+        },
+        getDisplay(data, id) {
+            return 'Empty slot'
+        }
+    },
+
+    clickables: {
         11: {
-            title: 'Multi-points',
-            description: 'Double point gain.',
-            cost: new Decimal(3)
+            title: 'Uranium-235',
+            display() {
+                return `Lifetime: 50 seconds
+                        Generates 10 H/s
+                        Cost: $40 / tile`
+            },
+            canClick() { return true; },
+            style() { return { 'background-color': 'green' }}
         },
         12: {
-            title: 'Point Collapse',
-            description: 'Gain more points based on your Prestige Points.',
-            cost: new Decimal(10),
-            effect() {
-                return player[this.layer].points.add(1).pow(0.5);
+            title: 'Thorium-189',
+            display() {
+                return `Lifetime: 2m30s
+                        Generates 50 H/s
+                        Cost: $500 / tile`
             },
-            effectDisplay() {
-                return format(upgradeEffect(this.layer, this.id)) + 'x';
-            }
+            canClick() { return true; },
+            style() { return { 'background-color': 'cyan' }}
         },
         13: {
-            title: 'Powered Points',
-            description: 'Gain more prestige points based on points.',
-            cost: new Decimal(25),
-            effect() {
-                return player.points.add(1).pow(0.15);
+            title: 'Americium-450',
+            display() {
+                return `Lifetime: 10m
+                        Generates 200 H/s
+                        Cost: $3500 / tile`
             },
-            effectDisplay() {
-                return format(upgradeEffect(this.layer, this.id)) + 'x';
-            }
+            canClick() { return true; },
+            style() { return { 'background-color': 'yellow' }}
         },
-        14: {
-            title: 'Double Points',
-            description: 'Gain twice as much prestige points.',
-            cost: new Decimal(50)
-        },
-        15: {
-            title: 'Point^2',
-            description: 'Square your point gain.',
-            cost: new Decimal(500)
-        },
+
         21: {
-            title: 'Even More Prestige',
-            description: 'Gain more prestige points based on your points.',
-            cost: new Decimal(10_000),
-            effect() { return player.points.add(1).pow(0.2) },
-            effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + 'x' }
+            title: 'Booster Mk.I',
+            display() {
+                return `Boosts H/s
+                        of 4 adjacent tiles by 1.5x, but lowers their
+                        lifespan by 0.9x.
+                        Cost: $100 / tile`
+            },
+            canClick() { return true; },
+            style() { return { 'background-color': 'silver' }}
         },
         22: {
-            title: 'Even More Points!',
-            description: 'Gain 10x points.',
-            cost: new Decimal(1_000_000)
+            title: 'Booster Mk.II',
+            display() {
+                return `Boosts H/s
+                        of 8 adjacent tiles by 2x, but lowers their
+                        lifespan by 0.8x.
+                        Cost: $1000 / tile`
+            },
+            canClick() { return true; },
+            style() { return { 'background-color': 'gray' }}
         },
         23: {
-            title: 'Reorder of Magnitude',
-            description: 'The previous upgrade is applied before the square upgrade.',
-            cost: new Decimal(1e15)
+            title: 'Fission Beam',
+            display() {
+                return `Increases the lifespan of fuel by 1.75x,
+                        but lowers their production by 0.75x.
+                        Cost: $2000 / tile`
+            },
+            canClick() { return true; },
+            style() { return { 'background-color': 'black', color: 'white' }}
         },
-        24: {
-            title: 'Pushing for More',
-            description: 'Gain more points based on the exponent of your prestige points.',
-            cost: new Decimal(1e20),
-            effect() { return player[this.layer].points.add(1).log10(); },
-            effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + 'x'; }
+
+        31: {
+            title: 'Copper Tubing',
+            display() {
+                return `Increases the maximum heat multiplier
+                        by 1.2x for each Uranium fuel rod.
+                        Cost: $650 / tile`
+            },
+            canClick() { return true; },
+            style() { return { 'background-color': 'orange' }}
         },
-        25: {
-            title: 'To the Limit',
-            description: 'The previous upgrade is also applied before the square upgrade.',
-            cost: new Decimal(1e30)
+        32: {
+            title: 'Aluminium Plating',
+            display() {
+                return `Increases the base maximum heat
+                        by 100 for each Thorium fuel rod.
+                        Cost: $750 / tile`
+            },
+            canClick() { return true; },
+            style() { return { 'background-color': 'white' }}
+        },
+        33: {
+            title: 'Titanium Plating',
+            display() {
+                return `Increases the maximum heat by 1.5x,
+                        but lowers the lifespan of fuel by 0.85x.
+                        Cost: $600 / tile`
+            },
+            canClick() { return true; },
+            style() { return { 'background-color': 'magenta' }}
         }
     }
 });
 
-addLayer('m', {
-    name: 'mastery',
-    symbol: 'M',
-    color: '#d552f2',
-    branches: [],
+/*
+addLayer('g', {
 
-    position: 0,
-    row: 1,
+    name: 'Generators',
+    symbol: 'G',
+    position: 1,
+    row: 0,
 
-    startData() { return {
-        unlocked: 0,
-        points: new Decimal(0),
-        total: new Decimal(0)
-    }},
+    resource: 'energy',
+    baseResource: 'cash',
 
-    resource: 'Mastery Points',
-    baseResource: 'prestige points',
+    startData() {
+        return {
+            energy: new Decimal(0),
+        }
+    },
 
-    requires: new Decimal(1e40),
-    baseAmount() { return player.p.points },
-    type: 'normal',
-    exponent: 0.5,
+    midsection: ['grid'],
 
-    upgrades: {
-        11: {
-            title: 'Presitigious',
-            description: 'Gain more prestige points based on your Mastery points.',
-            cost: new Decimal(1),
-            effect() {
-                return player[this.layer].points.add(4).pow(0.5);
-            },
-            effectDisplay() {
-                return format(upgradeEffect(this.layer, this.id)) + 'x';
+    grid: {
+        rows: 4,
+        cols: 5,
+        getStartData(id) {
+            return {
+                plotType: 'empty'
+            }
+        },
+        getUnlocked(id) { // Default
+            return true
+        },
+        getCanClick(data, id) {
+            return true
+        },
+        onClick(data, id) { 
+            player[this.layer].grid[id]++
+        },
+        getDisplay(data, id) {
+            switch(data.plotType) {
+                case 'empty': return 'Empty plot';
             }
         }
-    },
-
-    milestones: {
-        0: {
-            requirementDescription: '2 total Mastery Points',
-            effectDescription: 'Gain 10% of your Prestige Points per second.',
-            done() { return player[this.layer].best.gte(2); }
-        },
-        1: {
-            requirementDescription: '5 total Mastery Points',
-            effectDescription: 'Autobuy Prestige Points.',
-            done() { return player[this.layer].best.gte(5); }
-        },
-        2: {
-            requirementDescription: '20 total Mastery Points',
-            effectDescription: 'Gain 100% of your Prestige Points per second.',
-            done() { return player[this.layer].best.gte(20); }
-        },
-        3: {
-            requirementDescription: '50 total Mastery Points',
-            effectDescription: 'Prestige upgrades do not reset upon a Mastery.',
-            done() { return player[this.layer].best.gte(50); }
-        },
-        4: {
-            requirementDescription: '1000 total Mastery Points',
-            effectDescription: 'Unlock Challenges.',
-            done() { return player[this.layer].best.gte(1000); }
-        }
     }
 
 });
-
-addLayer('i', {
-    name: 'incrementy',
-    symbol: 'I',
-    color: '#ab7760',
-
-    row: 1,
-    position: 1,
-
-    startData() { return {
-        unlocked: 1,
-        points: new Decimal(0),
-        incrementyGain: new Decimal(0.001),
-        incrementyBoost: new Decimal(5),
-        ratio: new Decimal(50),
-        
-        incrementyGainPercentage: new Decimal(100),
-        incrementyBoostPercentage: new Decimal(100)
-    }},
-
-    resource: 'Incrementy',
-    baseResource: 'prestige points',
-
-    requires: new Decimal(5),
-    baseAmount() { return player.p.points },
-    type: 'normal',
-    exponent: 0.5,
-    effect() {
-        const self = player[this.layer];
-        return { 
-            incrementyGain: self.incrementyGain.times(self.ratio),
-            incrementyBoost: self.incrementyBoost.times(100 - self.ratio),
-            incrementyProduction: player[this.layer].incrementyGain.times(player[this.layer].points)
-    }},
-    effectDescription() { // Optional text to describe the effects
-        const eff = this.effect();
-        return `which is multiplying point gain by ${eff.incrementyGain} * ${eff.incrementyGain} = x${eff.incrementyBoost.toFixed(3)}.<br>
-            Each incrementy increases the multiplier by ${format(eff.incrementyGain)}/second.<br>
-            You are getting ${eff.incrementyProduction.toFixed(3)} incrementy boost per second.`
-    },
-    update(delta) {
-        let gain = player[this.layer].incrementyGain;
-        gain = gain.times(player[this.layer].points);
-        gain = gain.times(delta);
-        player[this.layer].incrementyBoost = player[this.layer].incrementyBoost.add(gain);
-    },
-
-    midsection: [
-        ["display-text", "Distribute your generation / boost ratio."],
-        ['display-text', function() {
-            return `${format(player.i.incrementyGainPercentage)}% / ${format(player.i.incrementyBoostPercentage)}%`
-        }],
-        ["slider", ["ratio", 0, 100]],
-    ]
-});
+*/

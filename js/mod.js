@@ -1,12 +1,12 @@
 let modInfo = {
-	name: "The Super Tree",
+	name: "The Reactor Tree",
 	id: "mymod",
 	author: "jasperfr",
-	pointsName: "cash",
-	modFiles: ["layers.js", "tree.js"],
+	pointsName: "$",
+	modFiles: ["layers/reactor.js", 'layers/steam.js', 'layers/turbine.js', 'layers/pump.js', "tree.js"],
 	discordName: "",
 	discordLink: "",
-	initialStartPoints: new Decimal(0), // Used for hard resets and new players
+	initialStartPoints: new Decimal(10), // Used for hard resets and new players
 	offlineLimit: 1,  // In hours
 }
 
@@ -41,7 +41,7 @@ function getPointGen() {
 	if(!canGenPoints())
 		return new Decimal(0)
 
-	let gain = new Decimal(1);
+	let gain = new Decimal(0);
 	return gain
 }
 

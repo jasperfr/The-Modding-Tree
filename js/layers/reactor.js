@@ -3,21 +3,28 @@ addLayer('h', {
     name: 'Heat',
     symbol: 'H',
     position: 0,
-    row: 0,
+    row: 1,
     color: 'red',
+    nodeStyle: {
+        'background': 'linear-gradient(359deg, #d93a29, #e4bb53, #fffffc)',
+        'background-size': '600% 600%',
+        '-webkit-animation': 'fire 20s ease infinite',
+        '-moz-animation': 'fire 20s ease infinite',
+        'animation': 'fire 20s ease infinite'
+    },
 
     resource: 'heat',
     baseResource: 'cash',
 
     startData() {
         return {
-            heat: new Decimal(0),
-            maxHeat: new Decimal(100),
-            heatGeneration: new Decimal(0.01)
+            heat: new Decimal(100),
+            maxHeat: new Decimal(1000),
+            heatGeneration: new Decimal(1)
         }
     },
 
-    tooltip() { return `${format(player[this.layer].heat)}/${player[this.layer].maxHeat} heat` },
+    tooltip() { return `${format(player[this.layer].heat)}/${player[this.layer].maxHeat}°C` },
 
     update(diff) {
         const self = player[this.layer];
@@ -28,7 +35,7 @@ addLayer('h', {
 
     tabFormat: [
         ['display-text', function() { return `
-            <h2>You have <span style="color: red; text-shadow: 0 0 2px red; font-weight:600;">${format(player[this.layer].heat)}</span><span>/${player[this.layer].maxHeat}</span> heat.</h2><br>
+            <h2>Your reactor's temperature is <span style="color: red; text-shadow: 0 0 2px red; font-weight:600;">${format(player[this.layer].heat)}</span><span>/${player[this.layer].maxHeat}</span>°C.</h2><br>
             <h3>Your reactor produces <span style="color: red; text-shadow: 0 0 2px red; font-weight:600;">${player[this.layer].heatGeneration}</span> heat per second.</h3>`}],
         'blank',
         'h-line',
@@ -160,49 +167,3 @@ addLayer('h', {
         }
     }
 });
-
-/*
-addLayer('g', {
-
-    name: 'Generators',
-    symbol: 'G',
-    position: 1,
-    row: 0,
-
-    resource: 'energy',
-    baseResource: 'cash',
-
-    startData() {
-        return {
-            energy: new Decimal(0),
-        }
-    },
-
-    midsection: ['grid'],
-
-    grid: {
-        rows: 4,
-        cols: 5,
-        getStartData(id) {
-            return {
-                plotType: 'empty'
-            }
-        },
-        getUnlocked(id) { // Default
-            return true
-        },
-        getCanClick(data, id) {
-            return true
-        },
-        onClick(data, id) { 
-            player[this.layer].grid[id]++
-        },
-        getDisplay(data, id) {
-            switch(data.plotType) {
-                case 'empty': return 'Empty plot';
-            }
-        }
-    }
-
-});
-*/

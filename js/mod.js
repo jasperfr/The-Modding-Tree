@@ -3,7 +3,7 @@ let modInfo = {
 	id: "mymod",
 	author: "jasperfr",
 	pointsName: "$",
-	modFiles: ["layers/reactor.js", 'layers/steam.js', 'layers/turbine.js', 'layers/pump.js', "tree.js"],
+	modFiles: ["layers/reactor.js", 'layers/steam.js', 'layers/energy.js', 'layers/turbine.js', 'layers/pump.js', 'layers/research.js', "tree.js"],
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal(10), // Used for hard resets and new players

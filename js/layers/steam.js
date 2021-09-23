@@ -1,12 +1,10 @@
 addLayer('s', {
 
     name: 'Steam',
-    symbol: 'S',
-    position: 1,
-    row: 1,
+    symbol: '∿',
     color: 'white',
 
-    branches: ['h'],
+    branches: [['h', 3], 't'],
 
     resource: 'steam',
     baseResource: 'heat',
@@ -14,7 +12,7 @@ addLayer('s', {
     startData() {
         return {
             steam: new Decimal(0),
-            maxSteam: new Decimal(10000),
+            maxSteam: new Decimal(1000),
             steamPerSecond: new Decimal(0)
         }
     },

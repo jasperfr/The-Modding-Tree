@@ -2,6 +2,12 @@ var layoutInfo = {
     startTab: "none",
     startNavTab: "tree-tab",
 	showTree: true,
+
+    treeLayout: [
+        ['r', 'blank', 'p'],
+        ['h', 'blank','blank','blank','s'],
+        ['e', 'blank', 't']   
+    ]
 }
 
 

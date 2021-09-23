@@ -1,9 +1,7 @@
 addLayer('h', {
 
-    name: 'Heat',
-    symbol: 'H',
-    position: 0,
-    row: 1,
+    name: 'Reactor',
+    symbol: '☢',
     color: 'red',
     nodeStyle: {
         'background': 'linear-gradient(359deg, #d93a29, #e4bb53, #fffffc)',
@@ -19,7 +17,7 @@ addLayer('h', {
     startData() {
         return {
             heat: new Decimal(100),
-            maxHeat: new Decimal(1000),
+            maxHeat: new Decimal(100),
             heatGeneration: new Decimal(1)
         }
     },

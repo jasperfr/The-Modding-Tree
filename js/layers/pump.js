@@ -1,9 +1,7 @@
 addLayer('p', {
 
     name: 'Pumps',
-    symbol: 'P',
-    position: 0,
-    row: 0,
+    symbol: '≋',
     color: '#2384eb',
     nodeStyle: {
         'background': 'linear-gradient(317deg, #2f5bb4, #53a3e4, #a1bdf5)',

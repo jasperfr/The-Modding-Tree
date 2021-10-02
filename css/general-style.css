@@ -16,7 +16,7 @@ h1, h2, h3, b, input {
 
 /* These are styles for different states of components. You can make layer-specific versions with .c.locked, for example */
 .locked {
-	background-color: #bf8f8f;
+	background-color: #7A6537;
 	cursor: not-allowed;
 }
 
@@ -31,7 +31,7 @@ h1, h2, h3, b, input {
 }
 
 .bought {
-	background-color: #77bf5f;
+	background-color: #7A6537;
 	cursor: default;
 }
 

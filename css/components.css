@@ -15,18 +15,30 @@
 }
 
 .achievement {
-	height: 90px;
-	width: 90px;
-	border-radius: 25%;
+	height: 64px;
+	width: 64px;
+	border-radius: 0;
 	border: 2px solid;
-	border-color: rgba(0, 0, 0, 0.125);
+	border-color: rgb(59, 59, 59);
 	font-size: 10px;
 	color: white;
 	text-shadow: 0 0 2px #000000;
+	background-image: url('../resources/achievements.png');
 }
 .achievement:hover {
 	box-shadow: 0 0 10px var(--points);
 	z-index: 7;
+}
+
+.achievement.bought::after {
+	content: '';
+	display: block;
+	width: 64px;
+	height: 64px;
+	position: absolute;
+	left: 0;
+	top: 0;
+	background-color: rgba(0, 255, 0, 0.2);
 }
 
 .buyable {

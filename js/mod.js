@@ -3,7 +3,7 @@ let modInfo = {
 	id: "mymod",
 	author: "jasperfr",
 	pointsName: "antimatter",
-	modFiles: ['antimatter.js', "tree.js"],
+	modFiles: ['antimatter.js', 'achievements.js', "tree.js"],
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal(10), // Used for hard resets and new players
@@ -12,16 +12,16 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.0",
-	name: "Literally nothing",
+	num: "0.5a",
+	name: "Antimatter Dimensions",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
-	<h3>v0.0</h3><br>
-		- Added things.<br>
-		- Added stuff.`
+	<h3>v0.5a</h3><br>
+		- Added Antimatter Dimentions.<br>
+		- Added first 2 rows of achievements.`
 
-let winText = `Congratulations! You have reached the end and beaten this game, but for now...`
+let winText = `Congratulations! You have reached Infinity, and thus the end of the alpha version. More to come eventually.`
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
@@ -43,7 +43,7 @@ function getPointGen() {
 
 	let gain = new Decimal(0);
 
-	gain = gain.plus(player.ad.dimensions[0].amount).times(player.ad.dimensions[0].multiplier);
+	gain = gain.plus(player.ad.dimensions[0].amount).times(player.ad.dimensions[0].multiplier).times(player.ad.boosts.effect(0)).times(1.05 ** player.ach.achievements.length);
 
 	return gain
 }
@@ -58,7 +58,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-
+	return player.points.gt(1.79770e308);
 }
 
 

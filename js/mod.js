@@ -42,8 +42,12 @@ function getPointGen() {
 		return new Decimal(0)
 
 	let gain = new Decimal(0);
+	let boostEffect = Math.pow(player.ad.boosts.multiplier, Math.max(0, player.ad.boosts.amount));
 
-	gain = gain.plus(player.ad.dimensions[0].amount).times(player.ad.dimensions[0].multiplier).times(player.ad.boosts.effect(0)).times(1.05 ** player.ach.achievements.length);
+	gain = gain.plus(player.ad.dimensions[0].amount)
+			   .times(player.ad.dimensions[0].multiplier)
+			   .times(boostEffect)
+			   .times(1.05 ** player.ach.achievements.length);
 
 	return gain
 }

@@ -255,10 +255,13 @@ addLayer('ad', {
                 if(player.ad.dimensions[7].amount.eq(0)) return false;
 
                 let d = player.ad.dimensions[0].amount;
-                let g = new Decimal(1);
-                if(d.gt(0)) g = Decimal.max(Decimal.log10(d).divide(10), 1).pow(2);
+                let s = player.ad.sacrifice.sacrificed;
+                let g = new Decimal(1), j = new Decimal(1);
 
-                return g.gt(1);
+                if(d.gt(0)) g = Decimal.max(Decimal.log10(d).divide(10), 1).pow(2);
+                if(s.gt(0)) j = Decimal.max(Decimal.log10(s).divide(10), 1).pow(2);
+
+                return (g.divide(j)).gt(1);
             },
             onClick() {
                 const s = player.ad.sacrifice;

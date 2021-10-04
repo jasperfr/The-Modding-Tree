@@ -3,7 +3,7 @@ let modInfo = {
 	id: "antreematter",
 	author: "jasperfr",
 	pointsName: "antimatter",
-	modFiles: ['antimatter.js', 'achievements.js', "tree.js"],
+	modFiles: ['antimatter.js', 'booster.js', 'achievements.js', "tree.js"],
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal(10), // Used for hard resets and new players
@@ -12,11 +12,14 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.6a",
+	num: "0.7a",
 	name: "Antreematter Dimensions",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.7a</h3><br>
+		- Added Booster Dimensions.<br>
+		- Added first Booster Dimension upgrade.<br><br>
 	<h3>v0.6a</h3><br>
 		- Fixed startData() and moved functions out of it.<br>
 		- Added more hotkeys<br>
@@ -52,6 +55,7 @@ function getPointGen() {
 
 	gain = gain.plus(player.ad.dimensions[0].amount)
 			   .times(player.ad.dimensions[0].multiplier)
+			   .times(player.bd.multiplier)
 			   .times(boostEffect)
 			   .times(1.05 ** player.ach.achievements.length);
 

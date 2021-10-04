@@ -5,7 +5,8 @@ addLayer('ad', {
     name: 'Antimatter Dimensions',
     symbol: 'AD',
     color: '#914339',
-    row: 0,
+    tooltip: 'Antimatter Dimensions',
+    branches: ['bd'],
 
     baseResource: 'antimatter',
 
@@ -112,6 +113,7 @@ addLayer('ad', {
                     .times(delta)
                     .times(1.05 ** player.ach.achievements.length)
                     .times(self.dimensions[i+1].multiplier)
+                    .times(player.bd.multiplier)
                     .times(boostEffect)
                     .times(new Decimal(1000)
                         .divide(self.tickspeed.speed)
@@ -120,7 +122,6 @@ addLayer('ad', {
         }
     },
 
-    tooltip() { return 'Antimatter Dimensions' },
     
     tabFormat: [
         ['display-text', function() { return  `There is ${format(player.points, 2)} antimatter.`; }],
@@ -128,7 +129,7 @@ addLayer('ad', {
         ['bar', 'percentageToInfinity'],
         'blank',
 
-        ['display-text', '<h1>Dimensions</h1>'],'blank',
+        ['display-text', '<h1>Antimatter Dimensions</h1>'],'blank',
         ['display-text', function() { return `<h4>Reduce the tick interval by ${player.ad.tickspeed.decrease}%.</h4>` }],
         ['row', [['clickable', 't'], ['clickable', 't-max']]],
         ['display-text', function() { return `<h4>Tickspeed: ${player.ad.tickspeed.speed}</h4>` }],
@@ -146,9 +147,9 @@ addLayer('ad', {
             const html = ['column', []];
             const dimensions = player.ad.dimensions;
             for(let i = 0; i < dimensions.length; i++) {
-                let dimAmount = format(dimensions[i].amount.round());
+                let dimAmount = formatWhole(dimensions[i].amount);
                 let boostEffect = Math.pow(player.ad.boosts.multiplier, Math.max(0, player.ad.boosts.amount - i));
-                let dimMulti = dimensions[i].multiplier.times(boostEffect);
+                let dimMulti = dimensions[i].multiplier.times(boostEffect).times(player.bd.multiplier);
                 if(i == 7) dimMulti = dimMulti.times(player.ad.sacrifice.multiplier);
                 if(player.ad.boosts.amount > (i - 4)) {
                     html[1].push(['row', [
@@ -311,7 +312,8 @@ addLayer('ad', {
                     case 1: requirement = '20 5th'; break;
                     case 2: requirement = '20 6th'; break;
                     case 3: requirement = '20 7th'; break;
-                    default: requirement = `${20 + ((boosts - 4) * 15)} 8th`; break;
+                    default: return `Reset for ${Decimal.floor(player.ad.dimensions[7].amount.divide(10))} BP`;
+                    // default: requirement = `${20 + ((boosts - 4) * 15)} 8th`; break;
                 }
                 return `Dimensional ${boost}(${player.ad.boosts.amount})<br>Requires ${requirement} Dimensions`;
             },
@@ -323,14 +325,19 @@ addLayer('ad', {
                     case 1: [dim, amount] = [4, 20]; break;
                     case 2: [dim, amount] = [5, 20]; break;
                     case 3: [dim, amount] = [6, 20]; break;
-                    default: [dim, amount] = [7, (20 + ((boosts - 4) * 15))]; break;
+                    default: [dim, amount] = [7, 10]; break;
                 };
                 return player.ad.dimensions[dim].amount.gte(amount);
             },
             onClick() { 
                 const self = player.ad;
                 const boosts = player.ad.boosts;
-                boosts.amount++;
+                if(boosts.amount < 4) {
+                    boosts.amount++;
+                } else {
+                    player.bd.BP = player.bd.BP.plus(Decimal.floor(player.ad.dimensions[7].amount.divide(10)));
+                }
+
 
                 // reset the game up to this point.
                 for(let i = 0; i < self.dimensions.length; i++) {
@@ -375,6 +382,9 @@ addLayer('ad', {
 
                 player.points = new Decimal(10);
                 self.tickspeed.decrease = new Decimal(self.galaxies.effect[self.galaxies.amount]);
+
+                // Reset Booster Dimensions.
+                layerDataReset('bd');
             },
             style() { return { 'width': '300px' } }
         },

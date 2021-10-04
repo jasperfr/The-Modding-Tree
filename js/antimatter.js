@@ -308,7 +308,7 @@ addLayer('ad', {
                     case 1: requirement = '20 5th'; break;
                     case 2: requirement = '20 6th'; break;
                     case 3: requirement = '20 7th'; break;
-                    default: requirement `${20 + ((boosts - 4) * 15)} 8th`; break;
+                    default: requirement = `${20 + ((boosts - 4) * 15)} 8th`; break;
                 }
                 return `Dimensional ${boost}(${player.ad.boosts.amount})<br>Requires ${requirement} Dimensions`;
             },

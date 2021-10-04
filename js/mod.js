@@ -1,6 +1,6 @@
 let modInfo = {
 	name: "Antreematter Dimensions",
-	id: "mymod",
+	id: "antreematter",
 	author: "jasperfr",
 	pointsName: "antimatter",
 	modFiles: ['antimatter.js', 'achievements.js', "tree.js"],
@@ -12,14 +12,20 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.5a",
-	name: "Antimatter Dimensions",
+	num: "0.6a",
+	name: "Antreematter Dimensions",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.6a</h3><br>
+		- Fixed startData() and moved functions out of it.<br>
+		- Added more hotkeys<br>
+		- General performance fixes<br>
+		- Fixed end game screen<br><br>
 	<h3>v0.5a</h3><br>
 		- Added Antimatter Dimentions.<br>
-		- Added first 2 rows of achievements.`
+		- Added first 2 rows of achievements.<br>
+`
 
 let winText = `Congratulations! You have reached Infinity, and thus the end of the alpha version. More to come eventually.`
 
@@ -62,7 +68,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gt(1.79770e308);
+	return player.points.gt(1.79e308);
 }
 
 

@@ -3,7 +3,7 @@ let modInfo = {
 	id: "antreematter",
 	author: "jasperfr",
 	pointsName: "antimatter",
-	modFiles: ['antimatter.js', 'booster.js', 'achievements.js', "tree.js"],
+	modFiles: ['antimatter.js', "tree.js"],
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal(10), // Used for hard resets and new players
@@ -50,15 +50,8 @@ function getPointGen() {
 	if(!canGenPoints())
 		return new Decimal(0)
 
-	let gain = new Decimal(0);
-	let boostEffect = Math.pow(player.ad.boosts.multiplier, Math.max(0, player.ad.boosts.amount));
-
-	gain = gain.plus(player.ad.dimensions[0].amount)
-			   .times(player.ad.dimensions[0].multiplier)
-			   .times(player.bd.multiplier)
-			   .times(boostEffect)
-			   .times(1.05 ** player.ach.achievements.length);
-
+	let gain = new Decimal(1);
+	
 	return gain
 }
 

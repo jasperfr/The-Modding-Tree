@@ -4,14 +4,23 @@
 	width: 200px;
 	border-radius: 5px;
 	border: 2px solid;
-	border-color: rgb(68, 68, 68);
 	font-size: 10px;
 	overflow: visible;
+	border-color: #d05050;
 	font-size: 14px;
+	position:relative;
+	background-color: rgb(66, 66, 66) !important;
+	color: white !important;
+	outline: 1px solid black;
 }
 
 .upg.can {
-	background-color: #4ABB5F !important;
+	border-color: #4ABB5F !important;
+}
+
+.upg.bought {
+	border-color: #4ABB5F !important;
+	background-color: #357541 !important;
 }
 
 .achievement {

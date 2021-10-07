@@ -8,7 +8,7 @@ function mixedStandardFormat(num, precision = 0, whole = false) {
     if (num.e >= 9 && num.e < 12) return `${format(num.divide(1e9), precision)} B`;
     if (num.e >= 12 && num.e < 15) return `${format(num.divide(1e12), precision)} T`;
     if (num.e >= 15 && num.e < 18) return `${format(num.divide(1e15), precision)} Qd`;
-    if (num.e >= 18 && num.e < 21) return `${format(num.divide(1e18), precision)} Qi`;
+    if (num.e >= 18 && num.e < 21) return `${format(num.divide(1e18), precision)} Qt`;
     if (num.e >= 21 && num.e < 24) return `${format(num.divide(1e21), precision)} Sx`;
     if (num.e >= 24 && num.e < 27) return `${format(num.divide(1e24), precision)} Sp`;
     if (num.e >= 27 && num.e < 30) return `${format(num.divide(1e27), precision)} Oc`;

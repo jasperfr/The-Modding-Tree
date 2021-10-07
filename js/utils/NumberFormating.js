@@ -1,3 +1,21 @@
+// garbage function lol
+function mixedStandardFormat(num, precision = 0, whole = false) {
+    if (num === null || num === undefined) return "NaN"
+    if (num.mag < 0.001) return (0).toFixed(whole ? 0 : precision);
+    if (num.e < 3) return format(num, whole ? 0 : precision);
+    if (num.e >= 3 && num.e < 6) return `${format(num.divide(1e3), precision)} K`;
+    if (num.e >= 6 && num.e < 9) return `${format(num.divide(1e6), precision)} M`;
+    if (num.e >= 9 && num.e < 12) return `${format(num.divide(1e9), precision)} B`;
+    if (num.e >= 12 && num.e < 15) return `${format(num.divide(1e12), precision)} T`;
+    if (num.e >= 15 && num.e < 18) return `${format(num.divide(1e15), precision)} Qd`;
+    if (num.e >= 18 && num.e < 21) return `${format(num.divide(1e18), precision)} Qi`;
+    if (num.e >= 21 && num.e < 24) return `${format(num.divide(1e21), precision)} Sx`;
+    if (num.e >= 24 && num.e < 27) return `${format(num.divide(1e24), precision)} Sp`;
+    if (num.e >= 27 && num.e < 30) return `${format(num.divide(1e27), precision)} Oc`;
+    if (num.e >= 30 && num.e < 33) return `${format(num.divide(1e30), precision)} No`;
+    if (num.e >= 33 && num.e < 36) return `${format(num.divide(1e33), precision)} Dc`;
+    return format(num, precision)
+}
 
 function exponentialFormat(num, precision, mantissa = true) {
     let e = num.log10().floor()

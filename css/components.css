@@ -42,13 +42,21 @@
 }
 
 .buyable {
-	height: 200px;
+	height: 40px;
 	width: 200px;
-	border-radius: 25%;
+	border-radius: 2px;
 	border: 2px solid;
-	border-color: rgba(0, 0, 0, 0.125);
-	font-size: 10px;
+	margin: 2px;
+	border-color: #d05050;
+	font-size: 14px;
 	position:relative;
+	background-color: rgb(66, 66, 66) !important;
+	color: white !important;
+	outline: 1px solid black;
+}
+
+.buyable.can {
+	border-color: #4ABB5F !important;
 }
 
 .milestone {

@@ -14,42 +14,71 @@ const ORDINAL = ['0th','1st','2nd','3rd','4th','5th','6th','7th','8th'];
 addLayer('ad', {
 
     name: 'Antimatter Dimensions',
-    symbol: 'AD',
-    color: '#914339',
+    symbol: 'A',
+    color: '#e84848',
     tooltip: 'Antimatter Dimensions',
 
     baseResource: 'antimatter',
 
     startData() {
         return {
-            points: new Decimal(0),
             dimensions: [
-                { amount: new Decimal(0), purchased: new Decimal(0) },
-                // { amount: new Decimal(0), purchased: new Decimal(0) },
-                // { amount: new Decimal(0), purchased: new Decimal(0) },
-                // { amount: new Decimal(0), purchased: new Decimal(0) },
-                // { amount: new Decimal(0), purchased: new Decimal(0) },
-                // { amount: new Decimal(0), purchased: new Decimal(0) },
-                // { amount: new Decimal(0), purchased: new Decimal(0) }
+                new Decimal(0),
+                new Decimal(0),
+                new Decimal(0),
+                new Decimal(0),
+                new Decimal(0),
+                new Decimal(0),
+                new Decimal(0),
+                new Decimal(0),
             ],
 
-            tickspeed: { amount: new Decimal(1), purchased: new Decimal(2) },
             boosts: new Decimal(0),
-            galaxies: new Decimal(0)
+            galaxies: new Decimal(0),
+            style: [0, 0, 0, 0, 0, 0, 0, 0]
         }
     },
 
+    tickspeed: {
+        increase() { return Decimal.plus(1.125, player.ad.galaxies.times(2)) },
+        multiplier() { return Decimal.pow(tmp.ad.tickspeed.increase, getBuyableAmount('ad', 'tickspeed')); },
+    },
+
     update(delta) {
-        player.ad.tickspeed.purchased = player.ad.tickspeed.purchased.plus(1)
+        for(let i = 0; i < 6; i++) {
+            let multiplier = tmp.ad.buyables[`dimension-${i+2}`].multiplier
+            player.ad.dimensions[i] = player.ad.dimensions[i].plus(
+                player.ad.dimensions[i+1]
+                .times(multiplier)
+                .times(tmp.ad.tickspeed.multiplier)
+                .times(delta)
+            );
+        }
     },
     
     tabFormat: [
-        ['display-text', function() { return  `There is ${format(player.points, 2)} antimatter.`; }], 'blank',
+        ['display-text', function() { return  `There is ${mixedStandardFormat(player.points, 2)} antimatter.`; }], 'blank',
         ['bar', 'percentageToInfinity'], 'blank',
         ['display-text', '<h1>Antimatter Dimensions</h1>'],'blank',
-        ['display-text', function() { return `<h4>Increase the tick speed by ${new Decimal(15).plus(player.ad.galaxies.times(2))}%.</h4>` }],
-        ['row', [['clickable', 't'], ['clickable', 't-max']]],
-        ['display-text', function() { return `<h4>Tickspeed: ${format((new Decimal(1).divide(new Decimal(1).minus(new Decimal(99.9999999999).plus(player.ad.galaxies.times(2)).divide(100)))).pow(player.ad.tickspeed.purchased))}x</h4>` }],
+        ['display-text', function() { return `<h4>Increase tickspeed by ${tmp.ad.tickspeed.increase}x.</h4>` }],
+        ['row', [['buyable', 'tickspeed'], 'blank', ['buyable', 'tickspeed-max']]],
+        ['display-text', function() { return `<h4>Tickspeed: ${mixedStandardFormat(tmp.ad.tickspeed.multiplier, 3)}/s</h4>` }],
+        
+        'blank',
+
+        function() {
+            const html = ['column', []];
+            for(let i = 0; i < 8; i++) {
+                let multiplier = mixedStandardFormat(tmp.ad.buyables[`dimension-${i+1}`].multiplier, 1);
+                let amount = mixedStandardFormat(player.ad.dimensions[i], 3, true);
+                html[1].push(['row', [
+                    ['raw-html', `<div style="width:150px; text-align:left;"><h3>${ORDINAL[i+1]} Dimension</h3><br><span style="color:silver;">x${multiplier}</span></div>`],
+                    ['raw-html', `<div style="width:150px;"><h4>${amount}</h4></div>`],
+                    ['buyable', `dimension-${i+1}`]
+                ], { 'background-color' : i % 2 && '#4d3c3c', 'padding': '2px 16px' }]);
+            }
+            return html;
+        }
     ],
 
     bars: {
@@ -65,36 +94,37 @@ addLayer('ad', {
         }
     },
 
-    dimensions: [
-        dimension(0, 10, 1e3)
-    ],
+    buyables: {
+        'tickspeed': {
+            cost(x) { return Decimal.pow(10, Decimal.plus(3, x)) },
+            display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)}` },
+            canAfford() { return player.points.gte(this.cost()) },
+            buy() {
+                player.points = player.points.sub(this.cost())
+                setBuyableAmount('ad', 'tickspeed', getBuyableAmount('ad', 'tickspeed').add(1))
+            },
+            buyMax() { while(this.canAfford()) { this.buy(); } },
+            style() { return { 'width': '150px', 'background-color': this.canAfford() ? '#357541 !important' : '' } }
+        },
+        'tickspeed-max': {
+            cost() { return Decimal.pow(10, Decimal.plus(3, getBuyableAmount('ad', 'tickspeed'))) },
+            display() { return `Buy Max` },
+            canAfford() { return player.points.gte(this.cost()) },
+            buy() { buyMaxBuyable('ad', 'tickspeed') },
+            style() { return { 'width': '150px', 'background-color': this.canAfford() ? '#357541 !important' : '' } }
+        },
+
+        'dimension-1': dimBuyable(0, 1e1 , 1e3 ),
+        'dimension-2': dimBuyable(1, 1e2 , 1e4 ),
+        'dimension-3': dimBuyable(2, 1e4 , 1e5 ),
+        'dimension-4': dimBuyable(3, 1e6 , 1e6 ),
+        'dimension-5': dimBuyable(4, 1e9 , 1e8 ),
+        'dimension-6': dimBuyable(5, 1e13, 1e10),
+        'dimension-7': dimBuyable(6, 1e18, 1e12),
+        'dimension-8': dimBuyable(7, 1e24, 1e15),
+    },
 
     clickables: {
-
-        // 't': {
-        //     display() { return `Cost: ${format(player.ad.tickspeed.cost)}` },
-        //     canClick() { return player.points.gte(player.ad.tickspeed.cost); },
-        //     onClick() { 
-        //         const tickspeed = player.ad.tickspeed;
-        //         player.points = player.points.minus(tickspeed.cost);
-        //         tickspeed.cost = tickspeed.cost.times(tickspeed.costMultiplier);
-        //         tickspeed.speed = tickspeed.speed.minus(tickspeed.speed.times(tickspeed.decrease.divide(100)));
-        //     },
-        //     style() { return { 'width': '100px' } }
-        // },
-        // 't-max': {
-        //     display() { return `Buy Max` },
-        //     canClick() { return player.points.gte(player.ad.tickspeed.cost); },
-        //     onClick() { 
-        //         const tickspeed = player.ad.tickspeed;
-        //         while(player.points.gte(player.ad.tickspeed.cost)) {
-        //             player.points = player.points.minus(tickspeed.cost);
-        //             tickspeed.cost = tickspeed.cost.times(tickspeed.costMultiplier);
-        //             tickspeed.speed = tickspeed.speed.minus(tickspeed.speed.times(tickspeed.decrease.divide(100)));
-        //         }
-        //     },
-        //     style() { return { 'width': '100px' } }
-        // },
 
         // 'shift': {
         //     display() {
@@ -186,52 +216,28 @@ addLayer('ad', {
     }
 });
 
-function dimension(dimension, cost, multiplier) {
+function dimBuyable(dimension, cost, multiplier) {
     return {
-        cost() { return new Decimal(cost).times(Decimal.pow(multiplier, tmp.ad.dimensions[dimension].amount10)) },
-        multiplier() { return Decimal.pow(2, tmp.ad.dimensions[0].amount10) },
-        amount10() { return player.ad.dimensions[dimension].amount.div(10).floor() }
+        cost() { return Decimal.times(cost, Decimal.pow(multiplier, this.amount10())) },
+        display() { return `${mixedStandardFormat(this.cost(), 2, true)} AM` },
+        canAfford() { return player.points.gte(this.cost()) },
+        buy() {
+            while(this.canAfford()) {
+                player.points = player.points.sub(this.cost());
+                player.ad.dimensions[dimension] = player.ad.dimensions[dimension].plus(1);
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+                player.ad.style[dimension] = (player.ad.style[dimension] + 1) % 10;
+            }
+        },
+        multiplier() { return Decimal.pow(2, this.amount10()) },
+        amount10() { return getBuyableAmount(this.layer, this.id).div(10).floor() },
+        style() {
+            let s = player.ad.style[dimension] * 10;
+            let u = Decimal.max(0, Decimal.min(10, Decimal.floor(player.points.divide(this.cost())))).times(10);
+            return {
+                'width': '150px',
+                'background-image': `linear-gradient(to right, #4ABB5F ${s}%, #357541 ${s}%, #357541 ${u.plus(s)}%, transparent ${u.plus(s)}%)`
+            }
+        }
     }
 }
-
-// function dimUpgrade(dimension, cost, multiplier, until10) {
-//     return {
-//         cost() {
-//             return new Decimal(cost).times(Decimal.pow(multiplier, player.ad.dimensions[dimension].amount.div(10).floor()))
-//         },
-//         display() {
-//             const dim = player.ad.dimensions[dimension];
-//             if(until10) return `Until 10, cost: ${format(dim.cost.times(10 - dim.until10))}`;
-//             else return `Cost: ${format(this.cost())}`
-//         },
-//         canClick() {
-//             const dim = player.ad.dimensions[dimension];
-//             if(until10) return player.points.gte(dim.cost.times(10 - dim.until10));
-//             else return player.points.gte(dim.cost);
-//         },
-//         onClick() {
-//             // console.log(format(this.cost()))
-
-//             const dim = player.ad.dimensions[dimension];
-//             if(until10) {
-//                 while(dim.until10 < 10) {
-//                     dim.amount = dim.amount.plus(1);
-//                     player.points = player.points.minus(dim.cost);
-//                     dim.until10++;
-//                 }
-//                 dim.until10 = 0;
-//                 dim.multiplier = dim.multiplier.times(2.0);
-//                 dim.cost = dim.cost.times(dim.costMultiplier);
-//             } else {
-//                 dim.amount = dim.amount.plus(1);
-//                 player.points = player.points.minus(dim.cost);
-//                 dim.until10++;
-//                 if(dim.until10 == 10) {
-//                     dim.until10 = 0;
-//                     dim.multiplier = dim.multiplier.times(2.0);
-//                     dim.cost = dim.cost.times(dim.costMultiplier);
-//                 }
-//             }
-//         }
-//     }
-// }

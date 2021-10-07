@@ -6,7 +6,7 @@ let modInfo = {
 	modFiles: ['antimatter.js', "tree.js"],
 	discordName: "",
 	discordLink: "",
-	initialStartPoints: new Decimal(10), // Used for hard resets and new players
+	initialStartPoints: new Decimal(1000), // Used for hard resets and new players
 	offlineLimit: 1,  // In hours
 }
 
@@ -50,7 +50,9 @@ function getPointGen() {
 	if(!canGenPoints())
 		return new Decimal(0)
 
-	let gain = new Decimal(1);
+	let gain = player.ad.dimensions[0]
+		.times(tmp.ad.buyables['dimension-1'].multiplier)
+		.times(tmp.ad.tickspeed.multiplier)
 	
 	return gain
 }

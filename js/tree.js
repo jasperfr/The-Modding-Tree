@@ -4,7 +4,8 @@ var layoutInfo = {
 	showTree: true,
 
     treeLayout: [
-        ['ad']
+        ['ad'],
+        ['bd']
     ]
 
     /*

@@ -5,8 +5,9 @@ addLayer('ad', {
     /* === Base information === */
     name: 'Antimatter Dimensions',
     symbol: 'A',
-    color: '#e84848',
+    color: '#992c2c',
     tooltip: 'Antimatter Dimensions',
+    branches: ['bd'],
 
     baseResource: 'antimatter',
 
@@ -60,36 +61,34 @@ addLayer('ad', {
     tabFormat: {
         'Dimensions': {
             content: [
-                ['display-text', function() { return  `There is ${mixedStandardFormat(player.points, 2)} antimatter.`; }], 'blank',
-                ['bar', 'percentageToInfinity'], 'blank',
-                ['display-text', '<h1>Antimatter Dimensions</h1>'],'blank',
-                ['display-text', function() { return `<h4>Increase tickspeed by ${tmp.ad.tickspeed.increase}x.</h4>` }],
-                ['row', [['buyable', 'tickspeed'], 'blank', ['buyable', 'tickspeed-max']]],
-                ['display-text', function() { return `<h4>Tickspeed: ${mixedStandardFormat(tmp.ad.tickspeed.multiplier, 3)}/s</h4>` }],
+                ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }], 'blank',
+                ['display-text', function() { return `Increase tickspeed by ${tmp.ad.tickspeed.increase}x.` }, { 'font-size': '12px', 'color': 'silver' }],
+                ['row', [['buyable', 'tickspeed'], ['buyable', 'tickspeed-max']]],
+                ['display-text', function() { return `Tickspeed: ${mixedStandardFormat(tmp.ad.tickspeed.multiplier, 3)} / sec` }, { 'font-size': '12px', 'color': 'silver' }],
                 'blank',
                 // Dimensions
                 function() {
                     const html = ['column', []];
                     for(let i = 0; i <= (3 + player.ad.shifts); i++) {
                         let multiplier = mixedStandardFormat(tmp.ad.buyables[`dimension-${i+1}`].multiplier.times(Decimal.pow(1.5, player.ad.shifts)), 1);
-                        let amount = mixedStandardFormat(player.ad.dimensions[i], 3, true);
+                        let amount = mixedStandardFormat(player.ad.dimensions[i], 2, true);
                         html[1].push(['row', [
-                            ['raw-html', `<div style="width:150px; text-align:left;"><h3>${ORDINAL[i+1]} Dimension</h3><br><span style="color:silver;">x${multiplier}</span></div>`],
-                            ['raw-html', `<div style="width:150px;"><h4>${amount}</h4></div>`],
-                            ['buyable', `dimension-${i+1}`]
-                        ], { 'background-color' : i % 2 && '#4d3c3c', 'padding': '2px 16px' }]);
+                            ['raw-html', `<div style="width:150px; text-align:left;"><b>${ORDINAL[i+1]} Dimension</b><br><span style="color:silver;">x${multiplier}</span></div>`, { margin: 'auto 0', 'font-size': '12px' }],
+                            ['raw-html', `<div style="width:200px;font-weight:bold;">${amount}</div>`, { margin: 'auto 0', 'font-size': '14px' }],
+                            ['buyable', `dimension-${i+1}`, { margin: 'auto 0' }]
+                        ], { width: '100%', margin: 0, 'justify-content': 'space-between', 'background-color' : i % 2 && '#331616' }]);
                     }
                     return html;
                 },
                 'blank',
-                ['row', [['clickable', 'shift'], ['clickable', 'boost'], 'blank','blank','blank', ['clickable', 'galaxy']]]
-            ]
+                ['row', [['clickable', 'shift'], ['clickable', 'boost'], 'blank','blank','blank', ['clickable', 'galaxy']]],
+                'blank',
+                ['bar', 'percentageToInfinity']
+            ],
         },
         'Autobuyers': {
             content: [
-                ['display-text', function() { return  `There is ${mixedStandardFormat(player.points, 2)} antimatter.`; }], 'blank',
-                ['bar', 'percentageToInfinity'], 'blank',
-                ['display-text', '<h1>Autobuyers</h1>'],
+                ['display-text', function() { return  `You have ${mixedStandardFormat(player.points, 2)} antimatter.`; }], 'blank',
                 ['display-text', '<h5>In this version, autobuyers will always buy max.<br>This might change in a future update.</h5>'],'blank',
                 ['row', [['upgrade', 'ab-1'], ['upgrade', 'ab-2'], ['upgrade', 'ab-3']]],
                 ['row', [['upgrade', 'ab-4'], ['upgrade', 'ab-5'], ['upgrade', 'ab-6']]],
@@ -170,7 +169,7 @@ addLayer('ad', {
                     case 3: requirement = 'Requires 20 7th Dimensions'; break;
                     default: requirement = '<span style="color:red;">This shouldn\'t happen.</span>'; break;
                 }
-                return `Dimensional Shift (${player.ad.shifts})<br>${requirement}`;
+                return `Dimensional Shift (${player.ad.shifts})<br>${requirement}.`;
             },
             canClick() { return player.ad.dimensions[player.ad.shifts + 3].gte(20); },
             onClick() { 
@@ -180,6 +179,7 @@ addLayer('ad', {
             },
             tooltip() { return 'Dimensional Shifts unlock a new dimension and they give a 1.5x multiplier to all dimensions each.' },
             unlocked() { return player.ad.shifts < 4; },
+            style() { return { 'font-size': '10px' } }
         },
 
         // Dimensional Boosts appear after the 8th Dimension has been unlocked and give Booster Points.
@@ -190,12 +190,12 @@ addLayer('ad', {
             },
             canClick() { return this.gain().gte(1); },
             onClick() {
-                player.ad.shifts = 0;
                 layerDataReset('ad', ['shifts', 'upgrades']); // keep shifts and autobuyer upgrades on reset
                 player.points = new Decimal(10);
             },
             tooltip() { return 'Reset all your dimensions, but gain Booster Points based on your antimatter.<br>You need at least 1e100 antimatter to perform a Boost.<br><br>You will keep your Dimension Shifts.' },
-            unlocked() { return player.ad.shifts >= 4; }
+            unlocked() { return player.ad.shifts >= 4; },
+            style() { return { 'font-size': '10px' } }
         },
 
         // Galaxies give a galaxy based on the amount of 8th Dimensions.
@@ -204,7 +204,8 @@ addLayer('ad', {
                 return `Reset for a galaxy.`
             },
             tooltip() { return 'Currently removed in this version.<br><br>The next update will have a Galaxy Layer.' },
-            canClick() { return false; }
+            canClick() { return false; },
+            style() { return { 'font-size': '10px' } }
         }
 
     },

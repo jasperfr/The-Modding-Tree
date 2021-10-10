@@ -1,9 +1,11 @@
+function isDevBuild() { return VERSION.num.endsWith('dev') }
+
 let modInfo = {
 	name: "Antreematter Dimensions",
 	id: "antreematter",
 	author: "jasperfr",
 	pointsName: "antimatter",
-	modFiles: ['antimatter.js', "tree.js"],
+	modFiles: ['antimatter.js', 'booster.js', "tree.js"],
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal(10), // Used for hard resets and new players
@@ -12,7 +14,7 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.89a",
+	num: "0.89a-dev",
 	name: "Antreematter Dimensions",
 }
 
@@ -71,6 +73,7 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
+	isDevBuild() && 'DEVELOPMENT MODE'
 ]
 
 // Determines when the game "ends"

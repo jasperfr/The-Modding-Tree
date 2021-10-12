@@ -5,7 +5,7 @@ let modInfo = {
 	id: "antreematter",
 	author: "jasperfr",
 	pointsName: "antimatter",
-	modFiles: ['antimatter.js', 'booster.js', "tree.js"],
+	modFiles: ['antimatter.js', 'booster.js', 'galaxy.js', "tree.js"],
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal(10), // Used for hard resets and new players
@@ -14,11 +14,14 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.89a-dev",
+	num: "0.99a",
 	name: "Antreematter Dimensions",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.99a</h3><br>
+		- Added Booster Dimensions.<br>
+		- Added the first Booster Upgrades.<br><br>
 	<h3>v0.89a</h3><br>
 		- Added Autobuyers.<br>
 		- Completely revamped the game and fixed most if not all functions.<br>
@@ -62,6 +65,7 @@ function getPointGen() {
 	let gain = player.ad.dimensions[0]
 		.times(tmp.ad.buyables['dimension-1'].multiplier)
 		.times(Decimal.pow(1.5, player.ad.shifts))
+		.times(player.bd.multiplier)
 		.times(tmp.ad.tickspeed.multiplier)
 	
 	return gain
@@ -78,7 +82,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gt(1.79e308);
+	return player.points.gt(new Decimal('1e1000'));
 }
 
 

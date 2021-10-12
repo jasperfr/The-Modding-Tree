@@ -64,7 +64,7 @@ function getPointGen() {
 
 	let gain = player.ad.dimensions[0]
 		.times(tmp.ad.buyables['dimension-1'].multiplier)
-		.times(Decimal.pow(1.5, player.ad.shifts))
+		.times(Decimal.pow(hasUpgrade('bd', 'gain-2') ? 2.0 : 1.5, player.ad.shifts))
 		.times(player.bd.multiplier)
 		.times(tmp.ad.tickspeed.multiplier)
 	

@@ -26,7 +26,28 @@ addLayer('g', {
             ]
         },
         'Milestones': {
+            content: [
+                'milestones',
+                ['display-text', 'Milestones are still in development and may not work at all.']
+            ]
+        },
+    },
 
+    milestones: {
+        0: {
+            requirementDescription: "1 Galaxy",
+            effectDescription: "Start with 100 antimatter and Booster<br>Multiplier does not reset on Dimension Shifts.",
+            done() { return player.g.points.gte(1) }
+        },
+        1: {
+            requirementDescription: "2 Galaxies",
+            effectDescription: "Keep autobuyer upgrades on reset, and they max all<br>regardless of the Booster Upgrade.",
+            done() { return player.g.points.gte(2) }
+        },
+        2: {
+            requirementDescription: "3 Galaxies",
+            effectDescription: "Keep dimensional shifts on reset.",
+            done() { return player.g.points.gte(3) }
         },
     }
 });

@@ -7,14 +7,6 @@ var layoutInfo = {
         ['ad'],
         ['bd', 'g']
     ]
-
-    /*
-    treeLayout: [
-        ['r', 'blank', 'p'],
-        ['h', 'blank','blank','blank','s'],
-        ['e', 'blank', 't']   
-    ]
-    */
 }
 
 

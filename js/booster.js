@@ -7,8 +7,7 @@ addLayer('bd', {
     layerShown() {
         return (
             player.bd.points.gt(0) ||
-            player.bd.dimensions.some(d => d.gt(0)) ||
-            isDevBuild()
+            player.bd.dimensions.some(d => d.gt(0))
         );
     },
 
@@ -161,7 +160,6 @@ addLayer('bd', {
             description: 'Increase the Dimension Multiplier.<br>(1.5x -> 2.0x)',
             cost: new Decimal(2500),
             style() { return { height: '100px' } },
-            tooltip: 'Not implemented in this version.'
         },
         'more-b': {
             description: 'Increase the amount of BP you get.<br>(8th/10 -> 8th/5)',
@@ -207,6 +205,16 @@ addLayer('bd', {
             fillStyle: { 'background-color': '#4ABB5F', }
         }
     },
+
+    hotkeys: [
+        {
+            key: 'b',
+            description: 'b: Gain BP',
+            onPress() {
+                clickClickable('ad', 'boost');
+            }
+        }
+    ]
 
 });
 

@@ -45,7 +45,7 @@ addLayer('ad', {
                 player.ad.dimensions[i+1]
                 .times(multiplier)
                 .times(tmp.ad.tickspeed.multiplier)
-                .times(Decimal.pow(1.5, player.ad.shifts))
+                .times(Decimal.pow(hasUpgrade('bd', 'gain-2') ? 2.0 : 1.5, player.ad.shifts))
                 .times(player.bd.multiplier)
                 .times(delta)
             );
@@ -78,7 +78,7 @@ addLayer('ad', {
                 function() {
                     const html = ['column', []];
                     for(let i = 0; i <= (3 + player.ad.shifts); i++) {
-                        let multiplier = mixedStandardFormat(tmp.ad.buyables[`dimension-${i+1}`].multiplier.times(Decimal.pow(1.5, player.ad.shifts)).times(player.bd.multiplier), 1);
+                        let multiplier = mixedStandardFormat(tmp.ad.buyables[`dimension-${i+1}`].multiplier.times(Decimal.pow(hasUpgrade('bd', 'gain-2') ? 2.0 : 1.5, player.ad.shifts)).times(player.bd.multiplier), 1);
                         let amount = mixedStandardFormat(player.ad.dimensions[i], 2, true);
                         html[1].push(['row', [
                             ['raw-html', `<div style="width:150px; text-align:left;"><b>${ORDINAL[i+1]} Dimension</b><br><span style="color:silver;">x${multiplier}</span></div>`, { margin: 'auto 0', 'font-size': '12px' }],
@@ -183,9 +183,9 @@ addLayer('ad', {
             onClick() { 
                 player.ad.shifts++;
                 layerDataReset('ad', ['shifts', 'upgrades']); // keep shifts and autobuyer upgrades on reset
-                player.points = new Decimal(10);
+                player.points = hasMilestone('g', 0) ? new Decimal(100) : new Decimal(10);
             },
-            tooltip() { return 'Dimensional Shifts unlock a new dimension and they give a 1.5x multiplier to all dimensions each.' },
+            tooltip() { return `Dimensional Shifts unlock a new dimension and they give a ${hasUpgrade('bd', 'gain-2') ? 2.0 : 1.5}x multiplier to all dimensions each.` },
             unlocked() { return player.ad.shifts < 4; },
             style() { return { 'font-size': '10px' } }
         },
@@ -205,7 +205,7 @@ addLayer('ad', {
                 
                 player.bd.multiplier = hasUpgrade('bd', 'keep-b') ? player.bd.multiplier.times(0.5) : new Decimal(1.0);
                 player.bd.bestBoost = Decimal.max(player.bd.bestBoost, this.gain());
-                player.points = new Decimal(10);
+                player.points = hasMilestone('g', 0) ? new Decimal(100) : new Decimal(10);
                 
                 layerDataReset('ad', ['upgrades']); // keep autobuyer upgrades on reset
                 if(hasUpgrade('bd', 'keep-1')) player.ad.shifts = 1;
@@ -227,10 +227,12 @@ addLayer('ad', {
             canClick() { return player.points.gte(Decimal.pow(Decimal.pow(2, 1024), player.g.points.plus(1))); },
             onClick() {
                 player.g.points = player.g.points.plus(1);
-                layerDataReset('ad');
+                let keep = [];
+                if(hasMilestone('g', 1)) keep.push('upgrades');
+                if(hasMilestone('g', 2)) keep.push('shifts');
+                layerDataReset('ad', keep);
                 layerDataReset('bd');
-
-                player.points = new Decimal(10);
+                player.points = hasMilestone('g', 0) ? new Decimal(100) : new Decimal(10);
             },
             style() { return { 'font-size': '10px' } }
         }
@@ -241,7 +243,7 @@ addLayer('ad', {
     hotkeys: [
         {
             key: 'm',
-            description: 'Max All',
+            description: 'm: Max All',
             onPress() {
                 for(let i = 0; i <= (3 + player.ad.shifts); i++) {
                     buyMaxBuyable(this.layer, `dimension-${i+1}`);

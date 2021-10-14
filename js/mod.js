@@ -14,7 +14,7 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.99a",
+	num: "0.99a-d",
 	name: "Antreematter Dimensions",
 }
 

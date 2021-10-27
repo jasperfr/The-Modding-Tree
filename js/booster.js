@@ -5,14 +5,12 @@ addLayer('bd', {
     resource: 'BP',
 
     layerShown() {
-        return (
-            player.bd.points.gt(0) ||
-            player.bd.dimensions.some(d => d.gt(0))
-        );
+        return player.bd.unlocked
     },
 
     startData() {
         return {
+            unlocked: false,
             points: new Decimal(0),
             bestBoost: new Decimal(0),
             multiplier: new Decimal(1.0),
@@ -64,8 +62,8 @@ addLayer('bd', {
         'Dimensions': {
             content: [
                 ['display-text', function() { return  `You have <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.points, 2, 1)}</span> Booster Points.`; }, { 'color': 'silver' }],
-                ['display-text', function() { return `Your boosters multiply ADs by <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.multiplier, 2)}x</span> BP on reset.`; }, { 'font-size': '12px', 'color': 'silver' }],
-                ['display-text', function() { return `Your best gain was <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.bestBoost, 2, 1)}</span> BP on reset.`; }, { 'font-size': '12px', 'color': 'silver' }],
+                ['display-text', function() { return `Your boosters multiply ADs by <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.multiplier, 2)}x</span>.`; }, { 'font-size': '12px', 'color': 'silver' }],
+                ['display-text', function() { return `Your best BP gain was <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.bestBoost, 2, 1)}</span> BP on reset.`; }, { 'font-size': '12px', 'color': 'silver' }],
                 'blank','blank',
                 // Dimensions
                 function() {
@@ -154,7 +152,7 @@ addLayer('bd', {
             style() { return { height: '100px' } }
         },
         'gain-2': {
-            description: 'Increase the Dimension Multiplier.<br>(1.5x -> 2.0x)',
+            description: 'Achievements power is twice as powerful. (useless: no achievements)',
             cost: new Decimal(2500),
             style() { return { height: '100px' } },
         },

@@ -7,34 +7,24 @@ addLayer('ad', {
     symbol: 'A',
     color: '#992c2c',
     tooltip: 'Antimatter Dimensions',
-    branches: ['bd', 'g'],
+    branches: ['bd', 'gd'],
 
     baseResource: 'antimatter',
 
     /* === Data information === */
     startData() {
         return {
-            dimensions: [ // A list of all dimensions
-                new Decimal(0),
-                new Decimal(0),
-                new Decimal(0),
-                new Decimal(0),
-                new Decimal(0),
-                new Decimal(0),
-                new Decimal(0),
-                new Decimal(0),
-            ],
+            dimensions: Array(8).fill(0).map(() => new Decimal(0)),
+            tickspeed: new Decimal(0),
             shifts: 0, // 0 - 4 shifts, afterwards gain Booster Points
             style: [0, 0, 0, 0, 0, 0, 0, 0] // style state
         }
     },
 
     tickspeed: {
-        increase() { return Decimal.plus(1.125, Decimal.times(player.g.buff, player.g.points)) },
-        multiplier() { return Decimal.pow(tmp.ad.tickspeed.increase, getBuyableAmount('ad', 'tickspeed')); },
+        increase() { return new Decimal(1.125) },
+        multiplier() { return Decimal.pow(tmp.ad.tickspeed.increase, Decimal.plus(tmp.gd.tickUpgrades.amount, player.ad.tickspeed)); },
     },
-
-    // 00:19
 
     /* === Update information === */
     update(delta) {
@@ -45,7 +35,7 @@ addLayer('ad', {
                 player.ad.dimensions[i+1]
                 .times(multiplier)
                 .times(tmp.ad.tickspeed.multiplier)
-                .times(Decimal.pow(hasUpgrade('bd', 'gain-2') ? 2.0 : 1.5, player.ad.shifts))
+                .times(Decimal.pow(1.25, player.ad.shifts))
                 .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
                 .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
                 .times(player.bd.multiplier)
@@ -76,12 +66,14 @@ addLayer('ad', {
                 ['row', [['buyable', 'tickspeed'], ['buyable', 'tickspeed-max']]],
                 ['display-text', function() { return `Tickspeed: ${mixedStandardFormat(tmp.ad.tickspeed.multiplier, 3)} / sec` }, { 'font-size': '12px', 'color': 'silver' }],
                 'blank',
+                ['display-text', function() { return `Cost starts scaling at 1e308 antimatter.<br>(b⋅m<sup>a</sup> -> (b⋅m<sup>2a</sup>)/1e308)` }, { 'font-size': '12px', 'color': 'silver' }],
+                'blank',
                 // Dimensions
                 function() {
                     const html = ['column', []];
                     for(let i = 0; i <= (3 + player.ad.shifts); i++) {
                         let multiplier = mixedStandardFormat(tmp.ad.buyables[`dimension-${i+1}`].multiplier
-                            .times(Decimal.pow(hasUpgrade('bd', 'gain-2') ? 2.0 : 1.5, player.ad.shifts))
+                            .times(Decimal.pow(1.25, player.ad.shifts))
                             .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
                             .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
                             .times(player.bd.multiplier), 1);
@@ -102,12 +94,13 @@ addLayer('ad', {
         },
         'Autobuyers': {
             content: [
-                ['display-text', function() { return  `You have ${mixedStandardFormat(player.points, 2)} antimatter.`; }], 'blank',
-                ['display-text', '<h5>In this version, autobuyers will always buy max.<br>This might change in a future update.</h5>'],'blank',
+                ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }], 'blank',
                 ['row', [['upgrade', 'ab-1'], ['upgrade', 'ab-2'], ['upgrade', 'ab-3']]],
                 ['row', [['upgrade', 'ab-4'], ['upgrade', 'ab-5'], ['upgrade', 'ab-6']]],
                 ['row', [['upgrade', 'ab-7'], ['upgrade', 'ab-8'], ['upgrade', 'ab-t']]],
-                ['row', [['upgrade', 'ab-s'], ['upgrade', 'ab-g'], ['upgrade', 'ab-c']]]
+                ['row', [['upgrade', 'ab-s'], ['upgrade', 'ab-g'], ['upgrade', 'ab-c']]],
+                'blank',
+                ['bar', 'percentageToInfinity']
             ]
         }
     },
@@ -121,7 +114,8 @@ addLayer('ad', {
             display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)}` },
             canAfford() { return player.points.gte(this.cost()) },
             buy() {
-                player.points = player.points.sub(this.cost())
+                player.points = player.points.sub(this.cost());
+                player.ad.tickspeed = player.ad.tickspeed.plus(1);
                 setBuyableAmount('ad', 'tickspeed', getBuyableAmount('ad', 'tickspeed').add(1))
             },
             buyMax() { while(this.canAfford()) { this.buy(); } },
@@ -178,9 +172,9 @@ addLayer('ad', {
             onClick() { 
                 player.ad.shifts++;
                 layerDataReset('ad', ['shifts', 'upgrades']); // keep shifts and autobuyer upgrades on reset
-                player.points = hasMilestone('g', 0) ? new Decimal(100) : new Decimal(10);
+                player.points = new Decimal(10);
             },
-            tooltip() { return `Dimensional Shifts unlock a new dimension and they give a ${hasUpgrade('bd', 'gain-2') ? 2.0 : 1.5}x multiplier to all dimensions each.` },
+            tooltip() { return `Dimensional Shifts unlock a new dimension and they give a 1.25x multiplier to all dimensions each.` },
             unlocked() { return player.ad.shifts < 4; },
             style() { return { 'font-size': '10px' } }
         },
@@ -197,11 +191,12 @@ addLayer('ad', {
             },
             canClick() { return this.gain().gte(1); },
             onClick() {
+                player.bd.unlocked = true;
                 player.bd.points = player.bd.points.plus(this.gain());
                 
                 player.bd.multiplier = hasUpgrade('bd', 'keep-b') ? player.bd.multiplier.times(0.5) : new Decimal(1.0);
                 player.bd.bestBoost = Decimal.max(player.bd.bestBoost, this.gain());
-                player.points = hasMilestone('g', 0) ? new Decimal(100) : new Decimal(10);
+                player.points = hasMilestone('gd', 0) ? new Decimal(100) : new Decimal(10);
                 
                 layerDataReset('ad', ['upgrades']); // keep autobuyer upgrades on reset
                 if(hasUpgrade('bd', 'keep-1')) player.ad.shifts = 1;
@@ -216,20 +211,25 @@ addLayer('ad', {
 
         // Galaxies give a galaxy based on the amount of 8th Dimensions.
         'galaxy': {
-            display() {
-                return `Reset for a galaxy.<br>Cost: ${format(Decimal.pow(Decimal.pow(2, 1024), player.g.points.plus(1)))}`
+            gain() {
+                return Decimal.ceil(Decimal.log10(Decimal.divide(player.points, '1.79e308')));
             },
-            tooltip() { return 'Reset Booster Dimensions and Antimatter Dimensions for a galaxy.<br><br>Galaxies boost tickspeed upgrades.' },
-            canClick() { return player.points.gte(Decimal.pow(Decimal.pow(2, 1024), player.g.points.plus(1))); },
+            display() {
+                if(this.canClick()) {
+                    return `Gain ${this.gain()} GP.`;
+                }
+                else {
+                    return 'Reach 1.79e308 to unlock Galaxy Points.'
+                }
+            },
+            tooltip() { return 'Reset Booster Dimensions and Antimatter Dimensions for GP.<br><br>GP is based on your antimatter amount. log10(AM/1.79e308)<br><br>You need 1.79e308 antimatter to unlock this.' },
+            canClick() { return player.points.gte('1.79e308'); },
             onClick() {
-                player.g.points = player.g.points.plus(1);
-                let keep = [];
-                if(hasMilestone('g', 1)) keep.push('upgrades');
-                if(hasMilestone('g', 2)) keep.push('shifts');
-                layerDataReset('ad', keep);
+                player.gd.unlocked = true;
+                player.gd.points = player.gd.points.plus(this.gain());
                 layerDataReset('bd');
-                player.points = hasMilestone('g', 0) ? new Decimal(100) : new Decimal(10);
-                player.bd.points = hasMilestone('infinity', 'startWithBP') ? new Decimal(1) : new Decimal(0);
+                layerDataReset('ad', ['upgrades']);
+                player.points = new Decimal(100);
             },
             style() { return { 'font-size': '10px' } }
         }
@@ -281,6 +281,9 @@ function autoBuyable(dimension, cost) {
 
 /**
  * Create an upgrade for buying a dimension.
+ * Important notice: Cost scaling starts after the cost hit 1.79e308.
+ * The cost scaling is 2x, which means the next upgrade will cost 2x as much with the multiplier.
+ * 100, multiplier 10, with cost scaling -> 1000, 20000, 400000, 8000000, ...
  * @param {Number} dimension Dimension ID
  * @param {Number} cost Cost of the upgrade 
  * @param {Number} multiplier Cost multiplier
@@ -288,7 +291,13 @@ function autoBuyable(dimension, cost) {
  */
 function dimBuyable(dimension, cost, multiplier) {
     return {
-        cost() { return Decimal.times(cost, Decimal.pow(multiplier, this.amount10())) },
+        cost() {
+            if(Decimal.times(cost, Decimal.pow(multiplier, this.amount10())).lte('1e308')) {
+                return Decimal.times(cost, Decimal.pow(multiplier, this.amount10()))
+            } else {
+                return Decimal.times(cost, Decimal.pow(multiplier, this.amount10().times(2))).div('1e308')
+            }
+        },
         display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)}` },
         canAfford() { return player.points.gte(this.cost()) },
         buy() {

@@ -4,9 +4,9 @@ const elements = {
             direction: RIGHT,
             width: 500,
             height: 20,
-            display() { return `${format(player.points.log10().divide(1000).times(100), 1)}% to Infinity` },
+            display() { return `${format(Math.max(0, player.points.log10().divide(1024).times(100)), 1)}% to Infinity (2e1024)` },
             progress() {
-                return player.points.log10().divide(1000)
+                return Math.max(0, player.points.log10().divide(1024))
             },
             fillStyle: { 'background-color': '#4ABB5F', }
         }

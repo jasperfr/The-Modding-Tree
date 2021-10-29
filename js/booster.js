@@ -244,19 +244,19 @@ addLayer('bd', {
         },
         'keep-2': {
             description: 'Keep the second Dimension Shift on reset.',
-            cost: new Decimal(20),
+            cost: new Decimal(100),
             canAfford() { return hasUpgrade(this.layer, 'keep-1'); },
             style() { return { height: '100px' } }
         },
         'keep-3': {
             description: 'Keep the third Dimension Shift on reset.',
-            cost: new Decimal(50),
+            cost: new Decimal(1000),
             canAfford() { return hasUpgrade(this.layer, 'keep-2'); },
             style() { return { height: '100px' } }
         },
         'keep-4': {
             description: 'Keep all Dimension Shifts on reset.',
-            cost: new Decimal(100),
+            cost: new Decimal(10000),
             canAfford() { return hasUpgrade(this.layer, 'keep-3'); },
             style() { return { height: '100px' } }
         },

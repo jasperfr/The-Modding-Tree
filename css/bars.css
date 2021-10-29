@@ -36,3 +36,9 @@
 .overlayText {
 	z-index: 6;
 }
+
+.upgTable bd {
+	font-size: 20px;
+	color: #63b8ff;
+	font-weight: bold;
+}

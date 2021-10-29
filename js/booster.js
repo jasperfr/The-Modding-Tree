@@ -12,92 +12,67 @@ addLayer('bd', {
         return {
             unlocked: false,
             points: new Decimal(0),
-            bestBoost: new Decimal(0),
-            multiplier: new Decimal(1.0),
-            dimensions: [
-                new Decimal(0),
-                new Decimal(0),
-                new Decimal(0),
-                new Decimal(0),
-            ]
+            power: new Decimal(0)
         }
+    },
+
+    power: {
+        perSecond() {
+            if(!player.bd.unlocked) return new Decimal(0);
+            let base = tmp.bd.buyables[1].effect;
+            let cap = tmp.bd.buyables[2].effect;
+            if(player.bd.power.gte(cap)) {
+                let over = Decimal.div(player.bd.power, cap);
+                let nerf = hasUpgrade('bd', 'reducePenal2') ? 0.5 : (hasUpgrade('bd', 'reducePenal') ? 2 : 10);
+                base = base.div(over.pow(nerf));
+            }
+            base = base.times(tmp.bd.upgrades.log10boost.effect)
+            return base;
+        },
+        multiplier() { return Decimal.plus(1, player.bd.power).times(tmp.bd.buyables[4].effect) }
     },
 
     update(delta) {
-        let multi = hasUpgrade(this.layer, 'incr-m') ? 1.5 : 1.2;
-        player.bd.multiplier = player.bd.multiplier.plus(
-            player.bd.dimensions[0]
-            .times(Decimal.pow(multi, getBuyableAmount(this.layer, `booster-dimension-1`)))
-            .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
-            .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
-            .times(0.1)
-            .times(delta)
-        );
-        for(let i = 0; i < 3; i++) {
-            player.bd.dimensions[i] = 
-            player.bd.dimensions[i]
-            .plus(
-                player.bd.dimensions[i+1]
-                .times(Decimal.pow(multi, getBuyableAmount(this.layer, `booster-dimension-${i+1}`)))
-                .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
-                .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
-                .times(0.1)
-                .times(delta)
-            )
-        };
-
-        if(hasUpgrade(this.layer, 'unlk-a')) {
-            buyBuyable(this.layer, 'booster-dimension-1');
-            buyBuyable(this.layer, 'booster-dimension-2');
-            buyBuyable(this.layer, 'booster-dimension-3');
-            buyBuyable(this.layer, 'booster-dimension-4');
-        }
-
-        if(hasUpgrade(this.layer, 'boos-t')) {
-            player.bd.points = player.bd.points.plus(player.bd.bestBoost.divide(20).times(Decimal.pow(2, getBuyableAmount('bd', 'mult-b'))).times(delta));
-        }
+        player.bd.power = player.bd.power.plus(Decimal.times(tmp.bd.power.perSecond, delta))
     },
 
     tabFormat: {
-        'Dimensions': {
+       'Power': {
             content: [
-                ['display-text', function() { return  `You have <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.points, 2, 1)}</span> Booster Points.`; }, { 'color': 'silver' }],
-                ['display-text', function() { return `Your boosters multiply ADs by <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.multiplier, 2)}x</span>.`; }, { 'font-size': '12px', 'color': 'silver' }],
-                ['display-text', function() { return `Your best BP gain was <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.bestBoost, 2, 1)}</span> BP on reset.`; }, { 'font-size': '12px', 'color': 'silver' }],
-                'blank','blank',
-                // Dimensions
-                function() {
-                    const html = ['column', []];
-                    let multi = hasUpgrade(this.layer, 'incr-m') ? 1.5 : 1.2;
-                    for(let i = 0; i < player.bd.dimensions.length; i++) {
-                        let multiplier = mixedStandardFormat(
-                            Decimal.pow(multi, getBuyableAmount(this.layer, `booster-dimension-${i+1}`))
-                            .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
-                            .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
-                        , 1);
-                        let amount = mixedStandardFormat(player.bd.dimensions[i]);
-                        html[1].push(['row', [
-                            ['raw-html', `<div style="width:150px; text-align:left;"><b>${ORDINAL[i+1]} Booster Dim</b><br><span style="color:silver;">x${multiplier}</span></div>`, { margin: 'auto 0', 'font-size': '12px' }],
-                            ['raw-html', `<div style="width:200px;font-weight:bold;">${amount}</div>`, { margin: 'auto 0', 'font-size': '14px' }],
-                            ['buyable', `booster-dimension-${i+1}`, { margin: 'auto 0' }]
-                        ], { width: '100%', margin: 0, 'justify-content': 'space-between', 'background-color' : i % 2 && '#234059' }]);
-                    }
-                    return html;
-                },
+                ['display-text', function() {
+                    const self = player[this.layer];
+                    const temp = tmp[this.layer];
+                    return `
+                        You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
+                        You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
+                        You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
+                        This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>
+                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.
+                    `
+                }, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
-                ['bar', 'percentageToInfinity']
+                ['row', [['buyable', 1], ['buyable', 2]]],
+                ['row', [['buyable', 3], ['buyable', 4]]]
             ]
-        },
+        }, 
         'Upgrades': {
             content: [
-                ['display-text', function() { return  `You have <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.points, 2, 1)}</span> Booster Points.`; }, { 'color': 'silver' }],
-                ['display-text', function() { return `Your boosters multiply ADs by <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.multiplier, 2)}x</span>.`; }, { 'font-size': '12px', 'color': 'silver' }],
-                ['display-text', function() { return `Your best gain was <span style="color:#63b8ff;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.bd.bestBoost, 2, 1)}</span> BP on reset.`; }, { 'font-size': '12px', 'color': 'silver' }],
-                'blank','blank',
-                ['row', [['upgrade', 'keep-1'], 'blank', ['upgrade', 'keep-2'], 'blank', ['upgrade', 'keep-3']]],
-                ['row', [['upgrade', 'keep-4'], 'blank', ['upgrade', 'gain-2'], 'blank', ['upgrade', 'more-b']], { 'margin-top': '6px' }],
-                ['row', [['upgrade', 'incr-m'], 'blank', ['upgrade', 'boos-t'], 'blank', ['upgrade', 'unlk-a']], { 'margin-top': '6px' }],
-                ['row', [['upgrade', 'keep-b'], 'blank', ['upgrade', 'adim-m'], 'blank', ['buyable', 'mult-b']], { 'margin-top': '6px' }],
+                ['display-text', function() {
+                    const self = player[this.layer];
+                    const temp = tmp[this.layer];
+                    return `
+                        You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
+                        You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
+                        You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
+                        This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>
+                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.
+                    `
+                }, { 'color': 'silver', 'font-size': '12px' }],
+                'blank',
+                ['row', [['upgrade', 'keep-1'], 'blank', ['upgrade', 'adim-m'], 'blank', ['upgrade', 'reducePenal']]],
+                ['row', [['upgrade', 'keep-2'], 'blank', ['upgrade', 'doubleMaxCap'], 'blank', ['upgrade', 'reducePenal2']], { 'margin-top': '6px' }],
+                ['row', [['upgrade', 'keep-3'], 'blank', ['upgrade', 'log10boost'], 'blank', ['upgrade', 'gain10times']], { 'margin-top': '6px' }],
+                ['row', [['upgrade', 'keep-4'], 'blank', ['upgrade', 'placeholder'], 'blank', ['upgrade', 'placeholder']], { 'margin-top': '6px' }],
                 'blank',
                 ['bar', 'percentageToInfinity']
             ]
@@ -107,10 +82,59 @@ addLayer('bd', {
     bars: { percentageToInfinity: elements.infinityPercentage() },
 
     buyables: {
-        'booster-dimension-1': boosterBuyable(0, 1e0 , 3),
-        'booster-dimension-2': boosterBuyable(1, 1e1 , 4),
-        'booster-dimension-3': boosterBuyable(2, 1e2 , 5),
-        'booster-dimension-4': boosterBuyable(3, 1e3 , 6),
+        1: {
+            display() {
+                return `Increase the booster power gain by +50%.
+                Currently ${__(this.effect(),2,0)}/sec.
+                
+                Cost: ${__(this.cost(),2,0)} BP`
+            },
+            cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id)) },
+            effect() { return new Decimal(0.01).times(Decimal.pow(1.5, getBuyableAmount(this.layer, this.id))); },
+            canAfford() { return player.bd.points.gte(this.cost()); },
+            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            style() { return { width: '150px', height: '150px', margin: '8px' } }
+        },
+        2: {
+            display() { 
+                return `Increase the booster power cap by ${hasUpgrade(this.layer, 'doubleMaxCap') ? 10 : 4}.
+                Currently ${__(this.effect(),2,0)}.
+                
+                Cost: ${__(this.cost(),2,0)} BP`
+            },
+            cost() { return Decimal.pow(3, getBuyableAmount(this.layer, this.id)) },
+            effect() { return new Decimal(2.0).plus(Decimal.times(hasUpgrade(this.layer, 'doubleMaxCap') ? 10 : 4, getBuyableAmount(this.layer, this.id))); },
+            canAfford() { return player.bd.points.gte(this.cost()); },
+            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            style() { return { width: '150px', height: '150px', margin: '8px' } }
+        },
+        3: {
+            display() { 
+                return `Double the booster point gain per 8th dimensions.
+                Currently ${__(this.effect(),2,1)} per 10 8th.
+                
+                Cost: ${__(this.cost(),2,0)} BP`
+            },
+            cost() { return Decimal.pow(10, getBuyableAmount(this.layer, this.id)) },
+            effect() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id)); },
+            canAfford() { return player.bd.points.gte(this.cost()); },
+            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            style() { return { width: '150px', height: '150px', margin: '8px' } }
+        },
+        4: {
+            display() { 
+                return `Increase the booster multiplier effectiveness by +35%.
+                Currently x * ${__(this.effect(),2,0)}.
+                
+                Cost: ${__(this.cost(),2,0)} BP`
+            },
+            cost() { return Decimal.pow(5, getBuyableAmount(this.layer, this.id)) },
+            effect() { return Decimal.pow(1.35, getBuyableAmount(this.layer, this.id)); },
+            canAfford() { return player.bd.points.gte(this.cost()); },
+            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            style() { return { width: '150px', height: '150px', margin: '8px' } }
+        },
+
         // 'booster-dimension-5': boosterBuyable(4, 1e9 , 1e8 ),
         // 'booster-dimension-6': boosterBuyable(5, 1e13, 1e10),
         // 'booster-dimension-7': boosterBuyable(6, 1e18, 1e12),
@@ -128,6 +152,46 @@ addLayer('bd', {
     },
 
     upgrades: {
+        reducePenal: {
+            description: `Reduce the power scaling penalty.<br>
+            x/((power - cap)<sup>10</sup>) -> <br>
+            x/((power - cap)<sup>2</sup>)`,
+            cost: new Decimal(100),
+            style() { return { height: '100px' } }
+        },
+        doubleMaxCap: {
+            description: 'Increase the booster power cap effect.<br>(4 -> 10)',
+            cost: new Decimal(1000),
+            style() { return { height: '100px' } }
+        },
+        reducePenal2: {
+            description: `Reduce the power scaling penalty even more.<br>
+            x/((power - cap)<sup>2</sup>) -> <br>
+            x/(√(power - cap))`,
+            cost: new Decimal(1000),
+            canAfford() { return hasUpgrade(this.layer, 'reducePenal') },
+            style() { return { height: '100px' } }
+        },
+        log10boost: {
+            description() { return `BPS gains a multiplier <i>after</i> the scaling nerf based on the log10 of your current BP.<br>
+            Currently: ${__(this.effect(),2)}x` },
+            cost: new Decimal(2500),
+            effect() { return hasUpgrade(this.layer, this.id) ? Decimal.plus(1, Decimal.log10(player.bd.points)) : new Decimal(1); },
+            style() { return { height: '100px' } }
+        },
+        gain10times: {
+            description: 'Gain 10x as much BP per 8th dimensions.',
+            cost: new Decimal(3500),
+            style() { return { height: '100px' } }
+        },
+
+        placeholder: {
+            description: 'Placeholder, not implemented yet.',
+            cost: new Decimal(0),
+            canAfford() { return false; },
+            style() { return { height: '100px' } }
+        },
+
         'keep-1': {
             description: 'Keep the first Dimension Shift on reset.',
             cost: new Decimal(10),

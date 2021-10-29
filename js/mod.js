@@ -66,7 +66,7 @@ function getPointGen() {
 		.times(tmp.ad.buyables['dimension-1'].multiplier)
 		.times(Decimal.pow(hasUpgrade('bd', 'gain-2') ? 2.0 : 1.5, player.ad.shifts))
 		.times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
-		.times(player.bd.multiplier)
+		.times(tmp.bd.power.multiplier)
 		.times(tmp.ad.tickspeed.multiplier)
 	
 	return gain

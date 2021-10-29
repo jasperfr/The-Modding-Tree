@@ -16,6 +16,7 @@ function mixedStandardFormat(num, precision = 0, whole = false) {
     if (num.e >= 33 && num.e < 36) return `${format(num.divide(1e33), precision)} Dc`;
     return format(num, precision)
 }
+const __ = mixedStandardFormat; // shorthand
 
 function exponentialFormat(num, precision, mantissa = true) {
     let e = num.log10().floor()

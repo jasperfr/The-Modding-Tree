@@ -38,7 +38,7 @@ addLayer('ad', {
                 .times(Decimal.pow(1.25, player.ad.shifts))
                 .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
                 .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
-                .times(player.bd.multiplier)
+                .times(tmp.bd.power.multiplier)
                 .times(delta)
             );
         };
@@ -76,10 +76,10 @@ addLayer('ad', {
                             .times(Decimal.pow(1.25, player.ad.shifts))
                             .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
                             .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
-                            .times(player.bd.multiplier), 1);
+                            .times(tmp.bd.power.multiplier), 1);
                         let amount = mixedStandardFormat(player.ad.dimensions[i], 2, true);
                         html[1].push(['row', [
-                            ['raw-html', `<div style="width:150px; text-align:left;"><b>${ORDINAL[i+1]} Dimension</b><br><span style="color:silver;">x${multiplier}</span></div>`, { margin: 'auto 0', 'font-size': '12px' }],
+                            ['raw-html', `<div style="width:150px; text-align:left;"><span style="font-weight:bold;">${ORDINAL[i+1]} Dimension</span><br><span style="color:silver;">x${multiplier}</span></div>`, { margin: 'auto 0', 'font-size': '12px' }],
                             ['raw-html', `<div style="width:200px;font-weight:bold;">${amount}</div>`, { margin: 'auto 0', 'font-size': '14px' }],
                             ['buyable', `dimension-${i+1}`, { margin: 'auto 0' }]
                         ], { width: '100%', margin: 0, 'justify-content': 'space-between', 'background-color' : i % 2 && '#331616' }]);
@@ -98,7 +98,7 @@ addLayer('ad', {
                 ['row', [['upgrade', 'ab-1'], ['upgrade', 'ab-2'], ['upgrade', 'ab-3']]],
                 ['row', [['upgrade', 'ab-4'], ['upgrade', 'ab-5'], ['upgrade', 'ab-6']]],
                 ['row', [['upgrade', 'ab-7'], ['upgrade', 'ab-8'], ['upgrade', 'ab-t']]],
-                ['row', [['upgrade', 'ab-s'], ['upgrade', 'ab-g'], ['upgrade', 'ab-c']]],
+                ['row', [['upgrade', 'ab-s']]],
                 'blank',
                 ['bar', 'percentageToInfinity']
             ]
@@ -182,9 +182,7 @@ addLayer('ad', {
         // Dimensional Boosts appear after the 8th Dimension has been unlocked and give Booster Points.
         'boost': {
             gain() {
-                let req = hasUpgrade('bd', 'more-b') ? 5 : 10;
-                let multi = hasUpgrade('infinity', 'gainMoreBP') ? upgradeEffect('infinity', 'gainMoreBP') : 1.0;
-                return Decimal.divide(player.ad.dimensions[7], req).floor().times(Decimal.pow(2, getBuyableAmount('bd', 'mult-b'))).times(multi);
+                return Decimal.divide(player.ad.dimensions[7], 10).floor().times(tmp.bd.buyables[3].effect).times(hasUpgrade('bd', 'gain10times') ? 10 : 1);
             },
             display() {
                 return `Reset for ${formatWhole(this.gain())} BP.`

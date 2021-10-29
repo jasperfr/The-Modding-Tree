@@ -148,9 +148,7 @@ addLayer('ad', {
         'ab-7': autoBuyable(6, 1e70),
         'ab-8': autoBuyable(7, 1e80),
         'ab-t': autoBuyable(8, 1e90),
-        'ab-s': autoBuyable(9, 1e100),
-        'ab-g': autoBuyable(10, 1e200),
-        'ab-c': autoBuyable(11, 1e250),
+        'ab-s': autoBuyable(9, 1e100)
     },
 
     clickables: {
@@ -181,22 +179,12 @@ addLayer('ad', {
 
         // Dimensional Boosts appear after the 8th Dimension has been unlocked and give Booster Points.
         'boost': {
-            gain() {
-                return Decimal.divide(player.ad.dimensions[7], 10).floor().times(tmp.bd.buyables[3].effect).times(hasUpgrade('bd', 'gain10times') ? 10 : 1);
-            },
-            display() {
-                return `Reset for ${formatWhole(this.gain())} BP.`
-            },
-            canClick() { return this.gain().gte(1); },
+            display() { return `Reset for ${__(tmp.bd.points.gain,2,0)} BP.` },
+            canClick() { return tmp.bd.points.gain.gte(1); },
             onClick() {
-                player.bd.unlocked = true;
-                player.bd.points = player.bd.points.plus(this.gain());
-                
-                player.bd.multiplier = hasUpgrade('bd', 'keep-b') ? player.bd.multiplier.times(0.5) : new Decimal(1.0);
-                player.bd.bestBoost = Decimal.max(player.bd.bestBoost, this.gain());
-                player.points = hasMilestone('gd', 0) ? new Decimal(100) : new Decimal(10);
-                
-                layerDataReset('ad', ['upgrades']); // keep autobuyer upgrades on reset
+                player.points = new Decimal(10);
+                player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
+                layerDataReset('ad', ['upgrades']);
                 if(hasUpgrade('bd', 'keep-1')) player.ad.shifts = 1;
                 if(hasUpgrade('bd', 'keep-2')) player.ad.shifts = 2;
                 if(hasUpgrade('bd', 'keep-3')) player.ad.shifts = 3;
@@ -210,7 +198,7 @@ addLayer('ad', {
         // Galaxies give a galaxy based on the amount of 8th Dimensions.
         'galaxy': {
             gain() {
-                return Decimal.ceil(Decimal.log10(Decimal.divide(player.points, '1.79e308')));
+                return Decimal.ceil(Decimal.log(Decimal.divide(player.points, '1.79e308'), 10));
             },
             display() {
                 if(this.canClick()) {
@@ -228,6 +216,8 @@ addLayer('ad', {
                 layerDataReset('bd');
                 layerDataReset('ad', ['upgrades']);
                 player.points = new Decimal(100);
+                player.bd.power = new Decimal(0);
+                player.bd.restart = true;
             },
             style() { return { 'font-size': '10px' } }
         }

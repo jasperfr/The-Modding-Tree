@@ -184,6 +184,7 @@ addLayer('ad', {
             onClick() {
                 player.points = new Decimal(10);
                 player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
+                player.bd.unlocked = true;
                 layerDataReset('ad', ['upgrades']);
                 if(hasUpgrade('bd', 'keep-1')) player.ad.shifts = 1;
                 if(hasUpgrade('bd', 'keep-2')) player.ad.shifts = 2;

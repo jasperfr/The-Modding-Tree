@@ -5,7 +5,17 @@ let modInfo = {
 	id: "antreematter",
 	author: "jasperfr",
 	pointsName: "antimatter",
-	modFiles: ['elements.js', 'antimatter.js', 'booster.js', 'galaxy.js', 'crunch.js', "tree.js"],
+	modFiles: [
+		'elements.js',
+		'tree.js',
+		'layers/side/achievements.js',
+		'layers/side/debugger.js',
+		'layers/antimatter.js',
+		'layers/booster.js',
+		'layers/galaxy.js',
+		'layers/crunch.js',
+		'layers/dyson.js',
+	],
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal(10), // Used for hard resets and new players
@@ -14,11 +24,19 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.99a-d",
-	name: "Antreematter Dimensions",
+	num: "0.99.999a",
+	name: "The Update Nobody Asked For",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.99.999</h3><br>
+		- Achievements!<br>
+		- Fixed booster upgrades.<br>
+		- Added booster milestones.<br>
+		- Fixed booster upgrades.<br>
+		- You can now toggle autobuyers.<br>
+		- Removed the galaxy layer again because it's a trash mechanic<br>
+		- Added a beautiful discord embedded image.<br><br>
 	<h3>v0.99a</h3><br>
 		- Added Booster Dimensions.<br>
 		- Added the first Booster Upgrades.<br><br>
@@ -68,6 +86,7 @@ function getPointGen() {
 		.times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
 		.times(tmp.bd.power.multiplier)
 		.times(tmp.ad.tickspeed.multiplier)
+		.times(1.05 ** player.ach.achievements.length)
 	
 	return gain
 }

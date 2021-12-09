@@ -13,7 +13,9 @@ addLayer('bd', {
             unlocked: false,
             restart: false,
             points: new Decimal(0),
-            power: new Decimal(0)
+            power: new Decimal(0),
+            timeInCurrentAD: 0,
+            lowestTime: 1e100,
         }
     },
 
@@ -22,8 +24,8 @@ addLayer('bd', {
             return Decimal.divide(player.ad.dimensions[7], 10)
                 .floor()
                 .times(tmp.bd.buyables[3].effect)
-                .times(hasUpgrade('bd', 'gain10times') ? 10 : 1
-            );
+                .times(hasUpgrade('bd', 'gain10times') ? 10 : 1)
+            .times(hasMilestone('bd', 4) ? 10 : 1)
         }
     },
 
@@ -32,15 +34,22 @@ addLayer('bd', {
             if(!player.bd.unlocked) return new Decimal(0);
             if(player.bd.restart) {
                 player.bd.restart = false;
-                return new Decimal(0.01);
+                return new Decimal(0.001);
             }
             let base = tmp.bd.buyables[1].effect;
             let cap = tmp.bd.buyables[2].effect;
-            if(player.bd.power.gte(cap)) {
+
+            if(hasMilestone('bd', 0)) base = base.times(2);
+            if(hasMilestone('bd', 1)) base = base.times(3);
+            if(hasMilestone('bd', 2)) base = base.times(5);
+            if(hasMilestone('bd', 3)) base = base.times(10);
+
+            if(player.bd.power.gte(cap) && !hasMilestone('bd', 5)) {
                 let over = Decimal.div(player.bd.power, cap);
                 let nerf = hasUpgrade('bd', 'reducePenal2') ? 0.5 : (hasUpgrade('bd', 'reducePenal') ? 2 : 10);
                 base = base.div(over.pow(nerf));
             }
+
             base = base.times(tmp.bd.upgrades.log10boost.effect);
             base = base.times(tmp.bd.upgrades.log100boost.effect);
             return base;
@@ -51,6 +60,7 @@ addLayer('bd', {
     update(delta) {
         player.bd.power = player.bd.power.plus(Decimal.times(tmp.bd.power.perSecond, delta));
         player.bd.points = player.bd.points.plus(tmp.bd.buyables[5].effect.times(delta));
+        player.bd.timeInCurrentAD += delta;
     },
 
     tabFormat: {
@@ -63,8 +73,10 @@ addLayer('bd', {
                         You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
                         You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
                         You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
-                        This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>
-                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.
+                        ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
+                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
+                        Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
+                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>
                     `
                 }, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
@@ -83,8 +95,10 @@ addLayer('bd', {
                         You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
                         You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
                         You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
-                        This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>
-                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.
+                        ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
+                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
+                        Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
+                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>
                     `
                 }, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
@@ -93,6 +107,90 @@ addLayer('bd', {
                 ['row', [['upgrade', 'keep-3'], 'blank', ['upgrade', 'log10boost'], 'blank', ['upgrade', 'gain10times']], { 'margin-top': '6px' }],
                 ['row', [['upgrade', 'keep-4'], 'blank', ['upgrade', 'log100boost'], 'blank', ['upgrade', 'cheaperBuyables']], { 'margin-top': '6px' }],
             ]
+        },
+        'Milestones': {
+            content: [
+                ['display-text', function() {
+                    const self = player[this.layer];
+                    const temp = tmp[this.layer];
+                    return `
+                        You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
+                        You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
+                        You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
+                        ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
+                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
+                        Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
+                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>
+                    `
+                }, { 'color': 'silver', 'font-size': '12px' }],
+                'blank',
+                ['display-text', 'Complete milestones to get rewards!'],
+                'blank',
+                'milestones'
+            ]
+        }
+    },
+
+    milestones: {
+        0 : {
+            requirementDescription: "Boost in under 10 minutes",
+            effectDescription: "Reward: BPS * 2",
+            done() { return player.bd.lowestTime < 600 },
+            style() {
+                if(player.bd.timeInCurrentAD > 600 && !hasMilestone(this.layer, this.id)) {
+                    return { 'background-color': '#992c2c !important' }
+                }
+            }
+        },
+        1 : {
+            requirementDescription: "Boost in under 5 minutes",
+            effectDescription: "Reward: BPS * 3",
+            done() { return player.bd.lowestTime < 300 },
+            style() {
+                if(player.bd.timeInCurrentAD > 300 && !hasMilestone(this.layer, this.id)) {
+                    return { 'background-color': '#992c2c !important' }
+                }
+            }
+        },
+        2 : {
+            requirementDescription: "Boost in under 1 minute",
+            effectDescription: "Reward: BPS * 5",
+            done() { return player.bd.lowestTime < 60 },
+            style() {
+                if(player.bd.timeInCurrentAD > 60 && !hasMilestone(this.layer, this.id)) {
+                    return { 'background-color': '#992c2c !important' }
+                }
+            }
+        },
+        3 : {
+            requirementDescription: "Boost in under 10 seconds",
+            effectDescription: "Reward: BPS * 10, Booster cap * 10",
+            done() { return player.bd.lowestTime < 10 },
+            style() {
+                if(player.bd.timeInCurrentAD > 10 && !hasMilestone(this.layer, this.id)) {
+                    return { 'background-color': '#992c2c !important' }
+                }
+            }
+        },
+        4 : {
+            requirementDescription: "Boost in under 2 seconds",
+            effectDescription: "Reward: BP gain * 5",
+            done() { return player.bd.lowestTime < 2 },
+            style() {
+                if(player.bd.timeInCurrentAD > 2 && !hasMilestone(this.layer, this.id)) {
+                    return { 'background-color': '#992c2c !important' }
+                }
+            }
+        },
+        5 : {
+            requirementDescription: "Boost in under 1 second",
+            effectDescription: "Reward: Remove the booster cap",
+            done() { return player.bd.lowestTime < 1 },
+            style() {
+                if(player.bd.timeInCurrentAD > 1 && !hasMilestone(this.layer, this.id)) {
+                    return { 'background-color': '#992c2c !important' }
+                }
+            }
         }
     },
 
@@ -103,11 +201,15 @@ addLayer('bd', {
             onClick() {
                 player.points = new Decimal(10);
                 player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
-                layerDataReset('ad', ['upgrades']);
+                let temp = JSON.stringify(player.ad.autobuyers);
+                layerDataReset('ad', ['upgrades', 'autobuyers']);
+                player.ad.autobuyers = JSON.parse(temp);
                 if(hasUpgrade('bd', 'keep-1')) player.ad.shifts = 1;
                 if(hasUpgrade('bd', 'keep-2')) player.ad.shifts = 2;
                 if(hasUpgrade('bd', 'keep-3')) player.ad.shifts = 3;
                 if(hasUpgrade('bd', 'keep-4')) player.ad.shifts = 4;
+                player.bd.lowestTime = Math.min(player.bd.lowestTime, player.bd.timeInCurrentAD);
+                player.bd.timeInCurrentAD = 0;
             },
             style() { return { 'font-size': '10px', width: '316px', 'margin-bottom': '8px' } }
         }
@@ -122,7 +224,7 @@ addLayer('bd', {
                 Cost: ${__(this.cost(),2,0)} BP`
             },
             cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
-            effect() { return new Decimal(0.01).times(Decimal.pow(1.5, getBuyableAmount(this.layer, this.id))); },
+            effect() { return new Decimal(0.001).times(Decimal.pow(1.5, getBuyableAmount(this.layer, this.id))); },
             canAfford() { return player.bd.points.gte(this.cost()); },
             buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { width: '150px', height: '150px', margin: '8px' } }
@@ -132,11 +234,19 @@ addLayer('bd', {
                 return `Increase the booster power cap by ${hasUpgrade(this.layer, 'doubleMaxCap') ? 10 : 4}.
                 Currently ${__(this.effect(),2,0)}.
                 
-                Cost: ${__(this.cost(),2,0)} BP`
+                ${hasMilestone('bd', 5) ? 'Disabled<br>(best time < 0:01)' : `Cost: ${__(this.cost(),2,0)} BP`}`
             },
             cost() { return Decimal.pow(3, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
-            effect() { return new Decimal(2.0).plus(Decimal.times(hasUpgrade(this.layer, 'doubleMaxCap') ? 10 : 4, getBuyableAmount(this.layer, this.id))); },
-            canAfford() { return player.bd.points.gte(this.cost()); },
+            effect() {
+                return new Decimal(2.0)
+                    .plus(
+                        Decimal.times(
+                            hasUpgrade(this.layer, 'doubleMaxCap') ? 10 : 4,
+                            getBuyableAmount(this.layer, this.id)
+                        )
+                    ).times(hasMilestone('bd', 3) ? 10 : 1)
+                },
+            canAfford() { return !hasMilestone('bd', 5) && player.bd.points.gte(this.cost()); },
             buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { width: '150px', height: '150px', margin: '8px' } }
         },

@@ -1,3 +1,11 @@
+.achievement > span {
+	display: none;
+}
+
+.ab-toggle {
+	z-index: 100;
+}
+
 .upg {
 	min-height: 20px;
 	height: 40px;

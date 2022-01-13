@@ -1,9 +1,21 @@
-<canvas width="500" height="500" id="dyson" style="border: 1px solid black; background-color: black;"></canvas>
+<canvas width="1280" height="720" id="dyson" style="border: 1px solid black; background-color: black;"></canvas>
 <script>
     const cos = Math.cos;
     const sin = Math.sin;
     const canvas = document.querySelector('#dyson');
     const ctx = canvas.getContext('2d');
+
+    function renderStar(x, y, width, height, theta, phi, radius = 2, color = 'white') {
+        let px = x - sin(phi) * width;
+        let py = y + cos(phi) * height;
+        let p_x = cos(theta) * (px - x) - sin(theta) * (py - y) + x;
+        let p_y = sin(theta) * (px - x) + cos(theta) * (py - y) + y;
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.ellipse(p_x, p_y, radius, radius, 0, 0, Math.PI * 2)
+        ctx.fill();
+    }
 
     function renderPlanet(x, y, width, height, theta, phi, radius = 5, color = 'd1e0e8', orbit = true) {
         let px = x - sin(phi) * width;
@@ -27,7 +39,18 @@
     function draw(tick) {
         let i = tick / 10000;
 
-        ctx.clearRect(0, 0, 500, 500);
+        ctx.clearRect(0, 0, 1280, 720);
+
+        for(let j = 0; j < 1000; j++) {
+            let x = Math.sin(j) * 10000;
+            let rand = (x - Math.floor(x)) * 10;
+            renderPlanet(640, 360, 100 * rand, 20 * rand + (rands[j] * 20), 0.2, -i + rand, 1, 'white', false);
+            renderPlanet(640, 360, 100 * rand , 20 * rand + (rands[j] * 20), 0.2, Math.PI - i + rand, 1, 'white', false);
+            // renderPlanet(640, 360, 10 * rand, 1.5 * rand, -.2, -i - rand, 2, 'rgba(255,255,255,0.9)', false);
+        }
+
+        requestAnimationFrame(draw);
+        return;
 
         ctx.shadowBlur = 0;
         for(let q = 0; q < 500; q++) {

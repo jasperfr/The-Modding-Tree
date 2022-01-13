@@ -142,6 +142,12 @@ addLayer('ach', {
             done() { return false },
             style: { 'background-position' : '-512px -256px' }
         },
+        34: {
+            name: 'WHERE\'S THE GALAXY LAYER???!!!',
+            tooltip: '<h4>WHERE\'S THE GALAXY LAYER???!!</h4><br><h5>Unlock the Galaxy Layer. Reward: No more pings on Discord.</h5>',
+            done() { return false },
+            style: { 'background-position' : '-512px -320px' }
+        },
     }
 
 });

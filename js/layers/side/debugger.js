@@ -62,6 +62,22 @@ addLayer('debug', {
             onClick() {
                 player.bd.points = player.bd.points.plus(100);
             }
+        },
+        32: {
+            title: 'Unlock the galaxy layer',
+            canClick() { return true },
+            style: { 'margin-bottom': '10px', 'height': '80px' },
+            onClick() {
+                player.g.unlocked = true;
+            }
+        },
+        41: {
+            title: '+1 GP',
+            canClick() { return true },
+            style: { 'margin-bottom': '10px', 'height': '80px' },
+            onClick() {
+                player.g.points = player.g.points.plus(1);
+            }
         }
     }
 })

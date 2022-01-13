@@ -7,7 +7,7 @@ addLayer('ad', {
     symbol: 'A',
     color: '#992c2c',
     tooltip: 'Antimatter Dimensions',
-    branches: ['bd', 'ds'],
+    branches: ['bd', 'g'],
 
     baseResource: 'antimatter',
 
@@ -35,7 +35,7 @@ addLayer('ad', {
 
     tickspeed: {
         increase() { return new Decimal(1.125) },
-        multiplier() { return Decimal.pow(tmp.ad.tickspeed.increase, Decimal.plus(tmp.gd.tickUpgrades.amount, player.ad.tickspeed)); },
+        multiplier() { return Decimal.pow(tmp.ad.tickspeed.increase, Decimal.plus(0, player.ad.tickspeed)); },
     },
 
     /* === Update information === */
@@ -50,6 +50,7 @@ addLayer('ad', {
                 .times(Decimal.pow(1.25, player.ad.shifts))
                 .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
                 .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
+                .times(tmp.g.multiplier)
                 .times(tmp.bd.power.multiplier)
                 .times(1.05 ** player.ach.achievements.length)
                 .times(delta)
@@ -89,6 +90,7 @@ addLayer('ad', {
                             .times(Decimal.pow(1.25, player.ad.shifts))
                             .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
                             .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
+                            .times(tmp.g.multiplier)
                             .times(1.05 ** player.ach.achievements.length)
                             .times(tmp.bd.power.multiplier), 1);
                         let amount = mixedStandardFormat(player.ad.dimensions[i], 2, true);
@@ -263,8 +265,8 @@ addLayer('ad', {
             tooltip() { return 'Reset Booster Dimensions and Antimatter Dimensions for GP.<br><br>GP is based on your antimatter amount. log10(AM/1.79e308)<br><br>You need 1.79e308 antimatter to unlock this.' },
             canClick() { return player.points.gte('1.79e308'); },
             onClick() {
-                player.gd.unlocked = true;
-                player.gd.points = player.gd.points.plus(this.gain());
+                player.g.unlocked = true;
+                player.g.points = player.g.points.plus(this.gain());
                 layerDataReset('bd');
                 let temp = JSON.stringify(player.ad.autobuyers);
                 layerDataReset('ad', ['upgrades', 'autobuyers']);

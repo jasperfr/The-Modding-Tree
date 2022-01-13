@@ -42,3 +42,13 @@
 	color: #63b8ff;
 	font-weight: bold;
 }
+
+.upgTable tt {
+	font-size: 16px;
+}
+
+.upgTable gp {
+	font-size: 20px;
+	color: #dd3ffc;
+	font-weight: bold;
+}

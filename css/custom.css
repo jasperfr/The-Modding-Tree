@@ -1,3 +1,10 @@
+span.g {
+    color:#d676d6;
+    font-size:20px;
+    font-weight:bold;
+    text-shadow: 0 0 4px rgba(255,255,255,0.3);
+}
+
 @-webkit-keyframes hydro {
     0%{background-position:73% 0%}
     50%{background-position:28% 100%}

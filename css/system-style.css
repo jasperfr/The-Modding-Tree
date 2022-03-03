@@ -1,8 +1,7 @@
 * {
 	transition-duration: 0.5s;
 	text-align: center;
-	font-family: "Inconsolata", monospace;
-	font-weight: bold;
+	font-family: 'Roboto Mono', monospace !important;
 	table-align: center;
 	margin: auto;
 	-webkit-text-size-adjust: none;

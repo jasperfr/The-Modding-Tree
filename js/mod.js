@@ -1,9 +1,21 @@
+function isDevBuild() { return VERSION.num.endsWith('dev') }
+
 let modInfo = {
 	name: "Antreematter Dimensions",
 	id: "antreematter",
 	author: "jasperfr",
 	pointsName: "antimatter",
-	modFiles: ['antimatter.js', 'booster.js', 'achievements.js', "tree.js"],
+	modFiles: [
+		'elements.js',
+		'tree.js',
+		'layers/side/achievements.js',
+		'layers/side/debugger.js',
+		'layers/antimatter.js',
+		'layers/booster.js',
+		'layers/galaxy.js',
+		'layers/crunch.js',
+		'layers/dyson.js',
+	],
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new Decimal(10), // Used for hard resets and new players
@@ -12,11 +24,29 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.7a",
-	name: "Antreematter Dimensions",
+	num: "0.99.999a",
+	name: "The Update Nobody Asked For",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.99.999</h3><br>
+		- Achievements!<br>
+		- Fixed booster upgrades.<br>
+		- Added booster milestones.<br>
+		- Fixed booster upgrades.<br>
+		- You can now toggle autobuyers.<br>
+		- Removed the galaxy layer again because it's a trash mechanic<br>
+		- Added a beautiful discord embedded image.<br><br>
+	<h3>v0.99a</h3><br>
+		- Added Booster Dimensions.<br>
+		- Added the first Booster Upgrades.<br><br>
+	<h3>v0.89a</h3><br>
+		- Added Autobuyers.<br>
+		- Completely revamped the game and fixed most if not all functions.<br>
+		- Changed styling to something more fancy.<br>
+		- Antimatter Dimensions formatted to work on displays down to 768p devices.<br>
+		- Dimensional Shifts now give a 2.0x multiplier to <b>all dimensions</b><br>
+		! Removed galaxies in this version, next update will bring them back (and better)<br><br>
 	<h3>v0.7a</h3><br>
 		- Added Booster Dimensions.<br>
 		- Added first Booster Dimension upgrade.<br><br>
@@ -50,15 +80,15 @@ function getPointGen() {
 	if(!canGenPoints())
 		return new Decimal(0)
 
-	let gain = new Decimal(0);
-	let boostEffect = Math.pow(player.ad.boosts.multiplier, Math.max(0, player.ad.boosts.amount));
-
-	gain = gain.plus(player.ad.dimensions[0].amount)
-			   .times(player.ad.dimensions[0].multiplier)
-			   .times(player.bd.multiplier)
-			   .times(boostEffect)
-			   .times(1.05 ** player.ach.achievements.length);
-
+	let gain = player.ad.dimensions[0]
+		.times(tmp.ad.buyables['dimension-1'].multiplier)
+		.times(Decimal.pow(hasUpgrade('bd', 'gain-2') ? 2.0 : 1.5, player.ad.shifts))
+		.times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
+		.times(tmp.g.multiplier)
+		.times(tmp.bd.power.multiplier)
+		.times(tmp.ad.tickspeed.multiplier)
+		.times(1.05 ** player.ach.achievements.length)
+	
 	return gain
 }
 
@@ -68,11 +98,12 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
+	isDevBuild() && 'DEVELOPMENT MODE'
 ]
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gt(1.79e308);
+	return player.points.gt(new Decimal('1ee1000'));
 }
 
 

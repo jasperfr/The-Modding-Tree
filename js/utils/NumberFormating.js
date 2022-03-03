@@ -1,3 +1,19 @@
+const s=['K','M','B','T','Qd','Qt','Sx','Sp','Oc','No','Dc'];
+const t=['K','M','G','T','P','Ex','Zt','Yt'];
+const __=(n,p=0,w=0)=>n===null||n===undefined?'NaN':n.mag<0.001?(0).toFixed(!w&&p):n.e<3?format(n,!w&&p):n.e<=s.length*3?format(n.div(`1e${n.e-n.e%3}`),p)+' '+s[~~(n.e/3)-1]:format(n,p)
+const ___=(n,p=0,w=0)=>n===null||n===undefined?'NaN':n.mag<0.001?(0).toFixed(!w&&p):n.e<3?format(n,!w&&p):n.e<=t.length*3?format(n.div(`1e${n.e-n.e%3}`),p)+' '+t[~~(n.e/3)-1]:format(n,p)
+const TIME = function(n) {
+    if(n > 1e10) return 'forever';
+    let d = Math.floor(n / 86400).toString()
+    let h = Math.floor(n % 86400 / 3600).toString().padStart(2, '0');
+    let m = Math.floor(n % 86400 % 3600 / 60).toString().padStart(2, '0');
+    let s = Math.floor(n % 86400 % 3600 % 60).toString().padStart(2, '0');
+    let ms = (n - Math.floor(n)).toString().slice(2, 5);
+    return `${d > 0 ? `${d} days ` : ''}${h}:${m}:${s}.${ms}`
+}
+
+const mixedStandardFormat = __;
+const magFormat = ___;
 
 function exponentialFormat(num, precision, mantissa = true) {
     let e = num.log10().floor()

@@ -24,11 +24,16 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.99.999a",
-	name: "The Update Nobody Asked For",
+	num: "1.0.0",
+	name: "The Infinite Update",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v1.0</h3><br>
+		- Achievements!<br>
+		- Fixed galaxy layer.<br>
+		- Added supernova for galaxy layer.<br>
+		- Added a beautiful discord embedded image.<br><br>
 	<h3>v0.99.999</h3><br>
 		- Achievements!<br>
 		- Fixed booster upgrades.<br>

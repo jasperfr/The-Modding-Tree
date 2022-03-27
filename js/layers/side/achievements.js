@@ -71,15 +71,31 @@ addLayer('ach', {
         },
         
         21: {
-            name: 'No Shi(f)t',
-            tooltip: '<h4>No Shi(f)t</h4><br><h5>Have all the Shift upgrades from Booster Dimensions.</h5>',
-            done() { return false; },
+            name: 'Age of Automation',
+            tooltip: '<h4>Age of Automation</h4><br><h5>Have all the Autobuyer upgrades.</h5>',
+            done() { return (
+                hasUpgrade('ad', 'ab-1') &&
+                hasUpgrade('ad', 'ab-2') &&
+                hasUpgrade('ad', 'ab-3') &&
+                hasUpgrade('ad', 'ab-4') &&
+                hasUpgrade('ad', 'ab-5') &&
+                hasUpgrade('ad', 'ab-6') &&
+                hasUpgrade('ad', 'ab-7') &&
+                hasUpgrade('ad', 'ab-8') &&
+                hasUpgrade('ad', 'ab-t') &&
+                hasUpgrade('ad', 'ab-s')
+            ); },
             style: { 'background-position' : '0px -64px' }
         },
         22: {
-            name: 'I should fix this',
-            tooltip: '<h4>I should fix this</h4><br><h5>Bulk buy 100 10x dimensions at once. Reward: Bulk buy uses a different formula.</h5>',
-            done() { return false; },
+            name: 'Age of Shifting',
+            tooltip: '<h4>Age of Shifting</h4><br><h5>Have all the Shift upgrades from Booster Dimensions.</h5>',
+            done() { return (
+                hasUpgrade('bd', 'keep-1') &&
+                hasUpgrade('bd', 'keep-2') &&
+                hasUpgrade('bd', 'keep-3') &&
+                hasUpgrade('bd', 'keep-4')
+            ); },
             style: { 'background-position' : '-64px -64px' }
         },
         23: {

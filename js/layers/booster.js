@@ -53,6 +53,7 @@ addLayer('bd', {
             base = base.times(tmp.bd.upgrades.log10boost.effect);
             base = base.times(tmp.bd.upgrades.log100boost.effect);
             if(hasAchievement('ach', 25)) base = base.times(1.1);
+            base = Decimal.max(base, 0.001);
             return base;
         },
         multiplier() { return Decimal.plus(1, player.bd.power).times(tmp.bd.buyables[4].effect) }

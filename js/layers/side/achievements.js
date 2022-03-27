@@ -131,7 +131,7 @@ addLayer('ach', {
         28: {
             name: 'A long time later',
             tooltip: '<h4>A long time later</h4><br><h5>Get your booster gain per second to 0.000 BP/s. Reward: Booster gain minimum is always 0.001 BPS.<br><br>NOTE: You can\'t get this after the last milestone.</h5>',
-            done() { return false; },
+            done() { return tmp.bd.power.perSecond.lte(0.001); },
             style: { 'background-position' : '-448px -64px' }
         },
         29: {

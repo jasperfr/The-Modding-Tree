@@ -52,6 +52,7 @@ addLayer('bd', {
 
             base = base.times(tmp.bd.upgrades.log10boost.effect);
             base = base.times(tmp.bd.upgrades.log100boost.effect);
+            if(hasAchievement('ach', 25)) base = base.times(1.1);
             return base;
         },
         multiplier() { return Decimal.plus(1, player.bd.power).times(tmp.bd.buyables[4].effect) }
@@ -209,6 +210,7 @@ addLayer('bd', {
                 if(hasUpgrade('bd', 'keep-3')) player.ad.shifts = 3;
                 if(hasUpgrade('bd', 'keep-4')) player.ad.shifts = 4;
                 player.bd.lowestTime = Math.min(player.bd.lowestTime, player.bd.timeInCurrentAD);
+                player.bd.power = new Decimal(0);
                 player.bd.timeInCurrentAD = 0;
             },
             style() { return { 'font-size': '10px', width: '316px', 'margin-bottom': '8px' } }
@@ -303,7 +305,7 @@ addLayer('bd', {
         },
         doubleMaxCap: {
             description: 'Increase the booster power cap effect.<br>(4 -> 10)',
-            cost: new Decimal(1000),
+            cost: new Decimal(500),
             style() { return { height: '100px' } }
         },
         reducePenal2: {
@@ -329,13 +331,13 @@ addLayer('bd', {
         log100boost: {
             description() { return `BPS gains a multiplier <i>after</i> the scaling nerf based on the log100 of your current multiplier.<br>
             Currently: ${__(this.effect(),2)}x` },
-            cost: new Decimal(10000),
+            cost: new Decimal(50000),
             effect() { return hasUpgrade(this.layer, this.id) ? Decimal.plus(1, Decimal.log(tmp.bd.power.multiplier, 100)) : new Decimal(1); },
             style() { return { height: '100px' } }
         },
         cheaperBuyables: {
             description() { return `All buyables are 1,000x cheaper, and unlock a new one.` },
-            cost: new Decimal(100000),
+            cost: new Decimal(1000000),
             effect() { return hasUpgrade(this.layer, this.id) ? new Decimal(0.001) : new Decimal(1); },
             style() { return { height: '100px' } }
         },

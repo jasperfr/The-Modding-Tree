@@ -42,14 +42,23 @@ addLayer('ad', {
     update(delta) {
         // Update dimensions
         for(let i = 0; i < (3 + player.ad.shifts); i++) {
-            let multiplier = tmp.ad.buyables[`dimension-${i+2}`].multiplier
+            let multiplier = tmp.ad.buyables[`dimension-${i+2}`].multiplier;
+            let shiftMultiplier = 1;
+            switch(i) {
+                case 0: case 1: shiftMultiplier = 2 ** player.ad.shifts; break;
+                case 2: case 3: shiftMultiplier = 2 ** Math.max(0, (player.ad.shifts - 1)); break;
+                case 4: case 5: shiftMultiplier = 2 ** Math.max(0, (player.ad.shifts - 2)); break;
+                case 6: case 7: shiftMultiplier = 2 ** Math.max(0, (player.ad.shifts - 3)); break;
+            }
+
             player.ad.dimensions[i] = player.ad.dimensions[i].plus(
                 player.ad.dimensions[i+1]
                 .times(multiplier)
                 .times(tmp.ad.tickspeed.multiplier)
-                .times(Decimal.pow(1.25, player.ad.shifts))
+                .times(shiftMultiplier)
                 .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
                 .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
+                .times(hasAchievement('ach', 29) ? 1.1 : 1.0)
                 .times(tmp.g.multiplier)
                 .times(tmp.bd.power.multiplier)
                 .times(1.05 ** player.ach.achievements.length)
@@ -75,7 +84,8 @@ addLayer('ad', {
     tabFormat: {
         'Dimensions': {
             content: [
-                ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }], 'blank',
+                ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }],
+                ['display-text', function() { return  `You are getting <span style="font-size:12px;">${__(getPointGen(), 2, 1)}</span> antimatter per second.`; }, { 'color': 'silver', 'font-size': '10px' }], 'blank',
                 ['display-text', function() { return `Increase tickspeed by ${tmp.ad.tickspeed.increase}x.` }, { 'font-size': '12px', 'color': 'silver' }],
                 ['row', [['buyable', 'tickspeed'], ['buyable', 'tickspeed-max']]],
                 ['display-text', function() { return `Tickspeed: ${mixedStandardFormat(tmp.ad.tickspeed.multiplier, 3)} / sec` }, { 'font-size': '12px', 'color': 'silver' }],
@@ -86,10 +96,18 @@ addLayer('ad', {
                 function() {
                     const html = ['column', []];
                     for(let i = 0; i <= (3 + player.ad.shifts); i++) {
+                        let shiftMultiplier = 1;
+                        switch(i) {
+                            case 0: case 1: shiftMultiplier = 2 ** player.ad.shifts; break;
+                            case 2: case 3: shiftMultiplier = 2 ** Math.max(0, (player.ad.shifts - 1)); break;
+                            case 4: case 5: shiftMultiplier = 2 ** Math.max(0, (player.ad.shifts - 2)); break;
+                            case 6: case 7: shiftMultiplier = 2 ** Math.max(0, (player.ad.shifts - 3)); break;
+                        }
                         let multiplier = mixedStandardFormat(tmp.ad.buyables[`dimension-${i+1}`].multiplier
-                            .times(Decimal.pow(1.25, player.ad.shifts))
+                            .times(shiftMultiplier)
                             .times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
                             .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
+                            .times(hasAchievement('ach', 29) ? 1.1 : 1.0)
                             .times(tmp.g.multiplier)
                             .times(1.05 ** player.ach.achievements.length)
                             .times(tmp.bd.power.multiplier), 1);
@@ -203,15 +221,13 @@ addLayer('ad', {
         // Dimensional Shifts appear until the 8th Dimension and give a multiplier to each dimension.
         'shift': {
             display() {
-                let requirement;
                 switch(player.ad.shifts) {
-                    case 0: requirement = 'Requires 20 4th Dimensions'; break;
-                    case 1: requirement = 'Requires 20 5th Dimensions'; break;
-                    case 2: requirement = 'Requires 20 6th Dimensions'; break;
-                    case 3: requirement = 'Requires 20 7th Dimensions'; break;
-                    default: requirement = '<span style="color:red;">This shouldn\'t happen.</span>'; break;
+                    case 0: return 'Dimensional Shift (0)<br>Reset to gain a x2.0 boost on 1st -> 2nd Dimensions.';
+                    case 1: return 'Dimensional Shift (1)<br>Reset to gain a x2.0 boost on 1st -> 4th Dimensions.';
+                    case 2: return 'Dimensional Shift (2)<br>Reset to gain a x2.0 boost on 1st -> 6th Dimensions.';
+                    case 3: return 'Dimensional Shift (3)<br>Reset to gain a x2.0 boost on 1st -> 8th Dimensions.';
+                    default: return 'ERROR?'
                 }
-                return `Dimensional Shift (${player.ad.shifts})<br>${requirement}.`;
             },
             canClick() { return player.ad.dimensions[player.ad.shifts + 3].gte(20); },
             onClick() { 
@@ -221,14 +237,16 @@ addLayer('ad', {
                 player.ad.autobuyers = JSON.parse(temp);
                 player.points = new Decimal(10);
             },
-            tooltip() { return `Dimensional Shifts unlock a new dimension and they give a 1.25x multiplier to all dimensions each.` },
             unlocked() { return player.ad.shifts < 4; },
-            style() { return { 'font-size': '10px' } }
+            tooltip() {
+                return `Requires 20 ${['4th', '5th', '6th', '7th'][player.ad.shifts]} Dimensions.`
+            },
+            style() { return { 'font-size': '10px', 'height': '60px' } }
         },
 
         // Dimensional Boosts appear after the 8th Dimension has been unlocked and give Booster Points.
         'boost': {
-            display() { return `Reset for ${__(tmp.bd.points.gain,2,0)} BP.` },
+            display() { return `Dimensional Boost<br>Reset all dimensions,<br>and gain ${__(tmp.bd.points.gain,2,0)} BP.` },
             canClick() { return tmp.bd.points.gain.gte(1); },
             onClick() {
                 player.points = new Decimal(10);
@@ -243,27 +261,28 @@ addLayer('ad', {
                 if(hasUpgrade('bd', 'keep-4')) player.ad.shifts = 4;
                 player.bd.lowestTime = Math.min(player.bd.lowestTime, player.bd.timeInCurrentAD);
                 player.bd.timeInCurrentAD = 0;
+                player.bd.power = new Decimal(0);
             },
-            tooltip() { return 'Reset all your dimensions, but gain Booster Points based on your 8th dimensions.<br><br>Booster Dimensions boost all Antimatter Dimension multipliers.' },
+            tooltip() { return 'Booster Point gain is based on your 8th dimensions.' },
             unlocked() { return player.ad.shifts >= 4; },
-            style() { return { 'font-size': '10px' } }
+            style() { return { 'font-size': '10px', 'height': '60px' } }
         },
 
         // Galaxies give a galaxy based on the amount of 8th Dimensions.
         'galaxy': {
             gain() {
-                return Decimal.ceil(Decimal.log(Decimal.divide(player.points, '1.79e308'), 10));
+                return Decimal.ceil(Decimal.log(Decimal.divide(player.points, '1e512'), 10));
             },
             display() {
                 if(this.canClick()) {
                     return `Gain ${this.gain()} GP.`;
                 }
                 else {
-                    return 'Reach 1.79e308 to unlock Galaxy Points.'
+                    return 'Reach 1e512 to unlock Galaxy Points.'
                 }
             },
-            tooltip() { return 'Reset Booster Dimensions and Antimatter Dimensions for GP.<br><br>GP is based on your antimatter amount. log10(AM/1.79e308)<br><br>You need 1.79e308 antimatter to unlock this.' },
-            canClick() { return player.points.gte('1.79e308'); },
+            tooltip() { return 'Reset Booster Dimensions and Antimatter Dimensions for GP.<br><br>GP is based on your antimatter amount. log10(AM/1e512)<br><br>You need 1e512 antimatter to unlock this.' },
+            canClick() { return player.points.gte('1e512'); },
             onClick() {
                 player.g.unlocked = true;
                 player.g.points = player.g.points.plus(this.gain());
@@ -275,7 +294,7 @@ addLayer('ad', {
                 player.bd.power = new Decimal(0);
                 player.bd.restart = true;
             },
-            style() { return { 'font-size': '10px' } }
+            style() { return { 'font-size': '10px', 'height': '60px' } }
         }
 
     },

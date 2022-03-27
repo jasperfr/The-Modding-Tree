@@ -7,9 +7,9 @@ addLayer('crunch', {
     ],
 
     update() {
-        if(player.points.gte(new Decimal('1e1000'))) {
+        if(player.points.gte(new Decimal('2e1024'))) {
             options.forceOneTab = true;
-            player.points = new Decimal('1e1000')
+            player.points = new Decimal('2e1024')
             showTab('crunch');
         }
     },
@@ -29,6 +29,7 @@ addLayer('crunch', {
                 // hasMilestone does not work for whatever reason, just hard code values for now...
                 player.points = player.infinity.infinities.gte(1) ? new Decimal(100) : new Decimal(10);
                 player.bd.points = player.infinity.infinities.gte(2) ? new Decimal(1) : new Decimal(0);
+                player.g.unlocked = false;
                 player.g.points = player.infinity.infinities.gte(3) ? new Decimal(1) : new Decimal(0);
                 player.g.buff = player.infinity.infinities.gte(3) ? new Decimal(0.03) : new Decimal(0.015);
 
@@ -102,13 +103,13 @@ addLayer('infinity', {
 
     upgrades: {
         boostTimePlayed: {
-            effect() { return Decimal.max(1.0, Decimal.pow(player.timePlayed / 100, 0.175)) },
+            effect() { return Decimal.max(1.0, Decimal.pow(player.timePlayed / 10, 0.25)) },
             description() { return `Antimatter and Booster Dimensions gain a multiplier based on time played.<br>Currently: ${mixedStandardFormat(this.effect(), 2, 0)}x`  },
             cost: 1,
             style: { height: '100px', border: '2px solid orange !important' }
         },
         boostInfinities: {
-            effect() { return Decimal.plus(2.0, Decimal.times(player.infinity.infinities, 0.2)) },
+            effect() { return Decimal.plus(5.0, Decimal.times(player.infinity.infinities, 0.55)) },
             description() { return `Antimatter and Booster Dimensions gain a multiplier based on infinities.<br>Currently: ${mixedStandardFormat(this.effect(), 2, 0)}x`  },
             cost: 1,
             style: { height: '100px', border: '2px solid orange !important' }

@@ -4,7 +4,11 @@ const elements = {
             direction: RIGHT,
             width: 500,
             height: 20,
-            display() { return `${format(Math.max(0, player.points.log10().divide(1024).times(100)), 1)}% to Infinity (2e1024)` },
+            instant: true,
+            display() {
+                const percentage = Math.max(0, player.points.log10().divide(1024).times(100));
+                return `${format(percentage)}% to Infinity`
+            },
             progress() {
                 return Math.max(0, player.points.log10().divide(1024))
             },

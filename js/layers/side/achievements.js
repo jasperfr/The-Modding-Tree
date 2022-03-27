@@ -1,7 +1,7 @@
 addLayer('ach', {
 
     row: 'side',
-    symbol: '<h1 style="margin:0;line-height:32px">★</h1>',
+    symbol: '<h1 style="margin:0;line-height:32px;font-size:26pt">★</h1>',
     tooltip() { return 'Achievements' },
 
     tabFormat: [
@@ -66,7 +66,7 @@ addLayer('ach', {
         19: {
             name: 'The Boosting Era',
             tooltip: '<h4>The Boosting Era</h4><br><h5>Perform a Booster Reset.</h5>',
-            done() { return player.bd.unlocked == true; },
+            done() { return player.bd.unlocked; },
             style: { 'background-position' : '-512px 0px' }
         },
         
@@ -96,14 +96,14 @@ addLayer('ach', {
         },
         25: {
             name: 'Boosting to the max',
-            tooltip: '<h4>Boosting to the max</h4><br><h5>Buy every Booster Upgrade.</h5>',
-            done() { return false; },
+            tooltip: '<h4>Boosting to the max</h4><br><h5>Get at least 1 Booster Power/second. Reward: Booster Power/second is 10% more effective.</h5>',
+            done() { return tmp.bd.power.perSecond.gt(1); },
             style: { 'background-position' : '-256px -64px' }
         },
         26: {
             name: 'You got past the Big Wall',
             tooltip: '<h4>You got past the Big Wall</h4><br><h5>Gain your first Galactic Points.</h5>',
-            done() { return false; },
+            done() { return player.g.points.gte(1); },
             style: { 'background-position' : '-320px -64px' }
         },
         27: {
@@ -120,8 +120,8 @@ addLayer('ach', {
         },
         29: {
             name: 'That\'s a lot',
-            tooltip: '<h4>That\'s a lot</h4><br><h5>Buy 100 Booster buyables in total.</h5>',
-            done() { return false; },
+            tooltip: '<h4>That\'s a lot</h4><br><h5>Have 1 billion Booster Points. Reward: All Antimatter Dimensions are 10% more effective.</h5>',
+            done() { return player.bd.points.gte(1e9); },
             style: { 'background-position' : '-512px -64px' }
         },
         31: {
@@ -137,16 +137,67 @@ addLayer('ach', {
             style: { 'background-position' : '-256px -256px' }
         },
         33: {
-            name: 'It\'s not a bug, it\'s a feature',
-            tooltip: '<h4>It\'s not a bug, it\'s a feature</h4><br><h5>Have enough BP to buy an upgrade but don\'t unlock it. Reward: Upgrades are 0.00000000000000001 BP cheaper.</h5>',
-            done() { return false },
-            style: { 'background-position' : '-512px -256px' }
+            name: 'Lazy Bastard',
+            tooltip: '<h4>Lazy Bastard</h4><br><h5>Let your merge/sec exceed your spawn rate/sec.</h5>',
+            done() { return tmp.g.spawnRate > tmp.g.mergeRate },
+            style: { 'background-position' : '-512px -320px' }
         },
         34: {
-            name: 'WHERE\'S THE GALAXY LAYER???!!!',
-            tooltip: '<h4>WHERE\'S THE GALAXY LAYER???!!</h4><br><h5>Unlock the Galaxy Layer. Reward: No more pings on Discord.</h5>',
-            done() { return false },
-            style: { 'background-position' : '-512px -320px' }
+            name: 'Ironic',
+            tooltip: '<h4>Ironic</h4><br><h5>Get your first iron (Fe) atom.</h5>',
+            done() { 
+                let sumOfFe = new Decimal(0);
+                for(let y = 1; y <= tmp.g.grid.cols; y++) {
+                    for(let x = 1; x <= tmp.g.grid.rows; x++) {
+                        let id = 100 * y + x;
+                        if(getGridData('g', id) == IRON) {
+                            sumOfFe = sumOfFe.plus(1);
+                        }
+                    }
+                }
+                return sumOfFe.gte(1) },
+            style: { 'background-position' : '-512px -384px' }
+        },
+        35: {
+            name: 'Super explosion',
+            tooltip: '<h4>Super explosion</h4><br><h5>Trigger a supernova.</h5>',
+            done() { return tmp.g.starPower > 1 },
+            style: { 'background-position' : '-512px -448px' }
+        },
+        36: {
+            name: 'Exponential Solar Power',
+            tooltip: '<h4>Exponential Solar Power</h4><br><h5>Get your Star Power to >= ^2. Reward: Additional +1 to Star Power.</h5>',
+            done() { return tmp.g.starPower > 2 },
+            style: { 'background-position' : '-512px -512px' }
+        },
+        37: {
+            name: 'Iron Age',
+            tooltip: '<h4>Iron Age</h4><br><h5>Get 6 iron atoms. Reward: Additional +1 to Star Power.</h5>',
+            done() { 
+                let sumOfFe = new Decimal(0);
+                for(let y = 1; y <= tmp.g.grid.cols; y++) {
+                    for(let x = 1; x <= tmp.g.grid.rows; x++) {
+                        let id = 100 * y + x;
+                        if(getGridData('g', id) == IRON) {
+                            sumOfFe = sumOfFe.plus(1);
+                        }
+                    }
+                }
+                return sumOfFe.gte(6)
+            },
+            style: { 'background-position' : '-512px -576px' }
+        },
+        38: {
+            name: 'We COULD afford 9!',
+            tooltip: '<h4>We COULD afford 9!</h4><br><h5>Get above 9e999 antimatter.</h5>',
+            done() { return player.points.gte('9e999') },
+            style: { 'background-position' : '-512px -640px' }
+        },
+        39: {
+            name: 'You win!',
+            tooltip: '<h4>You win!</h4><br><h5>Get 1e1024 antimatter. Reward: A sense of accomplishment.</h5>',
+            done() { return player.points.gte('1e1024') },
+            style: { 'background-position' : '-512px -704px' }
         },
     }
 

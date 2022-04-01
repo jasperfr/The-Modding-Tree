@@ -8,10 +8,10 @@ function shuffleArray(array) {
 
 const lootboxes = [
     {
-        label: 'Ruin! x0.01 antimatter!',
+        label: 'Ruin! x0.1 antimatter!',
         color: 'red',
         rarity: 'grey',
-        effect: ['antimatter', 0.01]
+        effect: ['antimatter', 0.1]
     },
     {
         label: 'Gain x2 antimatter.',

@@ -14,7 +14,7 @@ let modInfo = {
 		'layers/booster.js',
 		'layers/galaxy.js',
 		'layers/crunch.js',
-		'layers/dyson.js',
+		'layers/lootbox.js',
 	],
 	discordName: "",
 	discordLink: "",
@@ -94,6 +94,7 @@ function getPointGen() {
 		.times(tmp.g.multiplier)
 		.times(tmp.bd.power.multiplier)
 		.times(1.05 ** player.ach.achievements.length)
+		.times(player.$.effects.antimatter)
 	
 	return gain
 }

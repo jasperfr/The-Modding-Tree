@@ -25,6 +25,7 @@ addLayer('bd', {
                 .floor()
                 .times(tmp.bd.buyables[3].effect)
                 .times(hasUpgrade('bd', 'gain10times') ? 10 : 1)
+                .times(player.$.effects.BP)
             .times(hasMilestone('bd', 4) ? 10 : 1)
         }
     },

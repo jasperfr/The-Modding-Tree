@@ -212,6 +212,10 @@ const lootboxes = [
     },
 ];
 
+function swapShift(array) {
+    return [].concat(array.slice(1), array[0])
+}
+
 addLayer('$', {
 
     name: 'Lootboxes',
@@ -256,13 +260,11 @@ addLayer('$', {
             if(player.$.timer > Decimal.minus(11, getBuyableAmount('$', 'fasterLoot').div(2))) {
                 player.$.spinning = 'off'
 
-                if(player.$.spinPtr <= 0) player.$.spinPtr = player.$.lootboxArray.length;
-
-                if(player.$.lootboxArray[player.$.spinPtr - 1].label === 'BANKRUPT! Lose your antimatter!') {
+                if(player.$.lootboxArray[2].label === 'BANKRUPT! Lose your antimatter!') {
                     player.points = new Decimal(0);
                 }
 
-                const effect = player.$.lootboxArray[player.$.spinPtr - 1].effect;
+                const effect = player.$.lootboxArray[2].effect;
                 player.$.effects[effect[0]] = player.$.effects[effect[0]].times(effect[1])
             }
         }
@@ -281,31 +283,38 @@ addLayer('$', {
             player.$.timer = 0;
             player.$.speed = 0;
         }
+
         if(player.$.spinning === 'spin') {
-            let i = player.$.spinPtr;
-            if(player.$.lootboxArray[i] == undefined) i = 0;
             // Render lootboxes
-            const lootboxLeft = document.querySelector('.lootbox-left');
-            const lootboxCenter = document.querySelector('.lootbox-center');
-            const lootboxRight = document.querySelector('.lootbox-right');
-            if(!lootboxLeft) return; // tab hidden
+            const lootboxNorth = document.querySelector('.lootbox-n');
+            const lootboxNorthCenter = document.querySelector('.lootbox-nc');
+            const lootboxCenter = document.querySelector('.lootbox-c');
+            const lootboxCenterSouth = document.querySelector('.lootbox-cs');
+            const lootboxSouth = document.querySelector('.lootbox-s');
+            if(!lootboxNorth) return; // tab hidden
 
-            lootboxLeft.innerText = player.$.lootboxArray[(i - 1 < 0 ? player.$.lootboxArray.length - 1 : i - 1)].label;
-            lootboxCenter.innerText = player.$.lootboxArray[i].label;
-            lootboxRight.innerText = player.$.lootboxArray[i + 1 > player.$.lootboxArray.length - 1 ? 0 : i + 1].label;
+            const arr = player.$.lootboxArray;
+            lootboxNorth.innerText = arr[0].label;
+            lootboxNorth.style.borderColor = arr[0].color;
+            lootboxNorth.style.color = arr[0].rarity;
 
-            lootboxLeft.style.borderColor = player.$.lootboxArray[(i - 1 < 0 ? player.$.lootboxArray.length - 1 : i - 1)].color;
-            lootboxCenter.style.borderColor = player.$.lootboxArray[i].color;
-            lootboxRight.style.borderColor = player.$.lootboxArray[i + 1 > player.$.lootboxArray.length - 1 ? 0 : i + 1].color;
+            lootboxNorthCenter.innerText = arr[1].label;
+            lootboxNorthCenter.style.borderColor = arr[1].color;
+            lootboxNorthCenter.style.color = arr[1].rarity;
 
-            lootboxLeft.style.color = player.$.lootboxArray[(i - 1 < 0 ? player.$.lootboxArray.length - 1 : i - 1)].rarity;
-            lootboxCenter.style.color = player.$.lootboxArray[i].rarity;
-            lootboxRight.style.color = player.$.lootboxArray[i + 1 > player.$.lootboxArray.length - 1 ? 0 : i + 1].rarity;
+            lootboxCenter.innerText = arr[2].label;
+            lootboxCenter.style.borderColor = arr[2].color;
+            lootboxCenter.style.color = arr[2].rarity;
 
-            player.$.spinPtr++;
-            if(player.$.spinPtr >= player.$.lootboxArray.length - 1) {
-                player.$.spinPtr = 0;
-            }
+            lootboxCenterSouth.innerText = arr[3].label;
+            lootboxCenterSouth.style.borderColor = arr[3].color;
+            lootboxCenterSouth.style.color = arr[3].rarity;
+
+            lootboxSouth.innerText = arr[4].label;
+            lootboxSouth.style.borderColor = arr[4].color;
+            lootboxSouth.style.color = arr[4].rarity;
+
+            player.$.lootboxArray = swapShift(player.$.lootboxArray);
         }
     },
 
@@ -322,9 +331,13 @@ addLayer('$', {
         ['clickable', 'buyLootbox'],
         'blank',
         ['row', [
-            ['raw-html', '<div class="lootbox lootbox-left"></div>'],
-            ['raw-html', '<div class="lootbox lootbox-center"></div>'],
-            ['raw-html', '<div class="lootbox lootbox-right"></div>']
+            ['column', [
+                ['raw-html', '<div class="lootbox lootbox-n"></div>'],
+                ['raw-html', '<div class="lootbox lootbox-nc"></div>'],
+                ['raw-html', '<div class="lootbox lootbox-c"></div>'],
+                ['raw-html', '<div class="lootbox lootbox-cs"></div>'],
+                ['raw-html', '<div class="lootbox lootbox-s"></div>']
+            ]],
         ]],
         'blank',
         ['row', [

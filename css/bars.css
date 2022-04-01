@@ -66,6 +66,17 @@
 	margin: 4px;
 	border-radius: 2px;
 	padding: 20px 0;
+	transition: border-color 0ms;
+	height: 30px;
+}
+.lootbox:not(.lootbox-c) {
+	opacity: 0.5;
+}
+.lootbox.lootbox-c {
+	transform:scale(120%);
+}
+.lootbox.lootbox-cs, .lootbox.lootbox-nc {
+	transform:scale(110%);
 }
 
 @keyframes rainbow {
@@ -112,5 +123,5 @@
 	font-weight: bold;
 	animation: rainbow 2.5s linear;
 	animation-iteration-count: infinite;
-	text-shadow: 0 0 4px white;
+
 }

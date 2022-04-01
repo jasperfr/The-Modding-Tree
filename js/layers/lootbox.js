@@ -239,7 +239,7 @@ addLayer('$', {
                 antimatter: new Decimal(1),
                 BP: new Decimal(1),
                 $: new Decimal(1),
-                none: new Decimal(0)
+                none: new Decimal(0),
             }
         }
     },
@@ -255,6 +255,8 @@ addLayer('$', {
             player.$.timer += tick;
             if(player.$.timer > Decimal.minus(11, getBuyableAmount('$', 'fasterLoot').div(2))) {
                 player.$.spinning = 'off'
+
+                if(player.$.spinPtr <= 0) player.$.spinPtr = player.$.lootboxArray.length;
 
                 if(player.$.lootboxArray[player.$.spinPtr - 1].label === 'BANKRUPT! Lose your antimatter!') {
                     player.points = new Decimal(0);
@@ -280,7 +282,8 @@ addLayer('$', {
             player.$.speed = 0;
         }
         if(player.$.spinning === 'spin') {
-            const i = player.$.spinPtr;
+            let i = player.$.spinPtr;
+            if(player.$.lootboxArray[i] == undefined) i = 0;
             // Render lootboxes
             const lootboxLeft = document.querySelector('.lootbox-left');
             const lootboxCenter = document.querySelector('.lootbox-center');
@@ -300,7 +303,7 @@ addLayer('$', {
             lootboxRight.style.color = player.$.lootboxArray[i + 1 > player.$.lootboxArray.length - 1 ? 0 : i + 1].rarity;
 
             player.$.spinPtr++;
-            if(player.$.spinPtr > player.$.lootboxArray.length - 1) {
+            if(player.$.spinPtr >= player.$.lootboxArray.length - 1) {
                 player.$.spinPtr = 0;
             }
         }

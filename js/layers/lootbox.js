@@ -11,7 +11,7 @@ const lootboxes = [
         label: 'Ruin! x0.5 antimatter!',
         color: 'red',
         rarity: 'grey',
-        effect: ['antimatter', 0.1]
+        effect: ['antimatter', 0.5]
     },
     {
         label: 'Gain x2 antimatter.',

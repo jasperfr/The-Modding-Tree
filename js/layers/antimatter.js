@@ -62,7 +62,6 @@ addLayer('ad', {
                 .times(tmp.g.multiplier)
                 .times(tmp.bd.power.multiplier)
                 .times(1.05 ** player.ach.achievements.length)
-                .times(player.$.effects.antimatter)
                 .times(delta)
             );
         };
@@ -111,7 +110,6 @@ addLayer('ad', {
                             .times(hasAchievement('ach', 29) ? 1.1 : 1.0)
                             .times(tmp.g.multiplier)
                             .times(1.05 ** player.ach.achievements.length)
-                            .times(player.$.effects.antimatter)
                             .times(tmp.bd.power.multiplier), 1);
                         let amount = mixedStandardFormat(player.ad.dimensions[i], 2, true);
                         html[1].push(['row', [

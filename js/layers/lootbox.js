@@ -225,7 +225,7 @@ addLayer('$', {
     resource: '$',
 
     layerShown() {
-        return true;
+        return false;
     },
 
     startData() {

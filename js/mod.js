@@ -94,7 +94,6 @@ function getPointGen() {
 		.times(tmp.g.multiplier)
 		.times(tmp.bd.power.multiplier)
 		.times(1.05 ** player.ach.achievements.length)
-		.times(player.$.effects.antimatter)
 	
 	return gain
 }

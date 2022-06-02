@@ -1,3 +1,11 @@
+@keyframes ani-autobuyer-enabled {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 69% 100%;
+    }
+}
 
 /* Prestige button */
 .reset {

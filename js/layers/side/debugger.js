@@ -5,15 +5,12 @@ addLayer('debug', {
 
     // Snooping as usual, I see?
     layerShown() {
-        const query = window.location.search;
-        const params = new URLSearchParams(query);
-        const hotel = params.get('hotel');
-        return hotel === 'trivago';
+        return player.godMode;
     },
 
     tabFormat: [
         ['display-text', '<h1>God Mode</h1>'],
-        ['display-text', 'Hey! You\'re not supposed to be here.<br>This section is for debugging purposes.'],
+        ['display-text', 'This section is for debugging purposes.'],
         ['display-text', 'if you post this on the discord server i will break your kneecaps', { 'font-size': '8px' }],
         'blank',
         'clickables'
@@ -45,14 +42,11 @@ addLayer('debug', {
             }
         },
         22: {
-            title: 'Skip to Booster Layer, +10BP',
+            title: 'Skip to the Booster Layer',
             canClick() { return true },
             style: { 'margin-bottom': '10px', 'height': '80px' },
             onClick() {
-                player.points = new Decimal(10);
-                player.bd.points = player.bd.points.plus(10);
                 player.bd.unlocked = true;
-                layerDataReset('ad', ['upgrades']);
             }
         },
         31: {
@@ -64,7 +58,7 @@ addLayer('debug', {
             }
         },
         32: {
-            title: 'Unlock the galaxy layer',
+            title: 'Skip to the galaxy layer',
             canClick() { return true },
             style: { 'margin-bottom': '10px', 'height': '80px' },
             onClick() {
@@ -72,11 +66,19 @@ addLayer('debug', {
             }
         },
         41: {
-            title: '+1 GP',
+            title: '+100 GP',
             canClick() { return true },
             style: { 'margin-bottom': '10px', 'height': '80px' },
             onClick() {
-                player.g.points = player.g.points.plus(1);
+                player.g.points = player.g.points.plus(100);
+            }
+        },
+        42: {
+            title: 'Unlock Big Crunch (+2e1024AM)',
+            canClick() { return true },
+            style: { 'margin-bottom': '10px', 'height': '80px' },
+            onClick() {
+                player.points = new Decimal('2e1024');
             }
         }
     }

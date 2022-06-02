@@ -1,4 +1,5 @@
 const ORDINAL = ['0th','1st','2nd','3rd','4th','5th','6th','7th','8th'];
+const AUTOBUYERS = ['ab-1', 'ab-2', 'ab-3', 'ab-4', 'ab-5', 'ab-6', 'ab-7', 'ab-8', 'ab-t', 'ab-s'];
 
 addLayer('ad', {
 
@@ -18,18 +19,6 @@ addLayer('ad', {
             tickspeed: new Decimal(0),
             shifts: 0, // 0 - 4 shifts, afterwards gain Booster Points
             style: [0, 0, 0, 0, 0, 0, 0, 0], // style state
-            autobuyers: {
-                'ab-1': false,
-                'ab-2': false,
-                'ab-3': false,
-                'ab-4': false,
-                'ab-5': false,
-                'ab-6': false,
-                'ab-7': false,
-                'ab-8': false,
-                'ab-t': false,
-                'ab-s': false,
-            }
         }
     },
 
@@ -66,18 +55,22 @@ addLayer('ad', {
             );
         };
 
-        // Let the autobuyers buy upgrades.
+        // Dimension autobuyer
         for(let i = 0; i <= (3 + player.ad.shifts); i++) {
-            if(hasUpgrade(this.layer, `ab-${i+1}`) && player.ad.autobuyers[`ab-${i+1}`]) {
+            if(getClickableState(this.layer, `ab-${i+1}`) === 'Enabled') {
                 if(hasUpgrade('bd', 'adim-m')) buyMaxBuyable(this.layer, `dimension-${i+1}`);
                 else buyBuyable(this.layer, `dimension-${i+1}`);
             }
         }
-        if(hasUpgrade(this.layer, 'ab-t') && player.ad.autobuyers['ab-t']) {
+        // Tickspeed autobuyer
+        if (getClickableState(this.layer, `ab-t`) === 'Enabled') {
             if(hasUpgrade('bd', 'adim-m')) buyMaxBuyable(this.layer, `tickspeed`);
             else buyBuyable(this.layer, `tickspeed`);
         }
-        if(hasUpgrade(this.layer, 'ab-s') && player.ad.autobuyers['ab-s']) clickClickable(this.layer, 'shift');
+        // Dimension shift autobuyer
+        if (getClickableState(this.layer, `ab-s`) === 'Enabled') {
+            clickClickable(this.layer, 'shift');
+        }
     },
     
     /* === Renderer information === */
@@ -128,35 +121,14 @@ addLayer('ad', {
         },
         'Autobuyers': {
             content: [
-                ['microtabs', 'autobuyers']
+                ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }], 'blank',
+                ['row', [['clickable', 'ab-1'], ['clickable', 'ab-2'], ['clickable', 'ab-3']]],
+                ['row', [['clickable', 'ab-4'], ['clickable', 'ab-5'], ['clickable', 'ab-6']]],
+                ['row', [['clickable', 'ab-7'], ['clickable', 'ab-8'], ['clickable', 'ab-t']]],
+                ['row', [['clickable', 'ab-s']]],
+                'blank',
+                ['bar', 'percentageToInfinity']
             ]
-        }
-    },
-
-    microtabs: {
-        autobuyers: {
-            Upgrades: {
-                content: [
-                    ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }], 'blank',
-                    ['row', [['upgrade', 'ab-1'], ['upgrade', 'ab-2'], ['upgrade', 'ab-3']]],
-                    ['row', [['upgrade', 'ab-4'], ['upgrade', 'ab-5'], ['upgrade', 'ab-6']]],
-                    ['row', [['upgrade', 'ab-7'], ['upgrade', 'ab-8'], ['upgrade', 'ab-t']]],
-                    ['row', [['upgrade', 'ab-s']]],
-                    'blank',
-                    ['bar', 'percentageToInfinity']
-                ]
-            },
-            Toggle: {
-                content: [
-                    ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }], 'blank',
-                    ['row', [['clickable', 'ab-1'], ['clickable', 'ab-2'], ['clickable', 'ab-3']]],
-                    ['row', [['clickable', 'ab-4'], ['clickable', 'ab-5'], ['clickable', 'ab-6']]],
-                    ['row', [['clickable', 'ab-7'], ['clickable', 'ab-8'], ['clickable', 'ab-t']]],
-                    ['row', [['clickable', 'ab-s']]],
-                    'blank',
-                    ['bar', 'percentageToInfinity']
-                ]
-            }
         }
     },
 
@@ -193,7 +165,7 @@ addLayer('ad', {
         'dimension-8': dimBuyable(7, 1e24, 1e15),
     },
 
-    upgrades: {
+    clickables: {
         'ab-1': autoBuyable(0, 1e10),
         'ab-2': autoBuyable(1, 1e20),
         'ab-3': autoBuyable(2, 1e30),
@@ -203,20 +175,7 @@ addLayer('ad', {
         'ab-7': autoBuyable(6, 1e70),
         'ab-8': autoBuyable(7, 1e80),
         'ab-t': autoBuyable(8, 1e90),
-        'ab-s': autoBuyable(9, 1e100)
-    },
-
-    clickables: {
-        'ab-1': autoToggle(0),
-        'ab-2': autoToggle(1),
-        'ab-3': autoToggle(2),
-        'ab-4': autoToggle(3),
-        'ab-5': autoToggle(4),
-        'ab-6': autoToggle(5),
-        'ab-7': autoToggle(6),
-        'ab-8': autoToggle(7),
-        'ab-t': autoToggle(8),
-        'ab-s': autoToggle(9),
+        'ab-s': autoBuyable(9, 1e100),
 
         // Dimensional Shifts appear until the 8th Dimension and give a multiplier to each dimension.
         'shift': {
@@ -229,19 +188,32 @@ addLayer('ad', {
                     default: return 'ERROR?'
                 }
             },
-            canClick() { return player.ad.dimensions[player.ad.shifts + 3].gte(20); },
-            onClick() { 
-                player.ad.shifts++;
-                let temp = JSON.stringify(player.ad.autobuyers);
-                layerDataReset('ad', ['shifts', 'upgrades', 'autobuyers']); // keep shifts and autobuyer upgrades on reset
-                player.ad.autobuyers = JSON.parse(temp);
-                player.points = new Decimal(10);
+            canClick() {
+                return player.ad.dimensions[player.ad.shifts + 3].gte(20);
             },
-            unlocked() { return player.ad.shifts < 4; },
+            onClick() {
+                // Save data
+                const resetData = {
+                    shifts: player.ad.shifts + 1,
+                    autobuyerStates: AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState(this.layer, val)}), {})
+                }
+
+                layerDataReset('ad');
+
+                // Load data
+                player.points = new Decimal(10);
+                player.ad.shifts = resetData.shifts;
+                Object.entries(resetData.autobuyerStates).forEach(([k, v]) => { setClickableState(this.layer, k, v) });
+            },
+            unlocked() {
+                return player.ad.shifts < 4;
+            },
             tooltip() {
                 return `Requires 20 ${['4th', '5th', '6th', '7th'][player.ad.shifts]} Dimensions.`
             },
-            style() { return { 'font-size': '10px', 'height': '60px' } }
+            style() {
+                return { 'font-size': '10px', 'height': '60px' }
+            }
         },
 
         // Dimensional Boosts appear after the 8th Dimension has been unlocked and give Booster Points.
@@ -249,19 +221,24 @@ addLayer('ad', {
             display() { return `Dimensional Boost<br>Reset all dimensions,<br>and gain ${__(tmp.bd.points.gain,2,0)} BP.` },
             canClick() { return tmp.bd.points.gain.gte(1); },
             onClick() {
+                saveBPStatistics();
+                // Save data
+                const resetData = {
+                    autobuyerStates: AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState(this.layer, val)}), {})
+                }
+
+                layerDataReset('ad');
+
+                // Load data
                 player.points = new Decimal(10);
-                player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
+                player.ad.shifts = 0 + hasUpgrade('bd', 'keep-1') + hasUpgrade('bd', 'keep-2') + hasUpgrade('bd', 'keep-3') + hasUpgrade('bd', 'keep-4');
+                Object.entries(resetData.autobuyerStates).forEach(([k, v]) => { setClickableState(this.layer, k, v) });
+
                 player.bd.unlocked = true;
-                let temp = JSON.stringify(player.ad.autobuyers);
-                layerDataReset('ad', ['upgrades', 'autobuyers']);
-                player.ad.autobuyers = JSON.parse(temp);
-                if(hasUpgrade('bd', 'keep-1')) player.ad.shifts = 1;
-                if(hasUpgrade('bd', 'keep-2')) player.ad.shifts = 2;
-                if(hasUpgrade('bd', 'keep-3')) player.ad.shifts = 3;
-                if(hasUpgrade('bd', 'keep-4')) player.ad.shifts = 4;
+                player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
                 player.bd.lowestTime = Math.min(player.bd.lowestTime, player.bd.timeInCurrentAD);
                 player.bd.timeInCurrentAD = 0;
-                player.bd.power = new Decimal(0);
+                player.bd.power = hasUpgrade('bd', 'keep50OnReset') ? player.bd.power.times(0.5) : new Decimal(0);
             },
             tooltip() { return 'Booster Point gain is based on your 8th dimensions.' },
             unlocked() { return player.ad.shifts >= 4; },
@@ -284,15 +261,24 @@ addLayer('ad', {
             tooltip() { return 'Reset Booster Dimensions and Antimatter Dimensions for GP.<br><br>GP is based on your antimatter amount. log10(AM/1e512)<br><br>You need 1e512 antimatter to unlock this.' },
             canClick() { return player.points.gte('1e512'); },
             onClick() {
-                player.g.unlocked = true;
-                player.g.points = player.g.points.plus(this.gain());
+                // Save data
+                const resetData = {
+                    gain: this.gain(),
+                    autobuyerStates: AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState(this.layer, val)}), {})
+                }
+                
+                layerDataReset('ad');
                 layerDataReset('bd');
-                let temp = JSON.stringify(player.ad.autobuyers);
-                layerDataReset('ad', ['upgrades', 'autobuyers']);
-                player.ad.autobuyers = JSON.parse(temp);
+
+                // Load data
                 player.points = new Decimal(100);
+                Object.entries(resetData.autobuyerStates).forEach(([k, v]) => { setClickableState(this.layer, k, v) });
+
                 player.bd.power = new Decimal(0);
                 player.bd.restart = true;
+
+                player.g.unlocked = true;
+                player.g.points = player.g.points.plus(resetData.gain);
             },
             style() { return { 'font-size': '10px', 'height': '60px' } }
         }
@@ -312,7 +298,6 @@ addLayer('ad', {
             }
         }
     ]
-
 });
 
 /**
@@ -323,30 +308,7 @@ addLayer('ad', {
  */
 function autoBuyable(dimension, cost) {
     return {
-        price: new Decimal(cost), // idk cost doesn't work
-        fullDisplay() {
-            let label = '';
-            switch(dimension) {
-                case 11: label = 'Crunch'; break;
-                case 10: label = 'Galaxy'; break;
-                case 9: label = 'Dimensional Shift'; break;
-                case 8: label = 'Tickspeed'; break;
-                default: label = ORDINAL[dimension + 1] + ' Dimension'; break;
-            }
-            let bought = !hasUpgrade(this.layer, this.id) ? `Cost: ${mixedStandardFormat(this.price)}` : 'Purchased';
-            return `<h3>${label} Autobuyer</h3><br><br>${bought}`;
-        },
-        canAfford() { return player.points.gte(this.price) },
-        pay() { player.points = player.points.sub(this.price) },
-        style() { return { 'height': '100px', 'margin': '2px' } }
-    }
-}
-
-function autoToggle(dimension) {
-    return {
-        canClick() {
-            return hasUpgrade(this.layer, this.id);
-        },
+        price: new Decimal(cost),
         display() {
             let label = '';
             switch(dimension) {
@@ -356,22 +318,67 @@ function autoToggle(dimension) {
                 case 8: label = 'Tickspeed'; break;
                 default: label = ORDINAL[dimension + 1] + ' Dimension'; break;
             }
-            let bought = hasUpgrade(this.layer, this.id);
-            if(!bought) {
-                return `<h3>${label} Autobuyer</h3><br><br>Locked`;
-            } else {
-                let toggled = player.ad.autobuyers[this.id];
-                return `<h3>${label} Autobuyer</h3><br><br>${toggled ? 'ON' : 'OFF'}`;
+
+            if(!getClickableState(this.layer, this.id)) setClickableState(this.layer, this.id, 'Locked');
+            const state = getClickableState(this.layer, this.id);
+
+            switch(state) {
+                case 'Locked': return `<h3>${label} Autobuyer</h3><br><br><h3>Cost: ${mixedStandardFormat(this.price)}</h3>`;
+                case 'Enabled': return `<h3>${label} Autobuyer</h3><br><br><h3>Enabled</h3><h6>Click to disable.</h6>`;
+                case 'Disabled': return `<h3>${label} Autobuyer</h3><br><br><h3>Disabled</h3><h6>Click to enable.</h6>`;
             }
         },
-        onClick() {
-            player.ad.autobuyers[this.id] ^= true;
+
+        canClick() {
+            const state = getClickableState(this.layer, this.id);
+            switch(state) {
+                case 'Locked': return player.points.gte(this.price);
+                default: return true;
+            }
         },
+
+        onClick() {
+            const state = getClickableState(this.layer, this.id);
+            switch(state) {
+                case 'Locked':
+                    player.points = player.points.sub(this.price);
+                    setClickableState(this.layer, this.id, 'Enabled');
+                    break;
+                case 'Enabled': setClickableState(this.layer, this.id, 'Disabled'); break;
+                case 'Disabled': setClickableState(this.layer, this.id, 'Enabled'); break;
+            }
+        },
+
         style() {
-            let bought = hasUpgrade(this.layer, this.id);
-            let toggled = player.ad.autobuyers[this.id];
-            let borderColor = bought ? (toggled ? '#4ABB5F' : 'orange') : '#d05050';
-            return { 'height': '100px', 'margin': '2px', 'border-color': borderColor + ' !important' }
+            let borderColor = '';
+            let backgroundImage = '';
+            let animation = '';
+            const state = getClickableState(this.layer, this.id);
+
+            switch(state) {
+                case 'Locked':
+                    borderColor = '';
+                    backgroundImage = this.canClick() ? 'linear-gradient(#30472e, #30472e)' : 'linear-gradient(#381f1f, #381f1f)';
+                    break;
+                case 'Enabled':
+                    borderColor = '#c733cc !important';
+                    backgroundImage = 'repeating-linear-gradient(-45deg, #332833, 10%, #222 10%, #222 20%)';
+                    animation = 'ani-autobuyer-enabled 2000ms linear infinite';
+                    break;
+                case 'Disabled':
+                    borderColor = 'orange !important';
+                    backgroundImage = 'repeating-linear-gradient(-45deg, #423726, 10%, #222 10%, #222 20%)';
+                    break;
+            }
+            
+            return {
+                'background-size': '200% 200%',
+                'background-image': backgroundImage,
+                'border-color': borderColor,
+                'animation': animation,
+                'height': '100px',
+                'margin': '2px',
+            }
         }
     }
 }

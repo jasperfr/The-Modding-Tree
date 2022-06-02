@@ -24,11 +24,16 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.0.0",
-	name: "The Infinite Update",
+	num: "1.1.0",
+	name: "The Denerfed Update",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v1.1.0</h3><br>
+		- Fixed autobuyers
+		- De-nerfed Booster Layer
+		- Galaxy layer is easier to obtain
+		- Added statistics page for Booster Layer
 	<h3>v1.0</h3><br>
 		- Achievements!<br>
 		- Fixed galaxy layer.<br>
@@ -100,6 +105,7 @@ function getPointGen() {
 
 // You can add non-layer related variables that should to into "player" and be saved here, along with default values
 function addedPlayerData() { return {
+	godMode: false,
 }}
 
 // Display extra things at the top of the page

@@ -16,6 +16,7 @@ addLayer('bd', {
             power: new Decimal(0),
             timeInCurrentAD: 0,
             lowestTime: 1e100,
+            boosterStats: [null, null, null, null, null, null, null, null, null, null]
         }
     },
 
@@ -26,6 +27,9 @@ addLayer('bd', {
                 .times(tmp.bd.buyables[3].effect)
                 .times(hasUpgrade('bd', 'gain10times') ? 10 : 1)
             .times(hasMilestone('bd', 4) ? 10 : 1)
+        },
+        perSecond() {
+            return tmp.bd.points.gain.div(player.bd.timeInCurrentAD);
         }
     },
 
@@ -52,6 +56,7 @@ addLayer('bd', {
 
             base = base.times(tmp.bd.upgrades.log10boost.effect);
             base = base.times(tmp.bd.upgrades.log100boost.effect);
+            base = base.times(Decimal.pow(10, getBuyableAmount('bd', 6)))
             if(hasAchievement('ach', 25)) base = base.times(1.1);
             base = Decimal.max(base, 0.001);
             return base;
@@ -85,7 +90,7 @@ addLayer('bd', {
                 ['clickable', 'gain'],
                 ['row', [['buyable', 1], ['buyable', 2]]],
                 ['row', [['buyable', 3], ['buyable', 4]]],
-                ['row', [['buyable', 5]]]
+                ['row', [['buyable', 5], ['buyable', 6]]]
             ]
         }, 
         'Upgrades': {
@@ -105,7 +110,7 @@ addLayer('bd', {
                 }, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
                 ['row', [['upgrade', 'keep-1'], 'blank', ['upgrade', 'adim-m'], 'blank', ['upgrade', 'reducePenal']]],
-                ['row', [['upgrade', 'keep-2'], 'blank', ['upgrade', 'doubleMaxCap'], 'blank', ['upgrade', 'reducePenal2']], { 'margin-top': '6px' }],
+                ['row', [['upgrade', 'keep-2'], 'blank', ['upgrade', 'keep50OnReset'], 'blank', ['upgrade', 'reducePenal2']], { 'margin-top': '6px' }],
                 ['row', [['upgrade', 'keep-3'], 'blank', ['upgrade', 'log10boost'], 'blank', ['upgrade', 'gain10times']], { 'margin-top': '6px' }],
                 ['row', [['upgrade', 'keep-4'], 'blank', ['upgrade', 'log100boost'], 'blank', ['upgrade', 'cheaperBuyables']], { 'margin-top': '6px' }],
             ]
@@ -129,6 +134,38 @@ addLayer('bd', {
                 ['display-text', 'Complete milestones to get rewards!'],
                 'blank',
                 'milestones'
+            ]
+        },
+        'Statistics': {
+            content: [
+                ['display-text', function() {
+                    const self = player[this.layer];
+                    const temp = tmp[this.layer];
+                    return `
+                        You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
+                        You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
+                        You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
+                        ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
+                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
+                        Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
+                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>
+                    `
+                }, { 'color': 'silver', 'font-size': '12px' }],
+                'blank',
+                ['display-text', 'Last 10 boosters:'],
+                'blank',
+                function() {
+                    const html = ['column', []];
+                    for(let i = 0; i < 10; i++) {
+                        const statistic = player.bd.boosterStats[i];
+                        if(!statistic) {
+                            html[1].push(['display-text', `${i + 1}: Not happened yet`]);
+                        } else {
+                            html[1].push(['display-text', `${i + 1}: ${statistic.time}, ${__(statistic.gain,1,0)} BP, ${__(statistic.bps, 2, 0)} BP/s`]);
+                        }
+                    }
+                    return html;
+                }
             ]
         }
     },
@@ -157,7 +194,7 @@ addLayer('bd', {
         2 : {
             requirementDescription: "Boost in under 1 minute",
             effectDescription: "Reward: BPS * 5",
-            done() { return player.bd.lowestTime < 60 },
+            done() { return player.bd.lowestTime <= 60 },
             style() {
                 if(player.bd.timeInCurrentAD > 60 && !hasMilestone(this.layer, this.id)) {
                     return { 'background-color': '#992c2c !important' }
@@ -165,11 +202,11 @@ addLayer('bd', {
             }
         },
         3 : {
-            requirementDescription: "Boost in under 10 seconds",
+            requirementDescription: "Boost in under 15 seconds",
             effectDescription: "Reward: BPS * 10, Booster cap * 10",
-            done() { return player.bd.lowestTime < 10 },
+            done() { return player.bd.lowestTime <= 15 },
             style() {
-                if(player.bd.timeInCurrentAD > 10 && !hasMilestone(this.layer, this.id)) {
+                if(player.bd.timeInCurrentAD > 15 && !hasMilestone(this.layer, this.id)) {
                     return { 'background-color': '#992c2c !important' }
                 }
             }
@@ -198,21 +235,26 @@ addLayer('bd', {
 
     clickables: {
         gain: {
-            display() { return `Reset for ${__(tmp.bd.points.gain,2,0)} BP.` },
+            display() { return `Reset for ${__(tmp.bd.points.gain,2,0)} BP.<br>(${tmp.bd.points.perSecond.toFixed(2)} BP/sec)` },
             canClick() { return tmp.bd.points.gain.gte(1); },
             onClick() {
+                saveBPStatistics();
+                // Save data
+                const resetData = {
+                    autobuyerStates: AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState('ad', val)}), {})
+                }
+
+                layerDataReset('ad');
+
+                // Load data
                 player.points = new Decimal(10);
+                player.ad.shifts = 0 + hasUpgrade('bd', 'keep-1') + hasUpgrade('bd', 'keep-2') + hasUpgrade('bd', 'keep-3') + hasUpgrade('bd', 'keep-4');
+                Object.entries(resetData.autobuyerStates).forEach(([k, v]) => { setClickableState('ad', k, v) });
+
                 player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
-                let temp = JSON.stringify(player.ad.autobuyers);
-                layerDataReset('ad', ['upgrades', 'autobuyers']);
-                player.ad.autobuyers = JSON.parse(temp);
-                if(hasUpgrade('bd', 'keep-1')) player.ad.shifts = 1;
-                if(hasUpgrade('bd', 'keep-2')) player.ad.shifts = 2;
-                if(hasUpgrade('bd', 'keep-3')) player.ad.shifts = 3;
-                if(hasUpgrade('bd', 'keep-4')) player.ad.shifts = 4;
                 player.bd.lowestTime = Math.min(player.bd.lowestTime, player.bd.timeInCurrentAD);
-                player.bd.power = new Decimal(0);
                 player.bd.timeInCurrentAD = 0;
+                player.bd.power = hasUpgrade('bd', 'keep50OnReset') ? player.bd.power.times(0.5) : new Decimal(0);
             },
             style() { return { 'font-size': '10px', width: '316px', 'margin-bottom': '8px' } }
         }
@@ -234,7 +276,7 @@ addLayer('bd', {
         },
         2: {
             display() { 
-                return `Increase the booster power cap by ${hasUpgrade(this.layer, 'doubleMaxCap') ? 10 : 4}.
+                return `Increase the booster power cap by 4.
                 Currently ${__(this.effect(),2,0)}.
                 
                 ${hasMilestone('bd', 5) ? 'Disabled<br>(best time < 0:01)' : `Cost: ${__(this.cost(),2,0)} BP`}`
@@ -244,7 +286,7 @@ addLayer('bd', {
                 return new Decimal(2.0)
                     .plus(
                         Decimal.times(
-                            hasUpgrade(this.layer, 'doubleMaxCap') ? 10 : 4,
+                            4,
                             getBuyableAmount(this.layer, this.id)
                         )
                     ).times(hasMilestone('bd', 3) ? 10 : 1)
@@ -293,6 +335,21 @@ addLayer('bd', {
             unlocked() { return hasUpgrade(this.layer, 'cheaperBuyables') },
             buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { width: '150px', height: '150px', margin: '8px' } }
+        },
+        6: {
+            display() {
+                return `x10 to Booster Power.
+                Multiplicative.
+                Currently x${__(Decimal.pow(10, getBuyableAmount(this.layer, this.id)), 2, 0)}.
+                
+                Cost: ${__(this.cost(),2,0)} BP`
+            },
+            cost() { return Decimal.pow(100, getBuyableAmount(this.layer, this.id)) },
+            effect() { return Decimal.pow(10, getBuyableAmount(this.layer, this.id))},
+            canAfford() { return player.bd.points.gte(this.cost()); },
+            unlocked() { return hasUpgrade(this.layer, 'cheaperBuyables') },
+            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            style() { return { width: '150px', height: '150px', margin: '8px' } }
         }
     },
 
@@ -304,9 +361,9 @@ addLayer('bd', {
             cost: new Decimal(100),
             style() { return { height: '100px' } }
         },
-        doubleMaxCap: {
-            description: 'Increase the booster power cap effect.<br>(4 -> 10)',
-            cost: new Decimal(500),
+        keep50OnReset: {
+            description: 'Keep 50% of your Booster Power on reset.',
+            cost: new Decimal(250),
             style() { return { height: '100px' } }
         },
         reducePenal2: {
@@ -380,6 +437,18 @@ addLayer('bd', {
         }
     }
 });
+
+function saveBPStatistics() {
+    const statistics = {
+        gain: tmp.bd.points.gain,
+        time: TIME(player.bd.timeInCurrentAD),
+        bps: tmp.bd.points.perSecond,
+        power: player.bd.power,
+        multiplier: tmp.bd.power.multiplier
+    };
+
+    player.bd.boosterStats = [].concat([statistics], player.bd.boosterStats.slice(0, player.bd.boosterStats.length - 1));
+}
 
 function boosterBuyable(dimension, cost, multiplier) {
     return {

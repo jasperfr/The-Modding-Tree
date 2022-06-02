@@ -74,16 +74,16 @@ addLayer('ach', {
             name: 'Age of Automation',
             tooltip: '<h4>Age of Automation</h4><br><h5>Have all the Autobuyer upgrades.</h5>',
             done() { return (
-                hasUpgrade('ad', 'ab-1') &&
-                hasUpgrade('ad', 'ab-2') &&
-                hasUpgrade('ad', 'ab-3') &&
-                hasUpgrade('ad', 'ab-4') &&
-                hasUpgrade('ad', 'ab-5') &&
-                hasUpgrade('ad', 'ab-6') &&
-                hasUpgrade('ad', 'ab-7') &&
-                hasUpgrade('ad', 'ab-8') &&
-                hasUpgrade('ad', 'ab-t') &&
-                hasUpgrade('ad', 'ab-s')
+                getClickableState('ad', 'ab-1') === 'Enabled' && 
+                getClickableState('ad', 'ab-2') === 'Enabled' && 
+                getClickableState('ad', 'ab-3') === 'Enabled' && 
+                getClickableState('ad', 'ab-4') === 'Enabled' && 
+                getClickableState('ad', 'ab-5') === 'Enabled' && 
+                getClickableState('ad', 'ab-6') === 'Enabled' && 
+                getClickableState('ad', 'ab-7') === 'Enabled' && 
+                getClickableState('ad', 'ab-8') === 'Enabled' && 
+                getClickableState('ad', 'ab-t') === 'Enabled' && 
+                getClickableState('ad', 'ab-s') === 'Enabled'
             ); },
             style: { 'background-position' : '0px -64px' }
         },
@@ -131,7 +131,7 @@ addLayer('ach', {
         28: {
             name: 'A long time later',
             tooltip: '<h4>A long time later</h4><br><h5>Get your booster gain per second to 0.000 BP/s. Reward: Booster gain minimum is always 0.001 BPS.<br><br>NOTE: You can\'t get this after the last milestone.</h5>',
-            done() { return tmp.bd.power.perSecond.lte(0.001); },
+            done() { return player.bd.unlocked && tmp.bd.power.perSecond.lte(0.001); },
             style: { 'background-position' : '-448px -64px' }
         },
         29: {

@@ -1,11 +1,39 @@
+function resetBD() {
+    let autoBoosterUpgradeState = 'Locked';
+    let autoBoosterState = 'Locked';
+    let keep = ['clickables'];
+
+    if(hasChallenge('infinity', 11)) autoBoosterState = getClickableState('bd', 'auto');
+    if(hasChallenge('infinity', 31)) autoBoosterUpgradeState = getClickableState('bd', 'autoUpgrade');
+    if(hasChallenge('infinity', 41)) keep.push('milestones');
+
+    layerDataReset('bd', keep);
+    setClickableState('bd', 'auto', autoBoosterState);
+    setClickableState('bd', 'autoUpgrade', autoBoosterUpgradeState);
+}
+
 addLayer('bd', {
     name: 'Booster Dimensions',
-    symbol: 'B',
+    symbol: '',
     color: '#63b8ff',
+    tooltip: 'Boosters',
     resource: 'BP',
 
+    nodeStyle: {
+        'color': 'white',
+        'background-image': 'url("resources/booster.gif")',
+        'background-position': 'center center',
+        'background-size': '200%',
+        'border': '1px solid white'
+    },
+
     layerShown() {
-        return player.bd.unlocked
+        if(inChallenge('infinity', 11)) return false;   // true AD
+        if(inChallenge('infinity', 12)) return false;   // 2048
+        if(inChallenge('infinity', 21)) return false;    // boostless
+        if(inChallenge('infinity', 22)) return true;   // starless
+        if(inChallenge('infinity', 31)) return false;   // drought
+        return player.bd.unlocked;
     },
 
     startData() {
@@ -16,7 +44,8 @@ addLayer('bd', {
             power: new Decimal(0),
             timeInCurrentAD: 0,
             lowestTime: 1e100,
-            boosterStats: [null, null, null, null, null, null, null, null, null, null]
+            boosterStats: [null, null, null, null, null, null, null, null, null, null],
+            c_41_boughtUpgrades: []
         }
     },
 
@@ -61,13 +90,46 @@ addLayer('bd', {
             base = Decimal.max(base, 0.001);
             return base;
         },
-        multiplier() { return Decimal.plus(1, player.bd.power).times(tmp.bd.buyables[4].effect) }
+        multiplier() {
+            return Decimal.plus(1, player.bd.power)
+            .times(tmp.bd.buyables[4].effect)
+            .times(tmp.d.decrementy.effectB)
+            .times(inChallenge('infinity', 22) ? 1 + player.ad.dimensions[7] : 1)
+        }
     },
 
     update(delta) {
+        if(hasChallenge('infinity', 41)) {
+            player.bd.points = player.bd.points.plus(tmp.bd.points.gain.times(delta));
+        }
+
         player.bd.power = player.bd.power.plus(Decimal.times(tmp.bd.power.perSecond, delta));
         player.bd.points = player.bd.points.plus(tmp.bd.buyables[5].effect.times(delta));
         player.bd.timeInCurrentAD += delta;
+
+        if(getClickableState(this.layer, 'autoUpgrade') === 'ON') {
+            buyUpgrade(this.layer, 'reducePenal');
+            buyUpgrade(this.layer, 'keep50OnReset');
+            buyUpgrade(this.layer, 'reducePenal2');
+            buyUpgrade(this.layer, 'log10boost');
+            buyUpgrade(this.layer, 'gain10times');
+            buyUpgrade(this.layer, 'log100boost');
+            buyUpgrade(this.layer, 'cheaperBuyables');
+            buyUpgrade(this.layer, 'adim-m');
+            buyUpgrade(this.layer, 'keep-1');
+            buyUpgrade(this.layer, 'keep-2');
+            buyUpgrade(this.layer, 'keep-3');
+            buyUpgrade(this.layer, 'keep-4');
+        };
+
+        if(getClickableState(this.layer, 'auto') === 'ON') {
+            buyBuyable(this.layer, 1);
+            buyBuyable(this.layer, 2);
+            buyBuyable(this.layer, 3);
+            buyBuyable(this.layer, 4);
+            buyBuyable(this.layer, 5);
+            buyBuyable(this.layer, 6);
+        }
     },
 
     tabFormat: {
@@ -76,21 +138,24 @@ addLayer('bd', {
                 ['display-text', function() {
                     const self = player[this.layer];
                     const temp = tmp[this.layer];
+                    const auto = hasChallenge('infinity', 41);
                     return `
                         You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
                         You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
                         You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
                         ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
                         Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
-                        Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
-                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>
+                        ${auto ? `You are getting <bd>${__(temp.points.gain,2,1)}</bd> Booster Points per second.`: `Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
+                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>`}
                     `
                 }, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
                 ['clickable', 'gain'],
                 ['row', [['buyable', 1], ['buyable', 2]]],
                 ['row', [['buyable', 3], ['buyable', 4]]],
-                ['row', [['buyable', 5], ['buyable', 6]]]
+                ['row', [['buyable', 5], ['buyable', 6]]],
+                'blank',
+                ['clickable', 'auto']
             ]
         }, 
         'Upgrades': {
@@ -98,21 +163,24 @@ addLayer('bd', {
                 ['display-text', function() {
                     const self = player[this.layer];
                     const temp = tmp[this.layer];
+                    const auto = hasChallenge('infinity', 41);
                     return `
                         You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
                         You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
                         You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
                         ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
                         Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
-                        Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
-                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>
+                        ${auto ? `You are getting <bd>${__(temp.points.gain,2,1)}</bd> Booster Points per second.`: `Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
+                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>`}
                     `
                 }, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
                 ['row', [['upgrade', 'keep-1'], 'blank', ['upgrade', 'adim-m'], 'blank', ['upgrade', 'reducePenal']]],
                 ['row', [['upgrade', 'keep-2'], 'blank', ['upgrade', 'keep50OnReset'], 'blank', ['upgrade', 'reducePenal2']], { 'margin-top': '6px' }],
                 ['row', [['upgrade', 'keep-3'], 'blank', ['upgrade', 'log10boost'], 'blank', ['upgrade', 'gain10times']], { 'margin-top': '6px' }],
-                ['row', [['upgrade', 'keep-4'], 'blank', ['upgrade', 'log100boost'], 'blank', ['upgrade', 'cheaperBuyables']], { 'margin-top': '6px' }],
+                ['row', [['upgrade', 'keep-4'], 'blank', ['upgrade', 'log100boost'], 'blank', ['upgrade', 'cheaperBuyables']], { 'margin-top': '6px' }],,
+                'blank',
+                ['clickable', 'autoUpgrade']
             ]
         },
         'Milestones': {
@@ -120,14 +188,15 @@ addLayer('bd', {
                 ['display-text', function() {
                     const self = player[this.layer];
                     const temp = tmp[this.layer];
+                    const auto = hasChallenge('infinity', 41);
                     return `
                         You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
                         You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
                         You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
                         ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
                         Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
-                        Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
-                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>
+                        ${auto ? `You are getting <bd>${__(temp.points.gain,2,1)}</bd> Booster Points per second.`: `Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
+                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>`}
                     `
                 }, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
@@ -137,18 +206,22 @@ addLayer('bd', {
             ]
         },
         'Statistics': {
+            unlocked() {
+                return !hasChallenge('infinity', 41);
+            },
             content: [
                 ['display-text', function() {
                     const self = player[this.layer];
                     const temp = tmp[this.layer];
+                    const auto = hasChallenge('infinity', 41);
                     return `
                         You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
                         You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
                         You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
                         ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
                         Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
-                        Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
-                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>
+                        ${auto ? `You are getting <bd>${__(temp.points.gain,2,1)}</bd> Booster Points per second.`: `Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
+                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>`}
                     `
                 }, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
@@ -174,7 +247,7 @@ addLayer('bd', {
         0 : {
             requirementDescription: "Boost in under 10 minutes",
             effectDescription: "Reward: BPS * 2",
-            done() { return player.bd.lowestTime < 600 },
+            done() { return hasChallenge('infinity', 41) || player.bd.lowestTime < 600 },
             style() {
                 if(player.bd.timeInCurrentAD > 600 && !hasMilestone(this.layer, this.id)) {
                     return { 'background-color': '#992c2c !important' }
@@ -184,7 +257,7 @@ addLayer('bd', {
         1 : {
             requirementDescription: "Boost in under 5 minutes",
             effectDescription: "Reward: BPS * 3",
-            done() { return player.bd.lowestTime < 300 },
+            done() { return hasChallenge('infinity', 41) || player.bd.lowestTime < 300 },
             style() {
                 if(player.bd.timeInCurrentAD > 300 && !hasMilestone(this.layer, this.id)) {
                     return { 'background-color': '#992c2c !important' }
@@ -194,7 +267,7 @@ addLayer('bd', {
         2 : {
             requirementDescription: "Boost in under 1 minute",
             effectDescription: "Reward: BPS * 5",
-            done() { return player.bd.lowestTime <= 60 },
+            done() { return hasChallenge('infinity', 41) || player.bd.lowestTime <= 60 },
             style() {
                 if(player.bd.timeInCurrentAD > 60 && !hasMilestone(this.layer, this.id)) {
                     return { 'background-color': '#992c2c !important' }
@@ -204,7 +277,7 @@ addLayer('bd', {
         3 : {
             requirementDescription: "Boost in under 15 seconds",
             effectDescription: "Reward: BPS * 10, Booster cap * 10",
-            done() { return player.bd.lowestTime <= 15 },
+            done() { return hasChallenge('infinity', 41) || player.bd.lowestTime <= 15 },
             style() {
                 if(player.bd.timeInCurrentAD > 15 && !hasMilestone(this.layer, this.id)) {
                     return { 'background-color': '#992c2c !important' }
@@ -214,7 +287,7 @@ addLayer('bd', {
         4 : {
             requirementDescription: "Boost in under 2 seconds",
             effectDescription: "Reward: BP gain * 5",
-            done() { return player.bd.lowestTime < 2 },
+            done() { return hasChallenge('infinity', 41) || player.bd.lowestTime < 2 },
             style() {
                 if(player.bd.timeInCurrentAD > 2 && !hasMilestone(this.layer, this.id)) {
                     return { 'background-color': '#992c2c !important' }
@@ -224,7 +297,7 @@ addLayer('bd', {
         5 : {
             requirementDescription: "Boost in under 1 second",
             effectDescription: "Reward: Remove the booster cap",
-            done() { return player.bd.lowestTime < 1 },
+            done() { return hasChallenge('infinity', 41) || player.bd.lowestTime < 1 },
             style() {
                 if(player.bd.timeInCurrentAD > 1 && !hasMilestone(this.layer, this.id)) {
                     return { 'background-color': '#992c2c !important' }
@@ -234,29 +307,148 @@ addLayer('bd', {
     },
 
     clickables: {
-        gain: {
-            display() { return `Reset for ${__(tmp.bd.points.gain,2,0)} BP.<br>(${tmp.bd.points.perSecond.toFixed(2)} BP/sec)` },
-            canClick() { return tmp.bd.points.gain.gte(1); },
+        autoUpgrade: {
+            display() {
+                if(!getClickableState(this.layer, this.id)) setClickableState(this.layer, this.id, 'Locked');
+                const state = getClickableState(this.layer, this.id);
+                if(state === 'Locked' && hasChallenge('infinity', 31)) setClickableState(this.layer, this.id, 'ON');
+
+                return `Auto: ${state}`;
+            },
+
+            canClick() {
+                const state = getClickableState(this.layer, this.id);
+                return state !== 'Locked'
+            },
+
             onClick() {
-                saveBPStatistics();
-                // Save data
-                const resetData = {
-                    autobuyerStates: AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState('ad', val)}), {})
+                const state = getClickableState(this.layer, this.id);
+                switch(state) {
+                    case 'Locked': break;
+                    case 'ON': setClickableState(this.layer, this.id, 'OFF'); break;
+                    case 'OFF': setClickableState(this.layer, this.id, 'ON'); break;
+                }
+            },
+
+            style() {
+                let borderColor = '';
+                let backgroundImage = '';
+                let animation = '';
+                const state = getClickableState(this.layer, this.id);
+
+                if(state === 'Locked') return { 'display': 'none !important' }
+    
+                switch(state) {
+                    case 'ON':
+                        borderColor = '#c733cc !important';
+                        backgroundImage = 'repeating-linear-gradient(-45deg, #332833, 10%, #222 10%, #222 20%)';
+                        animation = 'ani-autobuyer-enabled 2000ms linear infinite';
+                        break;
+                    case 'OFF':
+                        borderColor = 'orange !important';
+                        backgroundImage = 'repeating-linear-gradient(-45deg, #423726, 10%, #222 10%, #222 20%)';
+                        break;
+                }
+                
+                return {
+                    'background-size': '200% 200%',
+                    'background-image': backgroundImage,
+                    'border-color': borderColor,
+                    'animation': animation,
+                    'height': '100px',
+                    'margin': '2px',
+                }
+            }
+        },
+
+        auto: {
+            display() {
+                if(!getClickableState(this.layer, this.id)) setClickableState(this.layer, this.id, 'Locked');
+                const state = getClickableState(this.layer, this.id);
+                if(state === 'Locked' && hasChallenge('infinity', 11)) setClickableState(this.layer, this.id, 'ON');
+
+                return `Auto: ${state}`;
+            },
+
+            canClick() {
+                const state = getClickableState(this.layer, this.id);
+                return state !== 'Locked'
+            },
+
+            onClick() {
+                const state = getClickableState(this.layer, this.id);
+                switch(state) {
+                    case 'Locked': break;
+                    case 'ON': setClickableState(this.layer, this.id, 'OFF'); break;
+                    case 'OFF': setClickableState(this.layer, this.id, 'ON'); break;
+                }
+            },
+
+            style() {
+                let borderColor = '';
+                let backgroundImage = '';
+                let animation = '';
+                const state = getClickableState(this.layer, this.id);
+
+                if(state === 'Locked') return { 'display': 'none !important' }
+    
+                switch(state) {
+                    case 'ON':
+                        borderColor = '#c733cc !important';
+                        backgroundImage = 'repeating-linear-gradient(-45deg, #332833, 10%, #222 10%, #222 20%)';
+                        animation = 'ani-autobuyer-enabled 2000ms linear infinite';
+                        break;
+                    case 'OFF':
+                        borderColor = 'orange !important';
+                        backgroundImage = 'repeating-linear-gradient(-45deg, #423726, 10%, #222 10%, #222 20%)';
+                        break;
+                }
+                
+                return {
+                    'background-size': '200% 200%',
+                    'background-image': backgroundImage,
+                    'border-color': borderColor,
+                    'animation': animation,
+                    'height': '100px',
+                    'margin': '2px',
+                }
+            }
+        },
+
+        gain: {
+            unlocked() {
+                return !hasChallenge('infinity', 41);
+            },
+            display() { 
+                if(hasChallenge('infinity', 41)) {
+                    return `You are getting ${__(tmp.bd.points.gain, 2, 1)} points per second.`
+                }
+                return `Reset for ${__(tmp.bd.points.gain,2,0)} BP.<br>(${tmp.bd.points.perSecond.toFixed(2)} BP/sec)` },
+            canClick() { return !hasChallenge('infinity', 41) && tmp.bd.points.gain.gte(1); },
+            onClick() {
+                if(hasChallenge('infinity', 21)) {
+                    player.ad.shifts = 0 + hasUpgrade('bd', 'keep-1') + hasUpgrade('bd', 'keep-2') + hasUpgrade('bd', 'keep-3') + hasUpgrade('bd', 'keep-4');
+                    player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
+                    player.bd.lowestTime = Math.min(player.bd.lowestTime, player.bd.timeInCurrentAD);
+                    player.bd.power = hasUpgrade('bd', 'keep50OnReset') ? player.bd.power.times(0.5) : new Decimal(0);
+                    player.bd.timeInCurrentAD = 0;
+                    return;
                 }
 
-                layerDataReset('ad');
+                saveBPStatistics();
 
-                // Load data
-                player.points = new Decimal(10);
-                player.ad.shifts = 0 + hasUpgrade('bd', 'keep-1') + hasUpgrade('bd', 'keep-2') + hasUpgrade('bd', 'keep-3') + hasUpgrade('bd', 'keep-4');
-                Object.entries(resetData.autobuyerStates).forEach(([k, v]) => { setClickableState('ad', k, v) });
-
+                resetAD();
+                
                 player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
                 player.bd.lowestTime = Math.min(player.bd.lowestTime, player.bd.timeInCurrentAD);
                 player.bd.timeInCurrentAD = 0;
                 player.bd.power = hasUpgrade('bd', 'keep50OnReset') ? player.bd.power.times(0.5) : new Decimal(0);
             },
-            style() { return { 'font-size': '10px', width: '316px', 'margin-bottom': '8px' } }
+            style() {
+                let bColor = {};
+                if(hasChallenge('infinity', 41)) bColor = { 'border-color': '#63b8ff' };
+                return { ...{ 'font-size': '10px', width: '316px', 'margin-bottom': '8px' }, ...bColor };
+            }
         }
     },
 
@@ -270,8 +462,18 @@ addLayer('bd', {
             },
             cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
             effect() { return new Decimal(0.001).times(Decimal.pow(1.5, getBuyableAmount(this.layer, this.id))); },
-            canAfford() { return player.bd.points.gte(this.cost()); },
-            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            canAfford() { 
+                if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {
+                    return false;
+                }
+                return player.bd.points.gte(this.cost());
+            },
+            buy() {
+                if(!this.canAfford()) return;
+                player.bd.points = player.bd.points.minus(this.cost());
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+                if(inChallenge('infinity', 41) && player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1) player.bd.c_41_boughtUpgrades.push(this.id);
+            },
             style() { return { width: '150px', height: '150px', margin: '8px' } }
         },
         2: {
@@ -291,8 +493,19 @@ addLayer('bd', {
                         )
                     ).times(hasMilestone('bd', 3) ? 10 : 1)
                 },
-            canAfford() { return !hasMilestone('bd', 5) && player.bd.points.gte(this.cost()); },
-            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            canAfford() {
+                if(hasMilestone('bd', 5)) return false; 
+                if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {
+                    return false;
+                }
+                return player.bd.points.gte(this.cost());
+            },
+            buy() {
+                if(!this.canAfford()) return;
+                player.bd.points = player.bd.points.minus(this.cost());
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+                if(inChallenge('infinity', 41) && player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1) player.bd.c_41_boughtUpgrades.push(this.id);
+            },
             style() { return { width: '150px', height: '150px', margin: '8px' } }
         },
         3: {
@@ -304,8 +517,18 @@ addLayer('bd', {
             },
             cost() { return Decimal.pow(10, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
             effect() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id)); },
-            canAfford() { return player.bd.points.gte(this.cost()); },
-            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            canAfford() {
+                if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {
+                    return false;
+                }
+                return player.bd.points.gte(this.cost());
+            },
+            buy() {
+                if(!this.canAfford()) return;
+                player.bd.points = player.bd.points.minus(this.cost());
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+                if(inChallenge('infinity', 41) && player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1) player.bd.c_41_boughtUpgrades.push(this.id);
+            },
             style() { return { width: '150px', height: '150px', margin: '8px' } }
         },
         4: {
@@ -317,8 +540,18 @@ addLayer('bd', {
             },
             cost() { return Decimal.pow(5, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
             effect() { return Decimal.pow(1.35, getBuyableAmount(this.layer, this.id)); },
-            canAfford() { return player.bd.points.gte(this.cost()); },
-            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            canAfford() {
+                if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {
+                    return false;
+                }
+                return player.bd.points.gte(this.cost());
+            },
+            buy() {
+                if(!this.canAfford()) return;
+                player.bd.points = player.bd.points.minus(this.cost());
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+                if(inChallenge('infinity', 41) && player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1) player.bd.c_41_boughtUpgrades.push(this.id);
+            },
             style() { return { width: '150px', height: '150px', margin: '8px' } }
         },
         5: {
@@ -329,11 +562,21 @@ addLayer('bd', {
                 
                 Cost: ${__(this.cost(),2,0)} BP`
             },
-            cost() { return Decimal.pow(25, getBuyableAmount(this.layer, this.id)) },
+            cost() { return Decimal.pow(25, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
             effect() { return new Decimal(0.05).times(getBuyableAmount(this.layer, this.id)).times(tmp.bd.points.gain) },
-            canAfford() { return player.bd.points.gte(this.cost()); },
-            unlocked() { return hasUpgrade(this.layer, 'cheaperBuyables') },
-            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            canAfford() {
+                if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {
+                    return false;
+                }
+                return player.bd.points.gte(this.cost());
+            },
+            unlocked() { return inChallenge('infinity', 41) || hasUpgrade(this.layer, 'cheaperBuyables') },
+            buy() {
+                if(!this.canAfford()) return;
+                player.bd.points = player.bd.points.minus(this.cost());
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+                if(inChallenge('infinity', 41) && player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1) player.bd.c_41_boughtUpgrades.push(this.id);
+            },
             style() { return { width: '150px', height: '150px', margin: '8px' } }
         },
         6: {
@@ -344,11 +587,21 @@ addLayer('bd', {
                 
                 Cost: ${__(this.cost(),2,0)} BP`
             },
-            cost() { return Decimal.pow(100, getBuyableAmount(this.layer, this.id)) },
+            cost() { return Decimal.pow(100, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
             effect() { return Decimal.pow(10, getBuyableAmount(this.layer, this.id))},
-            canAfford() { return player.bd.points.gte(this.cost()); },
-            unlocked() { return hasUpgrade(this.layer, 'cheaperBuyables') },
-            buy() { player.bd.points = player.bd.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            canAfford() {
+                if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {
+                    return false;
+                }
+                return player.bd.points.gte(this.cost());
+            },
+            unlocked() { return inChallenge('infinity', 41) || hasUpgrade(this.layer, 'cheaperBuyables') },
+            buy() {
+                if(!this.canAfford()) return;
+                player.bd.points = player.bd.points.minus(this.cost());
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+                if(inChallenge('infinity', 41) && player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1) player.bd.c_41_boughtUpgrades.push(this.id);
+            },
             style() { return { width: '150px', height: '150px', margin: '8px' } }
         }
     },
@@ -431,9 +684,13 @@ addLayer('bd', {
             style() { return { height: '100px' } }
         },
         'adim-m': {
-            description: 'Dimensional Autobuyers will now buy max.',
+            description() { return `Dimensional Autobuyers will now buy max.${hasUpgrade('infinity', 'keepBuyMax') ? '<br>Bought (Infinity Study 1)' : ''}`},
             cost: new Decimal(75),
-            style() { return { height: '100px' } }
+            canAfford() { return !hasUpgrade('infinity', 'keepBuyMax') },
+            style() {
+                if(hasUpgrade('infinity', 'keepBuyMax')) return { height: '100px', 'border-color': '#4ABB5F', 'background-color': '#357541 !important' }
+                return { height: '100px' }
+            }
         }
     }
 });

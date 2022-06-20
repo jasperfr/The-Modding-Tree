@@ -1,16 +1,40 @@
 const ORDINAL = ['0th','1st','2nd','3rd','4th','5th','6th','7th','8th'];
-const AUTOBUYERS = ['ab-1', 'ab-2', 'ab-3', 'ab-4', 'ab-5', 'ab-6', 'ab-7', 'ab-8', 'ab-t', 'ab-s'];
+const AUTOBUYERS = ['ab-1', 'ab-2', 'ab-3', 'ab-4', 'ab-5', 'ab-6', 'ab-7', 'ab-8', 'ab-t', 'ab-s', 'ab-g'];
+
+function resetAD() {
+    let autobuyerStates = {};
+    if(hasUpgrade('infinity', 'keepBuyMax')) {
+        autobuyerStates = AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState('ad', val)}), {})
+    }
+
+    layerDataReset('ad');
+
+    player.ad.shifts = 0 + hasUpgrade('bd', 'keep-1') + hasUpgrade('bd', 'keep-2') + hasUpgrade('bd', 'keep-3') + hasUpgrade('bd', 'keep-4');
+    Object.entries(autobuyerStates).forEach(([k, v]) => { setClickableState('ad', k, v) });
+}
 
 addLayer('ad', {
 
     /* === Base information === */
     name: 'Antimatter Dimensions',
-    symbol: 'A',
+    symbol: '',
     color: '#992c2c',
     tooltip: 'Antimatter Dimensions',
     branches: ['bd', 'g'],
 
     baseResource: 'antimatter',
+
+    nodeStyle: {
+        'color': 'white',
+        'background-image': 'url("resources/antimatter.gif")',
+        'background-position': 'center center',
+        'background-size': '200%',
+        'border': '1px solid white'
+    },
+
+    layerShown() {
+        return !inChallenge('infinity', 11) && !inChallenge('infinity', 12);
+    },
 
     /* === Data information === */
     startData() {
@@ -18,8 +42,13 @@ addLayer('ad', {
             dimensions: Array(8).fill(0).map(() => new Decimal(0)),
             tickspeed: new Decimal(0),
             shifts: 0, // 0 - 4 shifts, afterwards gain Booster Points
-            style: [0, 0, 0, 0, 0, 0, 0, 0], // style state
+            style: [0, 0, 0, 0, 0, 0, 0, 0], // style state,
+            matter: new Decimal(1),
         }
+    },
+
+    matter: {
+        divider() { return inChallenge('infinity', 32) ? Decimal.log10(Decimal.sqrt(player.ad.matter.plus(1))) : 1 }
     },
 
     tickspeed: {
@@ -29,6 +58,10 @@ addLayer('ad', {
 
     /* === Update information === */
     update(delta) {
+        if(inChallenge('infinity', 32)) {
+            player.ad.matter = Decimal.plus(player.ad.matter, 1).times(1.525);
+        }
+
         // Update dimensions
         for(let i = 0; i < (3 + player.ad.shifts); i++) {
             let multiplier = tmp.ad.buyables[`dimension-${i+2}`].multiplier;
@@ -49,8 +82,10 @@ addLayer('ad', {
                 .times(hasUpgrade('infinity', 'boostInfinities') ? upgradeEffect('infinity', 'boostInfinities') : 1.0)
                 .times(hasAchievement('ach', 29) ? 1.1 : 1.0)
                 .times(tmp.g.multiplier)
-                .times(tmp.bd.power.multiplier)
+                .times(inChallenge('infinity', 21) ? 1.0 : tmp.bd.power.multiplier)
                 .times(1.05 ** player.ach.achievements.length)
+                .div(tmp.ad.matter.divider)
+                .times(tmp.d.decrementy.effectAD)
                 .times(delta)
             );
         };
@@ -58,13 +93,13 @@ addLayer('ad', {
         // Dimension autobuyer
         for(let i = 0; i <= (3 + player.ad.shifts); i++) {
             if(getClickableState(this.layer, `ab-${i+1}`) === 'Enabled') {
-                if(hasUpgrade('bd', 'adim-m')) buyMaxBuyable(this.layer, `dimension-${i+1}`);
+                if(hasUpgrade('bd', 'adim-m') || hasUpgrade('infinity', 'keepBuyMax')) buyMaxBuyable(this.layer, `dimension-${i+1}`);
                 else buyBuyable(this.layer, `dimension-${i+1}`);
             }
         }
         // Tickspeed autobuyer
         if (getClickableState(this.layer, `ab-t`) === 'Enabled') {
-            if(hasUpgrade('bd', 'adim-m')) buyMaxBuyable(this.layer, `tickspeed`);
+            if(hasUpgrade('bd', 'adim-m') || hasUpgrade('infinity', 'keepBuyMax')) buyMaxBuyable(this.layer, `tickspeed`);
             else buyBuyable(this.layer, `tickspeed`);
         }
         // Dimension shift autobuyer
@@ -77,6 +112,8 @@ addLayer('ad', {
     tabFormat: {
         'Dimensions': {
             content: [
+                ['display-text', function() { if(inChallenge('infinity', 32)) return `There is <span style="color:#45b0b0;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.ad.matter, 2)}</span> matter.`; }, { 'color': 'silver' }],
+                ['display-text', function() { if(inChallenge('infinity', 32)) return `<span style="font-size:16px;">It's dividing <b>all</b> Antimatter Dimensions by <span style="color:#db5d23">/${mixedStandardFormat(tmp.ad.matter.divider, 2)}</span>.</span></blank>`; }, { 'color': 'silver' }],
                 ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }],
                 ['display-text', function() { return  `You are getting <span style="font-size:12px;">${__(getPointGen(), 2, 1)}</span> antimatter per second.`; }, { 'color': 'silver', 'font-size': '10px' }], 'blank',
                 ['display-text', function() { return `Increase tickspeed by ${tmp.ad.tickspeed.increase}x.` }, { 'font-size': '12px', 'color': 'silver' }],
@@ -103,7 +140,10 @@ addLayer('ad', {
                             .times(hasAchievement('ach', 29) ? 1.1 : 1.0)
                             .times(tmp.g.multiplier)
                             .times(1.05 ** player.ach.achievements.length)
-                            .times(tmp.bd.power.multiplier), 1);
+                            .times(inChallenge('infinity', 21) ? 1.0 : tmp.bd.power.multiplier)
+                            .div(tmp.ad.matter.divider)
+                            .times(tmp.d.decrementy.effectAD)
+                            , 1);
                         let amount = mixedStandardFormat(player.ad.dimensions[i], 2, true);
                         html[1].push(['row', [
                             ['raw-html', `<div style="width:150px; text-align:left;"><span style="font-weight:bold;">${ORDINAL[i+1]} Dimension</span><br><span style="color:silver;">x${multiplier}</span></div>`, { margin: 'auto 0', 'font-size': '12px' }],
@@ -192,18 +232,19 @@ addLayer('ad', {
                 return player.ad.dimensions[player.ad.shifts + 3].gte(20);
             },
             onClick() {
-                // Save data
-                const resetData = {
-                    shifts: player.ad.shifts + 1,
-                    autobuyerStates: AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState(this.layer, val)}), {})
+                if(hasChallenge('infinity', 21)) {
+                    player.ad.shifts = player.ad.shifts + 1;
+                    return;
                 }
 
-                layerDataReset('ad');
+                // Save data
+                const shifts = player.ad.shifts + 1;
+
+                resetAD();
+                resetPoints();
 
                 // Load data
-                player.points = new Decimal(10);
-                player.ad.shifts = resetData.shifts;
-                Object.entries(resetData.autobuyerStates).forEach(([k, v]) => { setClickableState(this.layer, k, v) });
+                player.ad.shifts = shifts;
             },
             unlocked() {
                 return player.ad.shifts < 4;
@@ -218,22 +259,35 @@ addLayer('ad', {
 
         // Dimensional Boosts appear after the 8th Dimension has been unlocked and give Booster Points.
         'boost': {
-            display() { return `Dimensional Boost<br>Reset all dimensions,<br>and gain ${__(tmp.bd.points.gain,2,0)} BP.` },
-            canClick() { return tmp.bd.points.gain.gte(1); },
+            display() {
+                if(hasChallenge('infinity', 42)) return `You gain ${__(tmp.bd.points.gain, 2, 1)} BP per second.`
+                if(inChallenge('infinity', 21)) return `Dimensional Boost<br>Locked ("Boostless" Challenge)`;
+                if(inChallenge('infinity', 31)) return `Dimensional Boost<br>Locked ("Drought" Challenge)`;
+                return `Dimensional Boost<br>Reset all dimensions,<br>and gain ${__(tmp.bd.points.gain,2,0)} BP.`
+            },
+            canClick() {
+                return !hasChallenge('infinity', 42)
+                    && !inChallenge('infinity', 21)
+                    && !inChallenge('infinity', 31)
+                    && tmp.bd.points.gain.gte(1);
+            },
             onClick() {
-                saveBPStatistics();
-                // Save data
-                const resetData = {
-                    autobuyerStates: AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState(this.layer, val)}), {})
+                if(hasChallenge('infinity', 21)) {
+                    player.ad.shifts = 0 + hasUpgrade('bd', 'keep-1') + hasUpgrade('bd', 'keep-2') + hasUpgrade('bd', 'keep-3') + hasUpgrade('bd', 'keep-4');
+                    player.bd.unlocked = true;
+                    player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
+                    player.bd.lowestTime = Math.min(player.bd.lowestTime, player.bd.timeInCurrentAD);
+                    player.bd.timeInCurrentAD = 0;
+                    return;
                 }
 
-                layerDataReset('ad');
+                saveBPStatistics();
+
+                resetAD();
 
                 // Load data
                 player.points = new Decimal(10);
                 player.ad.shifts = 0 + hasUpgrade('bd', 'keep-1') + hasUpgrade('bd', 'keep-2') + hasUpgrade('bd', 'keep-3') + hasUpgrade('bd', 'keep-4');
-                Object.entries(resetData.autobuyerStates).forEach(([k, v]) => { setClickableState(this.layer, k, v) });
-
                 player.bd.unlocked = true;
                 player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
                 player.bd.lowestTime = Math.min(player.bd.lowestTime, player.bd.timeInCurrentAD);
@@ -248,37 +302,50 @@ addLayer('ad', {
         // Galaxies give a galaxy based on the amount of 8th Dimensions.
         'galaxy': {
             gain() {
+                if(inChallenge('infinity', 22)) return new Decimal(0);
+                if(inChallenge('infinity', 21)) {
+                    if(player.points.lt('1e100')) return new Decimal(0);
+                    return Decimal.ceil(Decimal.log(Decimal.divide(player.points, '1e100'), 10));
+                }
+                if(inChallenge('infinity', 51)) {
+                    return Decimal.ceil(Decimal.log10(Decimal.plus(10, player.points)))
+                }
+                if(player.points.lt('1e512')) return new Decimal(0);
                 return Decimal.ceil(Decimal.log(Decimal.divide(player.points, '1e512'), 10));
             },
             display() {
+                if(hasChallenge('infinity', 42)) return `You gain ${__(this.gain(), 2, 1)} GP per second.`
+                if(inChallenge('infinity', 22)) return `GP Gain<br>Locked ("Starless" Challenge)`;
+                if(inChallenge('infinity', 31)) return `GP Gain<br>Locked ("Drought" Challenge)`;
                 if(this.canClick()) {
                     return `Gain ${this.gain()} GP.`;
                 }
                 else {
+                    if(inChallenge('infinity', 21)) return 'Reach 1e100 to unlock Galaxy Points.'
                     return 'Reach 1e512 to unlock Galaxy Points.'
                 }
             },
             tooltip() { return 'Reset Booster Dimensions and Antimatter Dimensions for GP.<br><br>GP is based on your antimatter amount. log10(AM/1e512)<br><br>You need 1e512 antimatter to unlock this.' },
-            canClick() { return player.points.gte('1e512'); },
+            canClick() { return this.gain().gt(0); },
             onClick() {
-                // Save data
-                const resetData = {
-                    gain: this.gain(),
-                    autobuyerStates: AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState(this.layer, val)}), {})
+                if(hasChallenge('infinity', 22)) {
+                    player.g.unlocked = true;
+                    player.g.points = player.g.points.plus(this.gain());
+                    return;
                 }
-                
-                layerDataReset('ad');
-                layerDataReset('bd');
 
-                // Load data
-                player.points = new Decimal(100);
-                Object.entries(resetData.autobuyerStates).forEach(([k, v]) => { setClickableState(this.layer, k, v) });
+                // Save data
+                const gain = this.gain();
+
+                resetAD();
+                resetBD();
+                resetPoints();
 
                 player.bd.power = new Decimal(0);
                 player.bd.restart = true;
 
                 player.g.unlocked = true;
-                player.g.points = player.g.points.plus(resetData.gain);
+                player.g.points = player.g.points.plus(gain);
             },
             style() { return { 'font-size': '10px', 'height': '60px' } }
         }
@@ -291,10 +358,18 @@ addLayer('ad', {
             key: 'm',
             description: 'm: Max All',
             onPress() {
-                for(let i = 0; i <= (3 + player.ad.shifts); i++) {
-                    buyMaxBuyable(this.layer, `dimension-${i+1}`);
+                if(inChallenge('infinity', 11)) {
+                    let shiftCount = getBuyableAmount('ta', 'shiftboost').toNumber();
+                    for(let i = 0; i <= Math.min(3 + shiftCount, 7); i++) {
+                        buyMaxBuyable('ta', `dimension-${i+1}`);
+                    }
+                    buyMaxBuyable('ta', 'tickspeed');
+                } else {
+                    for(let i = 0; i <= (3 + player.ad.shifts); i++) {
+                        buyMaxBuyable(this.layer, `dimension-${i+1}`);
+                    }
+                    buyMaxBuyable(this.layer, 'tickspeed');
                 }
-                buyMaxBuyable(this.layer, 'tickspeed');
             }
         }
     ]
@@ -399,7 +474,7 @@ function dimBuyable(dimension, cost, multiplier) {
             if(Decimal.times(cost, Decimal.pow(multiplier, this.amount10())).lte('1e308')) {
                 return Decimal.times(cost, Decimal.pow(multiplier, this.amount10()))
             } else {
-                return Decimal.times(cost, Decimal.pow(multiplier, this.amount10().times(2))).div('1e308')
+                return Decimal.times(cost, Decimal.pow(multiplier, this.amount10().times(1))).div('1e308')
             }
         },
         display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)}` },

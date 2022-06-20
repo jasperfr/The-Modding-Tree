@@ -1,5 +1,13 @@
 function isDevBuild() { return VERSION.num.endsWith('dev') }
 
+function resetPoints() {
+	if(player.infinity.unlocked) {
+		player.points = new Decimal(100);
+	} else {
+		player.points = new Decimal(10);
+	}
+}
+
 let modInfo = {
 	name: "Antreematter Dimensions",
 	id: "antreematter",
@@ -8,13 +16,20 @@ let modInfo = {
 	modFiles: [
 		'elements.js',
 		'tree.js',
-		'layers/side/achievements.js',
-		'layers/side/debugger.js',
 		'layers/antimatter.js',
 		'layers/booster.js',
 		'layers/galaxy.js',
-		'layers/crunch.js',
-		'layers/lootbox.js',
+		'layers/infinity.js',
+
+		'layers/challenges/true-antimatter.js',
+		'layers/challenges/2048.js',
+		'layers/challenges/decrementy.js',
+
+		'layers/misc/crunch.js',
+
+		'layers/side/achievements.js',
+		'layers/side/debugger.js'
+		
 	],
 	discordName: "",
 	discordLink: "",
@@ -24,11 +39,17 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.1.0",
-	name: "The Denerfed Update",
+	num: "1.2.0",
+	name: "The Challenging Update",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v1.2.0</h3><br>
+		- Added challenges
+		- Added new icons
+		- Various fixes to autobuyers
+		- Hidden unused Infinity Studies for the time being
+		- Endgame is now Break Infinity
 	<h3>v1.1.0</h3><br>
 		- Fixed autobuyers
 		- De-nerfed Booster Layer
@@ -70,7 +91,7 @@ let changelog = `<h1>Changelog:</h1><br>
 		- Added first 2 rows of achievements.<br>
 `
 
-let winText = `Congratulations! You have reached Infinity, and thus the end of the alpha version. More to come eventually.`
+let winText = `Congratulations! You have broken Infinity, and thus the end of the alpha version. More to come eventually.`
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
@@ -90,6 +111,16 @@ function getPointGen() {
 	if(!canGenPoints())
 		return new Decimal(0)
 
+	if(inChallenge('infinity', 11)) {
+        let shiftCount = getBuyableAmount('ta', 'shiftboost').toNumber();
+		let gain = player.ta.dimensions[0]
+		.times(tmp.ta.tickspeed.multiplier)
+		.times(tmp.ta.buyables['dimension-1'].multiplier)
+		.times(2 ** shiftCount)
+		.times(1.05 ** player.ach.achievements.length);
+		return gain;
+	}
+
 	let gain = player.ad.dimensions[0]
 		.times(tmp.ad.buyables['dimension-1'].multiplier)
 		.times(tmp.ad.tickspeed.multiplier)
@@ -97,7 +128,9 @@ function getPointGen() {
 		.times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
 		.times(hasAchievement('ach', 29) ? 1.1 : 1.0)
 		.times(tmp.g.multiplier)
-		.times(tmp.bd.power.multiplier)
+		.times(inChallenge('infinity', 21) ? 1.0 : tmp.bd.power.multiplier)
+		.div(tmp.ad.matter.divider)
+		.times(tmp.d.decrementy.effectAD)
 		.times(1.05 ** player.ach.achievements.length)
 	
 	return gain
@@ -115,7 +148,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gt(new Decimal('1ee1000'));
+	return player.infinity.broken;
 }
 
 

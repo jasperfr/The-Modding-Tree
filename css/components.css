@@ -102,23 +102,46 @@
 }
 
 .challenge {
-	background-color: #7A6537;
+	background-color: #222;
 	position: relative;
-	border: 4px solid;
-	border-color: rgba(0, 0, 0, 0.125);
-	color: rgba(0, 0, 0, 0.5);
+	color: white;
 	width: 300px;
 	height: 300px;
 	font-size: 15px;
-	border-radius: 33.33%;
+	padding: 10pt;
+	position: relative;
+	margin: 20pt;
 }
 
-.challenge.done {
-	background-color: #77bf5f;
+.challenge::after {
+	content: "";
+	position: absolute;
+	left: -8px;
+	top: -8px;
+	right: -8px;
+	bottom: -8px;
+	z-index: -1;
+	background-image: repeating-linear-gradient(-45deg, rgb(118, 58, 115), orange 25%, rgb(118, 58, 115) 50%);
+	background-size: 200% 200%;
+	animation: movebg 2500ms linear infinite;
+	border-radius: 4px;
+}
+
+@keyframes movebg {
+	0% {
+		background-position: 0% 0%;
+	}
+	100% {
+		background-position: 100% 100%;
+	}
+}
+
+.challenge.done::after {
+	background-image: repeating-linear-gradient(-45deg, rgb(64, 158, 136), lime 25%, rgb(64, 158, 136) 50%);
 }
 
 .challenge.canComplete {
-	background-color: #ffbf00;
+	background-color: #222;
 }
 
 /* Infoboxes */
@@ -190,11 +213,10 @@
 .longUpg {
 	height: 50px;
 	width: 120px;
-	background: var(--points);
-	border-radius: 50%;
-	border: 2px solid;
-	border-color: rgba(0, 0, 0, 0.125);
-	font-size: 10px;
+	background: #222 !important;
+	color: white;
+	border: 2px solid orange;
+	font-size: 12pt;
 }
 
 .smallUpg {

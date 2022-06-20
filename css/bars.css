@@ -59,6 +59,13 @@
 	font-weight: bold;
 }
 
+.upgTable d {
+	font-size: 20px;
+	font-weight: bold;
+	color: #666;
+	text-shadow: 0 0 8px rgb(55, 55, 55);
+}
+
 .lootbox {
 	display: block;
 	width: 200px;

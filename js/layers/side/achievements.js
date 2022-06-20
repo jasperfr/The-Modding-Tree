@@ -4,10 +4,16 @@ addLayer('ach', {
     symbol: '<h1 style="margin:0;line-height:32px;font-size:26pt">★</h1>',
     tooltip() { return 'Achievements' },
 
+    multiplier() {
+        let gain = 1.05 ** player.ach.achievements.length;
+        if(hasUpgrade('infinity', 'achievementBonus')) gain **= 1.5;
+        return gain;
+    },
+
     tabFormat: [
         ['display-text', '<h1>Achievements</h1>'],
         'blank',
-        ['display-text', function() { return `Your achievements boost Antimatter Dimensions by x${__(1.05 ** player.ach.achievements.length, 2, 0)}.`} ],
+        ['display-text', function() { return `Your achievements boost Antimatter Dimensions by x${__(tmp.ach.multiplier, 2, 0)}.`} ],
         ['display-text', '(Some achievements are a work in progress.)', { 'font-size': '10px' } ],
         'blank',
         'achievements'
@@ -182,8 +188,8 @@ addLayer('ach', {
         },
         36: {
             name: 'Exponential Solar Power',
-            tooltip: '<h4>Exponential Solar Power</h4><br><h5>Get your Star Power to >= ^2. Reward: Additional +1 to Star Power.</h5>',
-            done() { return tmp.g.starPower > 2 },
+            tooltip: '<h4>Exponential Solar Power</h4><br><h5>Get your Star Power to >= ^2 (outside of the Boostless challenge). Reward: Additional +1 to Star Power.</h5>',
+            done() { return !inChallenge('infinity', 21) && tmp.g.starPower > 2 },
             style: { 'background-position' : '-512px -512px' }
         },
         37: {

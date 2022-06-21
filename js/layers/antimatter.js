@@ -474,7 +474,7 @@ function dimBuyable(dimension, cost, multiplier) {
             if(Decimal.times(cost, Decimal.pow(multiplier, this.amount10())).lte('1e308')) {
                 return Decimal.times(cost, Decimal.pow(multiplier, this.amount10()))
             } else {
-                return Decimal.times(cost, Decimal.pow(multiplier, this.amount10().times(1))).div('1e308')
+                return Decimal.times(cost, Decimal.pow(multiplier, this.amount10().times(2))).div('1e308')
             }
         },
         display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)}` },

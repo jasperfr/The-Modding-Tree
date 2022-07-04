@@ -2,19 +2,21 @@ addLayer('d', {
 
     /* === Base information === */
     name: 'Decrementy',
-    symbol: '',
+    symbol: 'D',
     color: '#444',
     tooltip: 'Decrementy',
     branches: ['ad'],
 
     baseResource: 'decrementy',
 
-    nodeStyle: {
-        'color': 'white',
-        'background-image': 'url("resources/decrementy.gif")',
-        'background-position': 'center center',
-        'background-size': '100%',
-        'border': '1px solid white'
+    nodeStyle() {
+        return options.toggleButtonAnimations ? {
+            'color': 'white',
+            'background-image': 'url("resources/decrementy.gif")',
+            'background-position': 'center center',
+            'background-size': '100%',
+            'border': '1px solid white'
+        } : {}
     },
 
     startData() {
@@ -50,14 +52,17 @@ addLayer('d', {
             return Decimal.times(Decimal.plus(1, player.d.points), tmp.d.decrementy.raise);
         },
         effectAD() {
+            if(!inChallenge('infinity', 51)) return new Decimal(1);
             let log = Decimal.max(1, Decimal.log10(player.d.points));
             return Decimal.min(1, Decimal.divide(1, Decimal.plus(1, log)));
         },
         effectB() {
+            if(!inChallenge('infinity', 51)) return new Decimal(1);
             let log = Decimal.max(1, Decimal.sqrt(Decimal.plus(10, player.d.points)).pow(0.062));
             return Decimal.min(1, Decimal.divide(1, Decimal.plus(1, log)));
         },
         effectG() {
+            if(!inChallenge('infinity', 51)) return new Decimal(1);
             let log = Decimal.max(1, Decimal.ssqrt(Decimal.plus(1, Decimal.log10(player.d.points.plus(1)))));
             return Decimal.min(1, Decimal.divide(1, Decimal.plus(1, log)));
         }

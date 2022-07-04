@@ -49,6 +49,7 @@ addLayer('ta', {
                     .times(tmp.ta.tickspeed.multiplier)
                     .times(i === 7 ? tmp.ta.sacrifice.multiplier : 1)
                     .times(1.05 ** player.ach.achievements.length)
+                    .times(10)
                     .times(delta)
             );
         }

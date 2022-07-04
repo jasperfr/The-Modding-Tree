@@ -17,19 +17,21 @@ addLayer('ad', {
 
     /* === Base information === */
     name: 'Antimatter Dimensions',
-    symbol: '',
+    symbol() { return options.toggleButtonAnimations ? '' : 'A' },
     color: '#992c2c',
     tooltip: 'Antimatter Dimensions',
     branches: ['bd', 'g'],
 
     baseResource: 'antimatter',
 
-    nodeStyle: {
-        'color': 'white',
-        'background-image': 'url("resources/antimatter.gif")',
-        'background-position': 'center center',
-        'background-size': '200%',
-        'border': '1px solid white'
+    nodeStyle() {
+        return options.toggleButtonAnimations ? {
+            'color': 'white',
+            'background-image': 'url("resources/antimatter.gif")',
+            'background-position': 'center center',
+            'background-size': '200%',
+            'border': '1px solid white'
+        } : {}
     },
 
     layerShown() {
@@ -59,7 +61,7 @@ addLayer('ad', {
     /* === Update information === */
     update(delta) {
         if(inChallenge('infinity', 32)) {
-            player.ad.matter = Decimal.plus(player.ad.matter, 1).times(1.525);
+            player.ad.matter = Decimal.plus(player.ad.matter, 1).times(1.5);
         }
 
         // Update dimensions
@@ -260,13 +262,13 @@ addLayer('ad', {
         // Dimensional Boosts appear after the 8th Dimension has been unlocked and give Booster Points.
         'boost': {
             display() {
-                if(hasChallenge('infinity', 42)) return `You gain ${__(tmp.bd.points.gain, 2, 1)} BP per second.`
+                if(hasChallenge('infinity', 41)) return `You gain ${__(tmp.bd.points.gain, 2, 1)} BP per second.`
                 if(inChallenge('infinity', 21)) return `Dimensional Boost<br>Locked ("Boostless" Challenge)`;
                 if(inChallenge('infinity', 31)) return `Dimensional Boost<br>Locked ("Drought" Challenge)`;
                 return `Dimensional Boost<br>Reset all dimensions,<br>and gain ${__(tmp.bd.points.gain,2,0)} BP.`
             },
             canClick() {
-                return !hasChallenge('infinity', 42)
+                return !hasChallenge('infinity', 41)
                     && !inChallenge('infinity', 21)
                     && !inChallenge('infinity', 31)
                     && tmp.bd.points.gain.gte(1);
@@ -294,7 +296,7 @@ addLayer('ad', {
                 player.bd.timeInCurrentAD = 0;
                 player.bd.power = hasUpgrade('bd', 'keep50OnReset') ? player.bd.power.times(0.5) : new Decimal(0);
             },
-            tooltip() { return 'Booster Point gain is based on your 8th dimensions.' },
+            tooltip() { return `Booster Point gain is based on your ${ inChallenge('infinity', 22) ? '1st' : '8th'} dimensions.` },
             unlocked() { return player.ad.shifts >= 4; },
             style() { return { 'font-size': '10px', 'height': '60px' } }
         },
@@ -474,7 +476,7 @@ function dimBuyable(dimension, cost, multiplier) {
             if(Decimal.times(cost, Decimal.pow(multiplier, this.amount10())).lte('1e308')) {
                 return Decimal.times(cost, Decimal.pow(multiplier, this.amount10()))
             } else {
-                return Decimal.times(cost, Decimal.pow(multiplier, this.amount10().times(1))).div('1e308')
+                return Decimal.times(cost, Decimal.pow(multiplier, this.amount10().times(2))).div('1e308')
             }
         },
         display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)}` },

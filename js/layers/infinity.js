@@ -2,19 +2,21 @@ addLayer('infinity', {
 
     /* === Base information === */
     name: 'Infinity',
-    symbol: '',
+    symbol() { return options.toggleButtonAnimations ? '' : 'I' },
     color: 'orange',
     branches: ['bd', 'g'],
     layerShown() { return player.infinity.unlocked },
     resource: 'IP',
     tooltip: 'Infinity',
 
-    nodeStyle: {
-        'color': 'white',
-        'background-image': 'url("resources/infinity.gif")',
-        'background-position': 'center center',
-        'background-size': '250%',
-        'border': '1px solid white'
+    nodeStyle() {
+        return options.toggleButtonAnimations ? {
+            'color': 'white',
+            'background-image': 'url("resources/infinity.gif")',
+            'background-position': 'center center',
+            'background-size': '250%',
+            'border': '1px solid white'
+        } : {}
     },
 
     /* === Data information === */
@@ -95,7 +97,7 @@ addLayer('infinity', {
     challenges: {
         11: {
             name: 'True AD',
-            challengeDescription: 'Play the true original version of Antimatter Dimensions.<br>',
+            challengeDescription: 'Play the true original version of Antimatter Dimensions.<br>(At 100 times the speed).<br>',
             goalDescription: '1.79e308 True Antimatter<br>',
             rewardDescription: 'Unlock autobuyers for Booster Power Upgrades.',
             canComplete: function() { return player.points.gte('1.79e308') },
@@ -119,9 +121,9 @@ addLayer('infinity', {
         21: {
             name: 'Boostless',
             challengeDescription: 'The Booster Layer is disabled.<br>GP generation starts at 1e100 AM.',
-            goalDescription: '2e1024 Antimatter<br>',
+            goalDescription: '1e512 Antimatter<br>',
             rewardDescription: 'Dimensional Shifts and boosts reset nothing (except boosts to shifts).',
-            canComplete: function() { return player.points.gte('2e1024') },
+            canComplete: function() { return player.points.gte('1e512') },
             onEnter() {
                 resetAD();
                 resetBD();
@@ -131,10 +133,10 @@ addLayer('infinity', {
         },
         22: {
             name: 'Starless',
-            challengeDescription: 'The Galaxy Layer is disabled.<br>',
-            goalDescription: '2e1024 Antimatter<br>',
+            challengeDescription: 'The Galaxy Layer is disabled.<br>BP generation is based on your <b>super square rooted</b> 1st Dimensions instead.',
+            goalDescription: '1e700 Antimatter<br>',
             rewardDescription: 'Galaxial shifts reset nothing and unlock 2 more Galaxy Upgrades.',
-            canComplete: function() { return player.points.gte('2e1024') },
+            canComplete: function() { return player.points.gte('1e700') },
             onEnter() {
                 resetAD();
                 resetBD();
@@ -147,9 +149,9 @@ addLayer('infinity', {
         31: {
             name: 'Drought',
             challengeDescription: 'Booster and Galaxy layers are disabled.<br>',
-            goalDescription: '1e150 Antimatter<br>',
+            goalDescription: '1e100 Antimatter<br>',
             rewardDescription: 'Unlock autobuyers for Booster Upgrades.',
-            canComplete: function() { return player.points.gte('1e150') },
+            canComplete: function() { return player.points.gte('1e100') },
             onEnter() {
                 resetAD();
                 resetBD();
@@ -175,10 +177,10 @@ addLayer('infinity', {
         },
         41: {
             name: 'Boost or Nerf',
-            challengeDescription: 'All 6 Booster Upgrades are unlocked, but you can only buy 2 of them.<br>',
-            goalDescription: '2e1024 Antimatter<br>',
+            challengeDescription: 'All 6 Booster Upgrades are unlocked, but you can only buy 2 of them. x10 to BP gain.<br>',
+            goalDescription: '1e512 Antimatter<br>',
             rewardDescription: 'Gain 100% BP per second and keep your Booster Milestones.',
-            canComplete: function() { return player.points.gte('2e1024') },
+            canComplete: function() { return player.points.gte('1e512') },
             onEnter() {
                 resetAD();
                 resetBD();
@@ -190,9 +192,9 @@ addLayer('infinity', {
         42: {
             name: 'Compact Universe',
             challengeDescription: 'The Galaxy Layer\'s atomic grid is now 2x2.<br>',
-            goalDescription: '2e1024 Antimatter<br>',
+            goalDescription: '7e777 Antimatter<br>',
             rewardDescription: 'Gain 100% of GP gain per second.',
-            canComplete: function() { return player.points.gte('2e1024') },
+            canComplete: function() { return player.points.gte('7e777') },
             onEnter() {
                 resetAD();
                 resetBD();
@@ -210,9 +212,9 @@ addLayer('infinity', {
         51: {
             name: 'The Ultimate Challenge',
             challengeDescription: 'There is raising decrementy that divides ALL production multipliers. Each challenge completion nerfs this raise. When Decrementy reaches 1.79e308, it will explode exponentially. Galaxy points are gained <b>instantly.</b><br>',
-            goalDescription: '1e600 Antimatter<br>',
+            goalDescription: '1e450 Antimatter<br>',
             rewardDescription: 'Unlock the power to Break Infinity.',
-            canComplete: function() { return player.points.gte('1e600') },
+            canComplete: function() { return player.points.gte('1e450') },
             style: function() { return { 'width': '680px' } },
             onEnter() {
                 resetAD();

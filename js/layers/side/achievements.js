@@ -216,11 +216,124 @@ addLayer('ach', {
             style: { 'background-position' : '-512px -640px' }
         },
         39: {
-            name: 'You win!',
-            tooltip: '<h4>You win!</h4><br><h5>Get 1e1024 antimatter. Reward: A sense of accomplishment.</h5>',
+            name: 'Crunched',
+            tooltip: '<h4>Crunched</h4><br><h5>Get 1e1024 antimatter. Reward: A sense of accomplishment, and 1 Infinity Point.</h5>',
             done() { return player.points.gte('1e1024') },
             style: { 'background-position' : '-512px -704px' }
         },
+        41: {
+            name: 'Deja Vu',
+            tooltip: '<h4>Deja Vu</h4><br><h5>Complete challenge 1.</h5>',
+            done() { return hasChallenge('infinity', 11) },
+            style: { 'background-position' : '-576px 0px' }
+        },
+        42: {
+            name: 'I hate this mechanic',
+            tooltip: '<h4>I hate this mechanic</h4><br><h5>Complete challenge 2.</h5>',
+            done() { return hasChallenge('infinity', 12) },
+            style: { 'background-position' : '-640px 0px' }
+        },
+        43: {
+            name: 'Didn\'t need it',
+            tooltip: '<h4>Didn\'t need it</h4><br><h5>Complete challenge 3.</h5>',
+            done() { return hasChallenge('infinity', 21) },
+            style: { 'background-position' : '-576px -64px' }
+        },
+        44: {
+            name: 'Didn\'t need it either',
+            tooltip: '<h4>Didn\'t need it either</h4><br><h5>Complete challenge 4.</h5>',
+            done() { return hasChallenge('infinity', 22) },
+            style: { 'background-position' : '-640px -64px' }
+        },
+        45: {
+            name: 'This is just AD but worse',
+            tooltip: '<h4>This is just AD but worse</h4><br><h5>Complete challenge 5.</h5>',
+            done() { return hasChallenge('infinity', 31) },
+            style: { 'background-position' : '-576px -128px' }
+        },
+        46: {
+            name: 'Like watching a video on garbage wifi',
+            tooltip: '<h4>Like watching a video on garbage wifi</h4><br><h5>Complete challenge 6.</h5>',
+            done() { return hasChallenge('infinity', 32) },
+            style: { 'background-position' : '-640px -128px' }
+        },
+        47: {
+            name: 'Click spamming',
+            tooltip: '<h4>Click spamming</h4><br><h5>Complete challenge 7.</h5>',
+            done() { return hasChallenge('infinity', 41) },
+            style: { 'background-position' : '-576px -192px' }
+        },
+        48: {
+            name: 'Compact Claustrophobia',
+            tooltip: '<h4>Compact Claustrophobia</h4><br><h5>Complete challenge 8.</h5>',
+            done() { return hasChallenge('infinity', 42) },
+            style: { 'background-position' : '-640px -192px' }
+        },
+        49: {
+            name: 'Can\'t Touch This',
+            tooltip: '<h4>Can\'t Touch This</h4><br><h5>Enter the Ultimate Challenge after completing all challenges.</h5>',
+            done() { return hasChallenge('infinity', 11)
+                        && hasChallenge('infinity', 12)
+                        && hasChallenge('infinity', 21)
+                        && hasChallenge('infinity', 22)
+                        && hasChallenge('infinity', 31)
+                        && hasChallenge('infinity', 32)
+                        && hasChallenge('infinity', 41)
+                        && hasChallenge('infinity', 42)
+                        && inChallenge('infinity', 51)
+                },
+            style: { 'background-position' : '-640px -256px' }
+        },
+        51: {
+            name: 'You\'ve really nerfed this challenge',
+            tooltip: '<h4>You\'ve really nerfed this challenge</h4><br><h5>Enter challenge 3 after completing Challenge 4.</h5>',
+            done() { return hasChallenge('infinity', 22) && inChallenge('infinity', 21) },
+            style: { 'background-position' : '-704px -64px' }
+        },
+        52: {
+            name: 'Decrementy Hell',
+            tooltip: '<h4>Decrementy Hell</h4><br><h5>Let your Decrementy exceed e1e12. [UNIMPLEMENTED]</h5>',
+            done() { return false; },
+            style: { 'background-position' : '-576px -256px' }
+        },
+        53: {
+            name: 'HAHA FUNNY AD REFERENCE LAUGH',
+            tooltip: '<h4>HAHA FUNNY AD REFERENCE LAUGH</h4><br><h5>Have 1.79e308 matter.</h5>',
+            done() { return player.ad.matter.gte('1.79e308'); },
+            style: { 'background-position' : '-704px -128px' }
+        },
+        54: {
+            name: 'Antichallenged',
+            tooltip: '<h4>Antichallenged</h4><br><h5>Complete all challenges.</h5>',
+            done() { return hasChallenge('infinity', 11)
+                    && hasChallenge('infinity', 12)
+                    && hasChallenge('infinity', 21)
+                    && hasChallenge('infinity', 22)
+                    && hasChallenge('infinity', 31)
+                    && hasChallenge('infinity', 32)
+                    && hasChallenge('infinity', 41)
+                    && hasChallenge('infinity', 42)
+                    && hasChallenge('infinity', 51); },
+            style: { 'background-position' : '-704px -196px' }
+        },
+        55: {
+            name: 'Antibroken',
+            tooltip: '<h4>Antibroken</h4><br><h5>Break Infinity.</h5>',
+            done() { return player.infinity.broken == true; },
+            style: { 'background-position' : '-576px -320px' }
+        },
+        56: {
+            name: 'On second thought',
+            tooltip: '<h4>On second thought</h4><br><h5>Fix Infinity. [UNIMPLEMENTED]</h5>',
+            done() { return false; },
+            style: { 'background-position' : '-640px -320px' }
+        },
+        57: {
+            name: 'AAAAHHHH',
+            tooltip: '<h4>AAAAHHHH</h4><br><h5>Fix infinity after nerfing the cost scaling to 1.0x. [UNIMPLEMENTED]</h5>',
+            done() { return false; },
+            style: { 'background-position' : '-704px -256px' }
+        }
     }
 
 });

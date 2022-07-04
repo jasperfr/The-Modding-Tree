@@ -1,6 +1,15 @@
 const ORDINAL = ['0th','1st','2nd','3rd','4th','5th','6th','7th','8th'];
 const AUTOBUYERS = ['ab-1', 'ab-2', 'ab-3', 'ab-4', 'ab-5', 'ab-6', 'ab-7', 'ab-8', 'ab-t', 'ab-s', 'ab-g'];
 
+const __ad = {
+    header: ['column', [
+        ['display-text', function() { if(inChallenge('infinity', 32)) return `There is <span style="color:#45b0b0;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.ad.matter, 2)}</span> matter.`; }, { 'color': 'silver' }],
+        ['display-text', function() { if(inChallenge('infinity', 32)) return `<span style="font-size:16px;">It's dividing <b>all</b> Antimatter Dimensions by <span style="color:#db5d23">/${mixedStandardFormat(tmp.ad.matter.divider, 2)}</span>.</span></blank>`; }, { 'color': 'silver' }],
+        ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }],
+        ['display-text', function() { return  `You are getting <span style="font-size:12px;">${__(getPointGen(), 2, 1)}</span> antimatter per second.`; }, { 'color': 'silver', 'font-size': '10px' }], 'blank',
+    ]]
+}
+
 function resetAD() {
     let autobuyerStates = {};
     if(hasUpgrade('infinity', 'keepBuyMax')) {
@@ -112,10 +121,7 @@ addLayer('ad', {
     tabFormat: {
         'Dimensions': {
             content: [
-                ['display-text', function() { if(inChallenge('infinity', 32)) return `There is <span style="color:#45b0b0;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.ad.matter, 2)}</span> matter.`; }, { 'color': 'silver' }],
-                ['display-text', function() { if(inChallenge('infinity', 32)) return `<span style="font-size:16px;">It's dividing <b>all</b> Antimatter Dimensions by <span style="color:#db5d23">/${mixedStandardFormat(tmp.ad.matter.divider, 2)}</span>.</span></blank>`; }, { 'color': 'silver' }],
-                ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }],
-                ['display-text', function() { return  `You are getting <span style="font-size:12px;">${__(getPointGen(), 2, 1)}</span> antimatter per second.`; }, { 'color': 'silver', 'font-size': '10px' }], 'blank',
+                __ad.header,
                 ['display-text', function() { return `Increase tickspeed by ${tmp.ad.tickspeed.increase}x.` }, { 'font-size': '12px', 'color': 'silver' }],
                 ['row', [['buyable', 'tickspeed'], ['buyable', 'tickspeed-max']]],
                 ['display-text', function() { return `Tickspeed: ${mixedStandardFormat(tmp.ad.tickspeed.multiplier, 3)} / sec` }, { 'font-size': '12px', 'color': 'silver' }],
@@ -156,23 +162,21 @@ addLayer('ad', {
                 'blank',
                 ['row', [['clickable', 'shift'], ['clickable', 'boost'], 'blank','blank','blank', ['clickable', 'galaxy']]],
                 'blank',
-                ['bar', 'percentageToInfinity']
+                ['layer-proxy', ['elements', [['bar', 'percentageToInfinity']]]]
             ],
         },
         'Autobuyers': {
             content: [
-                ['display-text', function() { return  `You have <span style="color:#b04545;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.points, 2)}</span> antimatter.`; }, { 'color': 'silver' }], 'blank',
+                __ad.header,
                 ['row', [['clickable', 'ab-1'], ['clickable', 'ab-2'], ['clickable', 'ab-3']]],
                 ['row', [['clickable', 'ab-4'], ['clickable', 'ab-5'], ['clickable', 'ab-6']]],
                 ['row', [['clickable', 'ab-7'], ['clickable', 'ab-8'], ['clickable', 'ab-t']]],
                 ['row', [['clickable', 'ab-s']]],
                 'blank',
-                ['bar', 'percentageToInfinity']
+                ['layer-proxy', ['elements', [['bar', 'percentageToInfinity']]]]
             ]
         }
     },
-
-    bars: { percentageToInfinity: elements.infinityPercentage() },
 
     /* === Upgrade information === */
     buyables: {

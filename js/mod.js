@@ -14,8 +14,8 @@ let modInfo = {
 	author: "jasperfr",
 	pointsName: "antimatter",
 	modFiles: [
-		'elements.js',
 		'tree.js',
+		'layers/misc/elements.js',
 		'layers/antimatter.js',
 		'layers/booster.js',
 		'layers/galaxy.js',

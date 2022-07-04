@@ -1,3 +1,11 @@
+const __in = {
+    header: ['column', [
+        ['display-text', function() { return `You have <span style="color:orange;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.infinity.points)}</span> IP.`; }, { 'color': 'silver' }],
+        ['display-text', function() { return `You have infinitied <span style="color:orange;font-size:20px;font-weight:bold;">${formatWhole(player.infinity.infinities)}</span> times.`; }, { 'color': 'silver', 'font-size': '12px' }],
+        'blank'
+    ]]
+}
+
 addLayer('infinity', {
 
     /* === Base information === */
@@ -35,7 +43,7 @@ addLayer('infinity', {
     tabFormat: {
         'Infinity Studies': {
             content: [
-                elements.ipHeader,
+                __in.header,
                 ['row', [['upgrade', 'keepBuyMax']]],
                 'blank','blank',
                 ['row', [['upgrade', 'boostTimePlayed']]],
@@ -74,7 +82,7 @@ addLayer('infinity', {
         },
         'Challenges': {
             content: [
-                elements.ipHeader,
+                __in.header,
                 ['raw-html', '<h1>Challenges</h1>'],
                 'blank',
                 'blank',
@@ -83,7 +91,7 @@ addLayer('infinity', {
         },
         'Break': {
             content: [
-                elements.ipHeader,
+                __in.header,
                 ['clickable', 'break-infinity'],
                 ['row', [['buyable', 1], ['buyable', 2]]],
                 ['row', [['buyable', 3], ['buyable', 4]]],

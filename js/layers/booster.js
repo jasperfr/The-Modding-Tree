@@ -1,3 +1,23 @@
+const __bd = {
+    header: ['column', [
+        ['display-text', function() {
+            const self = player.bd;
+            const temp = tmp.bd;
+            const auto = hasChallenge('infinity', 41);
+            return `
+                You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
+                You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
+                You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
+                ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(temp.buyables[2].effect,2,0)}</bd> power. <br>`}
+                Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
+                ${auto ? `You are getting <bd>${__(temp.points.gain,2,1)}</bd> Booster Points per second.`: `Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
+                Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>`}
+            `
+        }, { 'color': 'silver', 'font-size': '12px' }],
+        'blank'
+    ]]
+}
+
 function resetBD() {
     let autoBoosterUpgradeState = 'Locked';
     let autoBoosterState = 'Locked';
@@ -135,21 +155,7 @@ addLayer('bd', {
     tabFormat: {
        'Power': {
             content: [
-                ['display-text', function() {
-                    const self = player[this.layer];
-                    const temp = tmp[this.layer];
-                    const auto = hasChallenge('infinity', 41);
-                    return `
-                        You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
-                        You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
-                        You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
-                        ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
-                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
-                        ${auto ? `You are getting <bd>${__(temp.points.gain,2,1)}</bd> Booster Points per second.`: `Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
-                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>`}
-                    `
-                }, { 'color': 'silver', 'font-size': '12px' }],
-                'blank',
+                __bd.header,
                 ['clickable', 'gain'],
                 ['row', [['buyable', 1], ['buyable', 2]]],
                 ['row', [['buyable', 3], ['buyable', 4]]],
@@ -160,46 +166,18 @@ addLayer('bd', {
         }, 
         'Upgrades': {
             content: [
-                ['display-text', function() {
-                    const self = player[this.layer];
-                    const temp = tmp[this.layer];
-                    const auto = hasChallenge('infinity', 41);
-                    return `
-                        You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
-                        You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
-                        You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
-                        ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
-                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
-                        ${auto ? `You are getting <bd>${__(temp.points.gain,2,1)}</bd> Booster Points per second.`: `Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
-                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>`}
-                    `
-                }, { 'color': 'silver', 'font-size': '12px' }],
-                'blank',
+                __bd.header,
                 ['row', [['upgrade', 'keep-1'], 'blank', ['upgrade', 'adim-m'], 'blank', ['upgrade', 'reducePenal']]],
                 ['row', [['upgrade', 'keep-2'], 'blank', ['upgrade', 'keep50OnReset'], 'blank', ['upgrade', 'reducePenal2']], { 'margin-top': '6px' }],
                 ['row', [['upgrade', 'keep-3'], 'blank', ['upgrade', 'log10boost'], 'blank', ['upgrade', 'gain10times']], { 'margin-top': '6px' }],
                 ['row', [['upgrade', 'keep-4'], 'blank', ['upgrade', 'log100boost'], 'blank', ['upgrade', 'cheaperBuyables']], { 'margin-top': '6px' }],,
                 'blank',
-                ['clickable', 'autoUpgrade']
+                ['clickable', 'autoUpgrade'],
             ]
         },
         'Milestones': {
             content: [
-                ['display-text', function() {
-                    const self = player[this.layer];
-                    const temp = tmp[this.layer];
-                    const auto = hasChallenge('infinity', 41);
-                    return `
-                        You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
-                        You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
-                        You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
-                        ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
-                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
-                        ${auto ? `You are getting <bd>${__(temp.points.gain,2,1)}</bd> Booster Points per second.`: `Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
-                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>`}
-                    `
-                }, { 'color': 'silver', 'font-size': '12px' }],
-                'blank',
+                __bd.header,
                 ['display-text', 'Complete milestones to get rewards!'],
                 'blank',
                 'milestones'
@@ -210,21 +188,7 @@ addLayer('bd', {
                 return !hasChallenge('infinity', 41);
             },
             content: [
-                ['display-text', function() {
-                    const self = player[this.layer];
-                    const temp = tmp[this.layer];
-                    const auto = hasChallenge('infinity', 41);
-                    return `
-                        You have <bd>${__(self.points,2,1)}</bd> Booster Points. <br>
-                        You have <bd>${__(self.power,2,0)}</bd> Booster Power. <br>
-                        You are getting <bd>${__(temp.power.perSecond,3,0)}</bd> Booster Power per second. <br>
-                        ${hasMilestone('bd', 5) ? '' : `This slows down exponentially after <bd>${__(tmp.bd.buyables[2].effect,2,0)}</bd> power. <br>`}
-                        Your booster power multiplies all dimensions by <bd>${__(temp.power.multiplier,1,0)}</bd>x.<br>
-                        ${auto ? `You are getting <bd>${__(temp.points.gain,2,1)}</bd> Booster Points per second.`: `Your time in this booster reset is <bd>${TIME(self.timeInCurrentAD)}</bd>.<br>
-                        Your best time is <bd>${TIME(self.lowestTime)}</bd>.<br>`}
-                    `
-                }, { 'color': 'silver', 'font-size': '12px' }],
-                'blank',
+                __bd.header,
                 ['display-text', 'Last 10 boosters:'],
                 'blank',
                 function() {

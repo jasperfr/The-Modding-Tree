@@ -305,24 +305,12 @@ addLayer('ad', {
 
         // Galaxies give a galaxy based on the amount of 8th Dimensions.
         'galaxy': {
-            gain() {
-                if(inChallenge('infinity', 22)) return new Decimal(0);
-                if(inChallenge('infinity', 21)) {
-                    if(player.points.lt('1e100')) return new Decimal(0);
-                    return Decimal.ceil(Decimal.log(Decimal.divide(player.points, '1e100'), 10));
-                }
-                if(inChallenge('infinity', 51)) {
-                    return Decimal.ceil(Decimal.log10(Decimal.plus(10, player.points)))
-                }
-                if(player.points.lt('1e512')) return new Decimal(0);
-                return Decimal.ceil(Decimal.log(Decimal.divide(player.points, '1e512'), 10));
-            },
             display() {
-                if(hasChallenge('infinity', 42)) return `You gain ${__(this.gain(), 2, 1)} GP per second.`
+                if(hasChallenge('infinity', 42)) return `You gain ${__(tmp.g.points.gain, 2, 1)} GP per second.`
                 if(inChallenge('infinity', 22)) return `GP Gain<br>Locked ("Starless" Challenge)`;
                 if(inChallenge('infinity', 31)) return `GP Gain<br>Locked ("Drought" Challenge)`;
                 if(this.canClick()) {
-                    return `Gain ${this.gain()} GP.`;
+                    return `Gain ${tmp.g.points.gain} GP.`;
                 }
                 else {
                     if(inChallenge('infinity', 21)) return 'Reach 1e100 to unlock Galaxy Points.'
@@ -330,16 +318,17 @@ addLayer('ad', {
                 }
             },
             tooltip() { return 'Reset Booster Dimensions and Antimatter Dimensions for GP.<br><br>GP is based on your antimatter amount. log10(AM/1e512)<br><br>You need 1e512 antimatter to unlock this.' },
-            canClick() { return this.gain().gt(0); },
+            canClick() { return tmp.g.points.gain.gt(0); },
             onClick() {
                 if(hasChallenge('infinity', 22)) {
                     player.g.unlocked = true;
-                    player.g.points = player.g.points.plus(this.gain());
+                    player.g.timeInCurrentAD = 0;
+                    player.g.points = player.g.points.plus(tmp.g.points.gain);
                     return;
                 }
 
                 // Save data
-                const gain = this.gain();
+                const gain = tmp.g.points.gain;
 
                 resetAD();
                 resetBD();
@@ -349,6 +338,7 @@ addLayer('ad', {
                 player.bd.restart = true;
 
                 player.g.unlocked = true;
+                player.g.timeInCurrentAD = 0;
                 player.g.points = player.g.points.plus(gain);
             },
             style() { return { 'font-size': '10px', 'height': '60px' } }

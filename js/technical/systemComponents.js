@@ -173,7 +173,7 @@ var systemComponents = {
 			</tr>
 			<tr>
 			<td></td>
-			<td><button class="opt" onclick="toggleOpt('toggleButtonAnimations')">Toggle animated button ({{ options.toggleButtonAnimations?"ON":"OFF"}})</button></td>
+			<td><button class="opt" onclick="toggleOpt('toggleButtonAnimations')">Animated buttons: {{ options.toggleButtonAnimations?"ON":"OFF"}}</button></td>
 			<td></td>
 			</tr>
         </table>`

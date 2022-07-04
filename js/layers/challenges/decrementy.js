@@ -2,7 +2,7 @@ addLayer('d', {
 
     /* === Base information === */
     name: 'Decrementy',
-    symbol: 'D',
+    symbol() { return options.toggleButtonAnimations ? '' : 'D' },
     color: '#444',
     tooltip: 'Decrementy',
     branches: ['ad'],

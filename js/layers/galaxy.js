@@ -56,6 +56,8 @@ addLayer('g', {
             elementMultiplier: 3,
 
             selectedObjectId: 0,
+
+            timeInCurrentAD: 0,
         }
     },
 
@@ -67,6 +69,24 @@ addLayer('g', {
             .plus(hasAchievement('ach', 37) ? 1 : 0)
             .times(tmp.d.decrementy.effectG)
             .toNumber();
+    },
+
+    points: {
+        gain() {
+            if(inChallenge('infinity', 22)) return new Decimal(0);
+            if(inChallenge('infinity', 21)) {
+                if(player.points.lt('1e100')) return new Decimal(0);
+                return Decimal.ceil(Decimal.log(Decimal.divide(player.points, '1e100'), 10));
+            }
+            if(inChallenge('infinity', 51)) {
+                return Decimal.ceil(Decimal.log10(Decimal.plus(10, player.points)))
+            }
+            if(player.points.lt('1e512')) return new Decimal(0);
+            return Decimal.ceil(Decimal.log(Decimal.divide(player.points, '1e512'), 10));
+        },
+        perSecond() {
+            return tmp.g.points.gain.div(player.g.timeInCurrentAD);
+        }
     },
 
     spawnRate() {
@@ -130,6 +150,7 @@ addLayer('g', {
         "grid",
         ['display-text', function() { return `Use the arrow keys or the mouse to move / merge the atoms around.<br>The multiplier increases with each higher atom,<br>but will <u tooltip="Stars can't fuse iron!">stop</u> at Iron (Fe).`; }, { 'color': 'silver', 'font-size': '12px' }],
         'blank',
+        ['clickable', 'gain'],
         ['row', [
             ['buyable', 11],
             ['buyable', 12],
@@ -150,6 +171,14 @@ addLayer('g', {
     ],
 
     update(tick) {
+
+        player.g.timeInCurrentAD += tick;
+
+        // not sure if this is a good idea tbh
+        if(inChallenge('infinity', 42)) {
+            tmp[this.layer].grid.rows = 2;
+            tmp[this.layer].grid.cols = 2;
+        }
 
         if(hasChallenge('infinity', 42) && (player.points.gte('1e512') || inChallenge('infinity', 51))) {
             if(inChallenge('infinity', 51)) {
@@ -265,9 +294,19 @@ addLayer('g', {
     },
 
     hotkeys: [
+        // gain
+        {
+            key: 'g',
+            description: 'g: Gain GP',
+            onPress() {
+                clickClickable('g', 'gain');
+            }
+        },
+
         // up
         {
             key: 'ArrowUp',
+            description: 'Arrow keys: Move the grid',
             onPress() {
                 if(inChallenge('infinity', 12)) { _c_2048_moveTo(Direction.UP); return; }
                 let anyMoved = false;
@@ -424,6 +463,49 @@ addLayer('g', {
     },
 
     clickables: {
+
+        gain: {
+            display() { 
+                if(hasChallenge('infinity', 42)) {
+                    return `You are getting ${__(tmp.g.points.gain, 2, 1)} points per second.`
+                }
+                let gps = __(tmp.g.points.perSecond, 2, 0);
+                if(gps === 'NaN') return `Reset for ${__(tmp.g.points.gain,2,0)} GP.<br>(You gain GP too fast to be calculated.)`;
+                return `Reset for ${__(tmp.g.points.gain,2,0)} GP.<br>(${gps} GP/sec)` },
+            canClick() { return !hasChallenge('infinity', 42) && tmp.g.points.gain.gte(1); },
+            onClick() {
+                if(hasChallenge('infinity', 42)) {
+                    return;
+                }
+
+                if(hasChallenge('infinity', 22)) {
+                    player.g.unlocked = true;
+                    player.g.timeInCurrentAD = 0;
+                    player.g.points = player.g.points.plus(tmp.g.points.gain);
+                    return;
+                }
+
+                // Save data
+                const gain = tmp.g.points.gain;
+
+                resetAD();
+                resetBD();
+                resetPoints();
+
+                player.bd.power = new Decimal(0);
+                player.bd.restart = true;
+
+                player.g.unlocked = true;
+                player.g.timeInCurrentAD = 0;
+                player.g.points = player.g.points.plus(gain);
+            },
+            style() {
+                let gColor = {};
+                if(hasChallenge('infinity', 42)) gColor = { 'border-color': '#63b8ff' };
+                return { ...{ 'font-size': '10px', width: '316px', 'margin-bottom': '8px' }, ...gColor };
+            }
+        },
+
         auto: {
             display() {
                 if(!getClickableState(this.layer, this.id)) setClickableState(this.layer, this.id, 'Locked');

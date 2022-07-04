@@ -39,22 +39,31 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.2.0_04 beta",
-	name: "The Challenging Update",
+	num: "1.3.0",
+	name: "The Bugfix Update",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v1.3.0</h3><br>
+		- Fixed challenges<br>
+		- Rebalanced challenges based on cost scaling<br>
+		- New achievements<br>
+		- Added hotkeys for booster and galaxy layer<br>
+		- Various bugfixes to challenges<br>
+		- Various bugfixes to loading times<br>
+		- QOL improvements to displays<br>
+		- Made Challenge 1 and 7 more forgiving<br>
 	<h3>v1.2.0</h3><br>
-		- Added challenges
-		- Added new icons
-		- Various fixes to autobuyers
-		- Hidden unused Infinity Studies for the time being
-		- Endgame is now Break Infinity
+		- Added challenges<br>
+		- Added new icons<br>
+		- Various fixes to autobuyers<br>
+		- Hidden unused Infinity Studies for the time being<br>
+		- Endgame is now Break Infinity<br>
 	<h3>v1.1.0</h3><br>
-		- Fixed autobuyers
-		- De-nerfed Booster Layer
-		- Galaxy layer is easier to obtain
-		- Added statistics page for Booster Layer
+		- Fixed autobuyers<br>
+		- De-nerfed Booster Layer<br>
+		- Galaxy layer is easier to obtain<br>
+		- Added statistics page for Booster Layer<br>
 	<h3>v1.0</h3><br>
 		- Achievements!<br>
 		- Fixed galaxy layer.<br>

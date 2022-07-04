@@ -390,16 +390,19 @@ addLayer('bd', {
         },
 
         gain: {
-            unlocked() {
-                return !hasChallenge('infinity', 41);
-            },
             display() { 
                 if(hasChallenge('infinity', 41)) {
                     return `You are getting ${__(tmp.bd.points.gain, 2, 1)} points per second.`
                 }
-                return `Reset for ${__(tmp.bd.points.gain,2,0)} BP.<br>(${tmp.bd.points.perSecond.toFixed(2)} BP/sec)` },
+                let bps = __(tmp.bd.points.perSecond, 2, 0);
+                if(bps === 'NaN') return `Reset for ${__(tmp.bd.points.gain,2,0)} BP.<br>(You gain BP too fast to be calculated.)`;
+                return `Reset for ${__(tmp.bd.points.gain,2,0)} BP.<br>(${bps} BP/sec)` },
             canClick() { return !hasChallenge('infinity', 41) && tmp.bd.points.gain.gte(1); },
             onClick() {
+                if(hasChallenge('infinity', 41)) {
+                    return;
+                }
+                
                 if(hasChallenge('infinity', 21)) {
                     player.ad.shifts = 0 + hasUpgrade('bd', 'keep-1') + hasUpgrade('bd', 'keep-2') + hasUpgrade('bd', 'keep-3') + hasUpgrade('bd', 'keep-4');
                     player.bd.points = player.bd.points.plus(tmp.bd.points.gain);
@@ -666,7 +669,17 @@ addLayer('bd', {
                 return { height: '100px' }
             }
         }
-    }
+    },
+
+    hotkeys: [
+        {
+            key: 'b',
+            description: 'b: Gain BP',
+            onPress() {
+                clickClickable(this.layer, 'gain');
+            }
+        }
+    ]
 });
 
 function saveBPStatistics() {

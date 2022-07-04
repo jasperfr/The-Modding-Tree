@@ -3,7 +3,21 @@ const __in = {
         ['display-text', function() { return `You have <span style="color:orange;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.infinity.points)}</span> IP.`; }, { 'color': 'silver' }],
         ['display-text', function() { return `You have infinitied <span style="color:orange;font-size:20px;font-weight:bold;">${formatWhole(player.infinity.infinities)}</span> times.`; }, { 'color': 'silver', 'font-size': '12px' }],
         'blank'
-    ]]
+    ]],
+
+    enterChallenge() {
+        resetAD();
+        resetBD();
+        resetG();
+        resetPoints();
+    },
+
+    exitChallenge() {
+        resetAD();
+        resetBD();
+        resetG();
+        resetPoints();
+    }
 }
 
 addLayer('infinity', {
@@ -110,8 +124,12 @@ addLayer('infinity', {
             rewardDescription: 'Unlock autobuyers for Booster Power Upgrades.',
             canComplete: function() { return player.points.gte('1.79e308') },
             onEnter() {
+                __in.enterChallenge();
                 layerDataReset('ta');
                 player.points = new Decimal(10);
+            },
+            onExit() {
+                __in.exitChallenge();
             }
         },
         12: {
@@ -119,11 +137,17 @@ addLayer('infinity', {
             challengeDescription: 'You can only merge using the arrow keys.<br>The grid is 5x5.<br>',
             goalDescription: '1 Iron atom<br>',
             rewardDescription: 'Unlock autobuyers for Galaxy Upgrades.',
-            canComplete: function() { 
+            onEnter() {
+                layerDataReset('c_2048');
+            },
+            canComplete: function() {
                 for(let item of GRIDLIST) {
                     if(player.c_2048.grid[item] === IRON) return true;
                 }
                 return false;
+            },
+            onExit() {
+                __in.exitChallenge();
             }
         },
         21: {
@@ -133,10 +157,10 @@ addLayer('infinity', {
             rewardDescription: 'Dimensional Shifts and boosts reset nothing (except boosts to shifts).',
             canComplete: function() { return player.points.gte('1e512') },
             onEnter() {
-                resetAD();
-                resetBD();
-                resetG();
-                resetPoints();
+                __in.enterChallenge();
+            },
+            onExit() {
+                __in.exitChallenge();
             }
         },
         22: {
@@ -146,12 +170,11 @@ addLayer('infinity', {
             rewardDescription: 'Galaxial shifts reset nothing and unlock 2 more Galaxy Upgrades.',
             canComplete: function() { return player.points.gte('1e700') },
             onEnter() {
-                resetAD();
-                resetBD();
-                resetG();
-                resetPoints();
-
+                __in.enterChallenge();
                 player.g.unlocked = false;
+            },
+            onExit() {
+                __in.exitChallenge();
             }
         },
         31: {
@@ -161,13 +184,12 @@ addLayer('infinity', {
             rewardDescription: 'Unlock autobuyers for Booster Upgrades.',
             canComplete: function() { return player.points.gte('1e100') },
             onEnter() {
-                resetAD();
-                resetBD();
-                resetG();
-                resetPoints();
-
+                __in.enterChallenge();
                 player.bd.unlocked = false;
                 player.g.unlocked = false;
+            },
+            onExit() {
+                __in.exitChallenge();
             }
         },
         32: {
@@ -177,10 +199,10 @@ addLayer('infinity', {
             rewardDescription: 'Unlock autobuyers for Supernovas and Supernovas do not reset your atomic grid.',
             canComplete: function() { return player.points.gte('1e750') },
             onEnter() {
-                resetAD();
-                resetBD();
-                resetG();
-                resetPoints();
+                __in.enterChallenge();
+            },
+            onExit() {
+                __in.exitChallenge();
             }
         },
         41: {
@@ -190,11 +212,11 @@ addLayer('infinity', {
             rewardDescription: 'Gain 100% BP per second and keep your Booster Milestones.',
             canComplete: function() { return player.points.gte('1e512') },
             onEnter() {
-                resetAD();
-                resetBD();
-                resetG();
-                resetPoints();
+                __in.enterChallenge();
                 player.bd.c_41_boughtUpgrades = [];
+            },
+            onExit() {
+                __in.exitChallenge();
             }
         },
         42: {
@@ -204,15 +226,12 @@ addLayer('infinity', {
             rewardDescription: 'Gain 100% of GP gain per second.',
             canComplete: function() { return player.points.gte('7e777') },
             onEnter() {
-                resetAD();
-                resetBD();
-                resetG();
-                resetPoints();
-
+                __in.enterChallenge();
                 tmp.g.grid.rows = 2;
                 tmp.g.grid.cols = 2;
             },
             onExit() {
+                __in.exitChallenge();
                 tmp.g.grid.rows = 4;
                 tmp.g.grid.cols = 4;
             }
@@ -225,11 +244,11 @@ addLayer('infinity', {
             canComplete: function() { return player.points.gte('1e450') },
             style: function() { return { 'width': '680px' } },
             onEnter() {
-                resetAD();
-                resetBD();
-                resetG();
-                resetPoints();
+                __in.enterChallenge();
             },
+            onExit() {
+                __in.exitChallenge();
+            }
         },
     },
 

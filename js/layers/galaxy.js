@@ -19,17 +19,19 @@ addLayer('g', {
 
     /* === Base information === */
     name: 'Galaxies',
-    symbol: '',
+    symbol() { return options.toggleButtonAnimations ? '' : 'G' },
     color: '#dd3ffc',
     tooltip: 'Galaxies',
     resource: 'GP',
 
-    nodeStyle: {
-        'color': 'white',
-        'background-image': 'url("resources/galaxy.gif")',
-        'background-position': 'center center',
-        'background-size': '100%',
-        'border': '1px solid white'
+    nodeStyle() {
+        return options.toggleButtonAnimations ? {
+            'color': 'white',
+            'background-image': 'url("resources/galaxy.gif")',
+            'background-position': 'center center',
+            'background-size': '100%',
+            'border': '1px solid white'
+        } : {}
     },
 
     layerShown() {

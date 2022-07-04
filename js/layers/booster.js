@@ -34,17 +34,19 @@ function resetBD() {
 
 addLayer('bd', {
     name: 'Booster Dimensions',
-    symbol: '',
+    symbol() { return options.toggleButtonAnimations ? '' : 'B' },
     color: '#63b8ff',
     tooltip: 'Boosters',
     resource: 'BP',
 
-    nodeStyle: {
-        'color': 'white',
-        'background-image': 'url("resources/booster.gif")',
-        'background-position': 'center center',
-        'background-size': '200%',
-        'border': '1px solid white'
+    nodeStyle() {
+        return options.toggleButtonAnimations ? {
+            'color': 'white',
+            'background-image': 'url("resources/booster.gif")',
+            'background-position': 'center center',
+            'background-size': '200%',
+            'border': '1px solid white'
+        } : {}
     },
 
     layerShown() {
@@ -71,10 +73,18 @@ addLayer('bd', {
 
     points: {
         gain() {
+            if(inChallenge('infinity', 22)) {
+                return Decimal.max(0, Decimal.ssqrt(player.ad.dimensions[0]))
+                    .floor()
+                    .times(tmp.bd.buyables[3].effect)
+                    .times(hasUpgrade('bd', 'gain10times') ? 10 : 1)
+                .times(hasMilestone('bd', 4) ? 10 : 1)
+            }
             return Decimal.divide(player.ad.dimensions[7], 10)
                 .floor()
                 .times(tmp.bd.buyables[3].effect)
                 .times(hasUpgrade('bd', 'gain10times') ? 10 : 1)
+                .times(inChallenge('infinity', 41) ? 10 : 1)
             .times(hasMilestone('bd', 4) ? 10 : 1)
         },
         perSecond() {
@@ -474,8 +484,8 @@ addLayer('bd', {
         },
         3: {
             display() { 
-                return `Double the booster point gain per 8th dimensions.
-                Currently ${__(this.effect(),2,1)} per 10 8th.
+                return `Double the booster point gain per ${inChallenge('infinity', 22) ? '1st' : '8th'} dimensions.
+                Currently ${__(this.effect(),2,1)} per 10 ${inChallenge('infinity', 22) ? '1st' : '8th'}.
                 
                 Cost: ${__(this.cost(),2,0)} BP`
             },
@@ -599,7 +609,7 @@ addLayer('bd', {
             style() { return { height: '100px' } }
         },
         gain10times: {
-            description: 'Gain 10x as much BP per 8th dimensions.',
+            description() { return `Gain 10x as much BP per ${inChallenge('infinity', 22) ? '1st' : '8th'} dimensions.` },
             cost: new Decimal(3500),
             style() { return { height: '100px' } }
         },

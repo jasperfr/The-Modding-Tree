@@ -39,7 +39,7 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.2.0",
+	num: "1.2.0_03 beta",
 	name: "The Challenging Update",
 }
 
@@ -117,7 +117,8 @@ function getPointGen() {
 		.times(tmp.ta.tickspeed.multiplier)
 		.times(tmp.ta.buyables['dimension-1'].multiplier)
 		.times(2 ** shiftCount)
-		.times(1.05 ** player.ach.achievements.length);
+		.times(1.05 ** player.ach.achievements.length)
+		.times(10);
 		return gain;
 	}
 

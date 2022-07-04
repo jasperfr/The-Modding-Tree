@@ -49,6 +49,7 @@ addLayer('ta', {
                     .times(tmp.ta.tickspeed.multiplier)
                     .times(i === 7 ? tmp.ta.sacrifice.multiplier : 1)
                     .times(1.05 ** player.ach.achievements.length)
+                    .times(10)
                     .times(delta)
             );
         }
@@ -214,17 +215,17 @@ addLayer('ta', {
     },
     
     clickables: {
-        'ab-1': autoBuyable(0, 1e10),
-        'ab-2': autoBuyable(1, 1e20),
-        'ab-3': autoBuyable(2, 1e30),
-        'ab-4': autoBuyable(3, 1e40),
-        'ab-5': autoBuyable(4, 1e50),
-        'ab-6': autoBuyable(5, 1e60),
-        'ab-7': autoBuyable(6, 1e70),
-        'ab-8': autoBuyable(7, 1e80),
-        'ab-t': autoBuyable(8, 1e90),
-        'ab-s': autoBuyable(9, 1e100),
-        'ab-g': autoBuyable(10, 1e110),
+        'ab-1': trueAutoBuyable(0, 1e10),
+        'ab-2': trueAutoBuyable(1, 1e20),
+        'ab-3': trueAutoBuyable(2, 1e30),
+        'ab-4': trueAutoBuyable(3, 1e40),
+        'ab-5': trueAutoBuyable(4, 1e50),
+        'ab-6': trueAutoBuyable(5, 1e60),
+        'ab-7': trueAutoBuyable(6, 1e70),
+        'ab-8': trueAutoBuyable(7, 1e80),
+        'ab-t': trueAutoBuyable(8, 1e90),
+        'ab-s': trueAutoBuyable(9, 1e100),
+        'ab-g': trueAutoBuyable(10, 1e110),
 
         'sacrifice': {
             display() {
@@ -290,6 +291,83 @@ function trueDimBuyable(dimension, cost, multiplier) {
             return {
                 'width': '150px',
                 'background-image': `linear-gradient(to right, #4ABB5F ${s}%, #357541 ${s}%, #357541 ${u.plus(s)}%, transparent ${u.plus(s)}%)`
+            }
+        }
+    }
+}
+
+function trueAutoBuyable(dimension, cost) {
+    return {
+        price: new Decimal(cost),
+        display() {
+            let label = '';
+            switch(dimension) {
+                case 11: label = 'Crunch'; break;
+                case 10: label = 'Galaxy'; break;
+                case 9: label = 'Dimensional Shift'; break;
+                case 8: label = 'Tickspeed'; break;
+                default: label = ORDINAL[dimension + 1] + ' Dimension'; break;
+            }
+
+            if(!getClickableState(this.layer, this.id)) setClickableState(this.layer, this.id, 'Locked');
+            const state = getClickableState(this.layer, this.id);
+
+            switch(state) {
+                case 'Locked': return `<h3>${label} Autobuyer</h3><br><br><h3>Cost: ${mixedStandardFormat(this.price)}</h3>`;
+                case 'Enabled': return `<h3>${label} Autobuyer</h3><br><br><h3>Enabled</h3><h6>Click to disable.</h6>`;
+                case 'Disabled': return `<h3>${label} Autobuyer</h3><br><br><h3>Disabled</h3><h6>Click to enable.</h6>`;
+            }
+        },
+
+        canClick() {
+            const state = getClickableState(this.layer, this.id);
+            switch(state) {
+                case 'Locked': return player.points.gte(this.price);
+                default: return true;
+            }
+        },
+
+        onClick() {
+            const state = getClickableState(this.layer, this.id);
+            switch(state) {
+                case 'Locked':
+                    player.points = player.points.sub(this.price);
+                    setClickableState(this.layer, this.id, 'Enabled');
+                    break;
+                case 'Enabled': setClickableState(this.layer, this.id, 'Disabled'); break;
+                case 'Disabled': setClickableState(this.layer, this.id, 'Enabled'); break;
+            }
+        },
+
+        style() {
+            let borderColor = '';
+            let backgroundImage = '';
+            let animation = '';
+            const state = getClickableState(this.layer, this.id);
+
+            switch(state) {
+                case 'Locked':
+                    borderColor = '';
+                    backgroundImage = this.canClick() ? 'linear-gradient(#30472e, #30472e)' : 'linear-gradient(#381f1f, #381f1f)';
+                    break;
+                case 'Enabled':
+                    borderColor = '#c733cc !important';
+                    backgroundImage = 'repeating-linear-gradient(-45deg, #332833, 10%, #222 10%, #222 20%)';
+                    animation = 'ani-autobuyer-enabled 2000ms linear infinite';
+                    break;
+                case 'Disabled':
+                    borderColor = 'orange !important';
+                    backgroundImage = 'repeating-linear-gradient(-45deg, #423726, 10%, #222 10%, #222 20%)';
+                    break;
+            }
+            
+            return {
+                'background-size': '200% 200%',
+                'background-image': backgroundImage,
+                'border-color': borderColor,
+                'animation': animation,
+                'height': '100px',
+                'margin': '2px',
             }
         }
     }

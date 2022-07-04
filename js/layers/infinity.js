@@ -227,7 +227,7 @@ addLayer('infinity', {
 
     upgrades: {
         keepBuyMax: {
-            description() { return `Keep your autobuyers and "Autobuyers Buy Max" upgrade.` },
+            description() { return `Keep your "Autobuyers Buy Max" upgrade.` },
             cost: 0,
             style: { height: '100px', border: '2px solid orange !important' },
             branches: ['boostTimePlayed']

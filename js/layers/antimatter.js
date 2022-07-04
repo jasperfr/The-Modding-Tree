@@ -3,9 +3,7 @@ const AUTOBUYERS = ['ab-1', 'ab-2', 'ab-3', 'ab-4', 'ab-5', 'ab-6', 'ab-7', 'ab-
 
 function resetAD() {
     let autobuyerStates = {};
-    if(hasUpgrade('infinity', 'keepBuyMax')) {
-        autobuyerStates = AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState('ad', val)}), {})
-    }
+    autobuyerStates = AUTOBUYERS.reduce((acc, val) => ({...acc, [val]: getClickableState('ad', val)}), {});
 
     layerDataReset('ad');
 

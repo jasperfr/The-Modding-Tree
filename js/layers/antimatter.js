@@ -67,6 +67,8 @@ addLayer('ad', {
 
     /* === Update information === */
     update(delta) {
+        if(inChallenge('infinity', 11) || inChallenge('infinity', 12)) return;
+        
         if(inChallenge('infinity', 32)) {
             player.ad.matter = Decimal.plus(player.ad.matter, 1).times(1.5);
         }

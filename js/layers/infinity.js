@@ -139,6 +139,9 @@ addLayer('infinity', {
             rewardDescription: 'Unlock autobuyers for Galaxy Upgrades.',
             onEnter() {
                 layerDataReset('c_2048');
+                __in.enterChallenge();
+                player.g.unlocked = false;
+                player.b.unlocked = false;
             },
             canComplete: function() {
                 for(let item of GRIDLIST) {

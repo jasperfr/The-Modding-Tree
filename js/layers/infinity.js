@@ -134,14 +134,14 @@ addLayer('infinity', {
         },
         12: {
             name: '2048',
-            challengeDescription: 'You can only merge using the arrow keys.<br>The grid is 5x5.<br>',
+            challengeDescription() { return `You can only merge using the arrow keys. The grid is 5x5.<br>Challenge completions raise the base atom by <b>1</b> per completion.<br>(Currently: ${tmp.c_2048.nerf.effect})` },
             goalDescription: '1 Iron atom<br>',
             rewardDescription: 'Unlock autobuyers for Galaxy Upgrades.',
             onEnter() {
                 layerDataReset('c_2048');
                 __in.enterChallenge();
                 player.g.unlocked = false;
-                player.b.unlocked = false;
+                player.bd.unlocked = false;
             },
             canComplete: function() {
                 for(let item of GRIDLIST) {

@@ -17,7 +17,7 @@ function _c_2048_createNew() {
     let set = false;
     for(let i = 0; i < data.length; i++) {
         if(!set && player.c_2048.grid[data[i]] === 0) {
-            player.c_2048.grid[data[i]] = Math.floor(1 + Math.random() * 2);
+            player.c_2048.grid[data[i]] = sumValues(player.infinity.challenges).toNumber() + Math.floor(1 + Math.random() * 2);
             set = true;
         }
     }
@@ -100,6 +100,12 @@ addLayer('c_2048', {
     startData() {
         return {
             selectedObjectId: 0,
+        }
+    },
+
+    nerf: {
+        effect() {
+            return ELEMENTS[sumValues(player.infinity.challenges).toNumber() + 1];
         }
     },
 

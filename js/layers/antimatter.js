@@ -50,6 +50,7 @@ addLayer('ad', {
     /* === Data information === */
     startData() {
         return {
+            unlocked: true,
             dimensions: Array(8).fill(0).map(() => new Decimal(0)),
             tickspeed: new Decimal(0),
             shifts: 0, // 0 - 4 shifts, afterwards gain Booster Points

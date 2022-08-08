@@ -333,6 +333,20 @@ addLayer('ach', {
             tooltip: '<h4>AAAAHHHH</h4><br><h5>Fix infinity after nerfing the cost scaling to 1.0x. [UNIMPLEMENTED]</h5>',
             done() { return false; },
             style: { 'background-position' : '-704px -256px' }
+        },
+        57: {
+            name: 'I still hate this mechanic',
+            tooltip: '<h4>I still hate this mechanic</h4><br><h5>Enter Challenge 2 after completing all other challenges (except the ultimate challenge).</h5>',
+            done() { return hasChallenge('infinity', 11)
+                        && hasChallenge('infinity', 51)
+                        && hasChallenge('infinity', 21)
+                        && hasChallenge('infinity', 22)
+                        && hasChallenge('infinity', 31)
+                        && hasChallenge('infinity', 32)
+                        && hasChallenge('infinity', 41)
+                        && hasChallenge('infinity', 42)
+                        && inChallenge('infinity', 12); },
+            style: { 'background-position' : '-768px 0px' }
         }
     }
 

@@ -1,6 +1,7 @@
 const __in = {
     header: ['column', [
-        ['display-text', function() { return `You have <span style="color:orange;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.infinity.points)}</span> IP.`; }, { 'color': 'silver' }],
+        function() { if(player.infinity.broken) return ['column', ['prestige-button', 'blank']] },
+        ['display-text', function() { return `You have <span style="color:orange;font-size:20px;font-weight:bold;">${__(player.infinity.points, 3, 1)}</span> IP.`; }, { 'color': 'silver' }],
         ['display-text', function() { return `You have infinitied <span style="color:orange;font-size:20px;font-weight:bold;">${formatWhole(player.infinity.infinities)}</span> times.`; }, { 'color': 'silver', 'font-size': '12px' }],
         'blank'
     ]],
@@ -31,6 +32,30 @@ addLayer('infinity', {
     resource: 'IP',
     tooltip: 'Infinity',
 
+    baseResource: 'antimatter',
+    exponent: 0.001,
+    type: 'normal',
+
+    requires: new Decimal('2e1024'),
+    baseAmount() { return player.points; },
+    gainMult() {
+        return new Decimal(1)
+        .times(tmp.infinity.buyables[1].effect);
+    },
+    gainExp() { return new Decimal(1); },
+
+    componentStyles: {
+        'prestige-button'() { return {
+            'border-radius': '2px',
+            'border': '2px solid #992c2c',
+            'background': '#222 !important',
+            'background-color': '#222 !important',
+            'color': '#fff',
+            'width': '400px',
+            'height': '100px'
+        }}
+    },
+
     nodeStyle() {
         return options.toggleButtonAnimations ? {
             'color': 'white',
@@ -38,7 +63,18 @@ addLayer('infinity', {
             'background-position': 'center center',
             'background-size': '250%',
             'border': '1px solid white'
-        } : {}
+        } : {
+            'background-image': 'radial-gradient(circle at center, #e3bb29, orange)'
+        }
+    },
+
+    doReset(layer) {
+        if(layer !== 'infinity') return;
+        player[this.layer].infinities = player[this.layer].infinities.plus(1);
+        resetAD();
+        resetBD();
+        resetG();
+        resetPoints();
     },
 
     /* === Data information === */
@@ -515,10 +551,10 @@ addLayer('infinity', {
     buyables: {
         1: {
             unlocked() { return player.infinity.broken; },
-            cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
+            cost() { return Decimal.pow(4, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
-            effect() { return Decimal.pow(getBuyableAmount(this.layer, this.id).plus(1), 2)},
-            display() { return `Gain x2 more IP.<br>Currently x${this.effect()}.<br><br>Cost: ${this.cost()} IP` },
+            effect() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(1))},
+            display() { return `Gain x2 more IP.<br>Currently x${__(this.effect())}.<br><br>Cost: ${__(this.cost(), 3, 1)} IP` },
             buy() { player.infinity.points = player.infinity.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { height: '120px' } }
         },
@@ -526,8 +562,9 @@ addLayer('infinity', {
             unlocked() { return player.infinity.broken; },
             cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
-            effect() { return new Decimal(2).minus(getBuyableAmount(this.layer, this.id).times(0.1)) },
-            display() { return `Reduce the AD cost scaling.<br>Currently 2 -> ${this.effect()}.<br><br>Cost: ${this.cost()} IP` },
+            effect() { return new Decimal(2).minus(getBuyableAmount(this.layer, this.id).times(0.05)) },
+            effectNext() { return new Decimal(2).minus((getBuyableAmount(this.layer, this.id).plus(1)).times(0.05)) },
+            display() { return `Reduce the AD cost scaling.<br>Currently ${__(this.effect(), 2)}.<br>Next ${__(this.effect(), 2)} -> ${__(this.effectNext(), 2)}<br><br>Cost: ${__(this.cost(), 3, 1)} IP` },
             buy() { player.infinity.points = player.infinity.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { height: '120px' } }
         },
@@ -536,7 +573,7 @@ addLayer('infinity', {
             cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
             effect() { return Decimal.pow(0.1, getBuyableAmount(this.layer, this.id))},
-            display() { return `Reduce Booster Upgrade cost by *0.1.<br>Currently x${this.effect()}.<br><br>Cost: ${this.cost()} IP` },
+            display() { return `Reduce Booster Upgrade cost by *0.1.<br>Currently x / ${__(Decimal.div(1, this.effect()))}.<br><br>Cost: ${__(this.cost())} IP` },
             buy() { player.infinity.points = player.infinity.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { height: '120px' } }
         },
@@ -545,25 +582,25 @@ addLayer('infinity', {
             cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
             effect() { return Decimal.pow(0.1, getBuyableAmount(this.layer, this.id))},
-            display() { return `Reduce Galaxy Upgrade cost by *0.1.<br>Currently x${this.effect()}.<br><br>Cost: ${this.cost()} IP` },
+            display() { return `Reduce Galaxy Upgrade cost by *0.1.<br>Currently x / ${__(Decimal.div(1, this.effect()))}.<br><br>Cost: ${__(this.cost())} IP` },
             buy() { player.infinity.points = player.infinity.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { height: '120px' } }
         },
         5: {
             unlocked() { return player.infinity.broken; },
-            cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
+            cost() { return Decimal.times(10, Decimal.pow(10, getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
-            effect() { return getBuyableAmount(this.layer, this.id)},
-            display() { return `Increase Galaxy grid width by 1.<br>Currently +${this.effect()}/4.<br><br>Cost: ${this.cost()} IP` },
+            effect() { return getBuyableAmount(this.layer, this.id) },
+            display() { return `Galaxies can produce atoms beyond iron.<br>Currently ${this.effect()} new atoms.<br><br>Cost: ${__(this.cost())} IP` },
             buy() { player.infinity.points = player.infinity.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { height: '120px' } }
         },
         6: {
             unlocked() { return player.infinity.broken; },
-            cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
+            cost() { return Decimal.pow(100, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
-            effect() { return getBuyableAmount(this.layer, this.id)},
-            display() { return `Increase Galaxy grid height by 1.<br>Currently +${this.effect()}/4.<br><br>Cost: ${this.cost()} IP` },
+            effect() { return Decimal.pow('1e10', getBuyableAmount(this.layer, this.id)) },
+            display() { return `x1e10 to all Antimatter Dimensions.<br>Currently x${this.effect()}.<br><br>Cost: ${__(this.cost())} IP` },
             buy() { player.infinity.points = player.infinity.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { height: '120px' } }
         },

@@ -14,7 +14,8 @@ function getStartOptions() {
 		forceOneTab: false,
 		oldStyle: false,
 		tooltipForcing: true,
-		toggleButtonAnimations: true
+		toggleButtonAnimations: true,
+		toggleGalaxyGridElements: true
 	}
 }
 

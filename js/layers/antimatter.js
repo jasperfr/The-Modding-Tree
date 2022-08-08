@@ -29,7 +29,7 @@ addLayer('ad', {
     tooltip: 'Antimatter Dimensions',
     branches: ['bd', 'g'],
 
-    baseResource: 'antimatter',
+    resource: 'antimatter',
 
     nodeStyle() {
         return options.toggleButtonAnimations ? {
@@ -38,7 +38,9 @@ addLayer('ad', {
             'background-position': 'center center',
             'background-size': '200%',
             'border': '1px solid white'
-        } : {}
+        } : {
+            'background-image': 'radial-gradient(circle at center, #e8743f, #992c2c)'
+        }
     },
 
     layerShown() {
@@ -97,6 +99,7 @@ addLayer('ad', {
                 .times(1.05 ** player.ach.achievements.length)
                 .div(tmp.ad.matter.divider)
                 .times(tmp.d.decrementy.effectAD)
+                .times(tmp.infinity.buyables[6].effect)
                 .times(delta)
             );
         };
@@ -128,7 +131,7 @@ addLayer('ad', {
                 ['row', [['buyable', 'tickspeed'], ['buyable', 'tickspeed-max']]],
                 ['display-text', function() { return `Tickspeed: ${mixedStandardFormat(tmp.ad.tickspeed.multiplier, 3)} / sec` }, { 'font-size': '12px', 'color': 'silver' }],
                 'blank',
-                ['display-text', function() { return `Cost starts scaling at 1e308 antimatter.<br>(b⋅m<sup>a</sup> -> (b⋅m<sup>2a</sup>)/1e308)` }, { 'font-size': '12px', 'color': 'silver' }],
+                ['display-text', function() { return `Cost starts scaling at 1e308 antimatter.<br>(b⋅m<sup>a</sup> -> (b⋅m<sup>${ tmp.infinity.buyables[2].effect }a</sup>)/1e308)` }, { 'font-size': '12px', 'color': 'silver' }],
                 'blank',
                 // Dimensions
                 function() {
@@ -151,6 +154,7 @@ addLayer('ad', {
                             .times(inChallenge('infinity', 21) ? 1.0 : tmp.bd.power.multiplier)
                             .div(tmp.ad.matter.divider)
                             .times(tmp.d.decrementy.effectAD)
+                            .times(tmp.infinity.buyables[6].effect)
                             , 1);
                         let amount = mixedStandardFormat(player.ad.dimensions[i], 2, true);
                         html[1].push(['row', [
@@ -470,7 +474,8 @@ function dimBuyable(dimension, cost, multiplier) {
             if(Decimal.times(cost, Decimal.pow(multiplier, this.amount10())).lte('1e308')) {
                 return Decimal.times(cost, Decimal.pow(multiplier, this.amount10()))
             } else {
-                return Decimal.times(cost, Decimal.pow(multiplier, this.amount10().times(2))).div('1e308')
+                let costScaling = tmp.infinity.buyables[2].effect;
+                return Decimal.times(cost, Decimal.pow(multiplier, this.amount10().times(costScaling))).div('1e308')
             }
         },
         display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)}` },

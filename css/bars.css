@@ -47,6 +47,20 @@
 	font-size: 16px;
 }
 
+.upgTable ts {
+	font-size: 20px;
+	color: #63b8ff;
+	text-shadow: 0 0 8px white;
+	font-weight: bold;
+}
+
+.upgTable sc {
+	font-size: 20px;
+	color: #992c2c;
+	text-shadow: 0 0 8px white;
+	font-weight: bold;
+}
+
 .upgTable gp {
 	font-size: 20px;
 	color: #dd3ffc;

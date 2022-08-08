@@ -46,7 +46,9 @@ addLayer('bd', {
             'background-position': 'center center',
             'background-size': '200%',
             'border': '1px solid white'
-        } : {}
+        } : {
+            'background-image': 'radial-gradient(circle at center, #5ae887, #63b8ff)'
+        }
     },
 
     layerShown() {
@@ -437,7 +439,11 @@ addLayer('bd', {
                 
                 Cost: ${__(this.cost(),2,0)} BP`
             },
-            cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
+            cost() {
+                return Decimal.pow(2, getBuyableAmount(this.layer, this.id))
+                .times(tmp.bd.upgrades.cheaperBuyables.effect)
+                .times(tmp.infinity.buyables[3].effect)
+            },
             effect() { return new Decimal(0.001).times(Decimal.pow(1.5, getBuyableAmount(this.layer, this.id))); },
             canAfford() { 
                 if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {
@@ -460,7 +466,11 @@ addLayer('bd', {
                 
                 ${hasMilestone('bd', 5) ? 'Disabled<br>(best time < 0:01)' : `Cost: ${__(this.cost(),2,0)} BP`}`
             },
-            cost() { return Decimal.pow(3, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
+            cost() {
+                return Decimal.pow(3, getBuyableAmount(this.layer, this.id))
+                .times(tmp.bd.upgrades.cheaperBuyables.effect)
+                .times(tmp.infinity.buyables[3].effect)
+            },
             effect() {
                 return new Decimal(2.0)
                     .plus(
@@ -492,7 +502,11 @@ addLayer('bd', {
                 
                 Cost: ${__(this.cost(),2,0)} BP`
             },
-            cost() { return Decimal.pow(10, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
+            cost() {
+                return Decimal.pow(10, getBuyableAmount(this.layer, this.id))
+                .times(tmp.bd.upgrades.cheaperBuyables.effect)
+                .times(tmp.infinity.buyables[3].effect)
+            },
             effect() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id)); },
             canAfford() {
                 if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {
@@ -515,7 +529,11 @@ addLayer('bd', {
                 
                 Cost: ${__(this.cost(),2,0)} BP`
             },
-            cost() { return Decimal.pow(5, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
+            cost() {
+                return Decimal.pow(5, getBuyableAmount(this.layer, this.id))
+                .times(tmp.bd.upgrades.cheaperBuyables.effect)
+                .times(tmp.infinity.buyables[3].effect)
+            },
             effect() { return Decimal.pow(1.35, getBuyableAmount(this.layer, this.id)); },
             canAfford() {
                 if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {
@@ -539,7 +557,11 @@ addLayer('bd', {
                 
                 Cost: ${__(this.cost(),2,0)} BP`
             },
-            cost() { return Decimal.pow(25, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
+            cost() {
+                return Decimal.pow(25, getBuyableAmount(this.layer, this.id))
+                .times(tmp.bd.upgrades.cheaperBuyables.effect)
+                .times(tmp.infinity.buyables[3].effect)
+            },
             effect() { return new Decimal(0.05).times(getBuyableAmount(this.layer, this.id)).times(tmp.bd.points.gain) },
             canAfford() {
                 if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {
@@ -564,7 +586,11 @@ addLayer('bd', {
                 
                 Cost: ${__(this.cost(),2,0)} BP`
             },
-            cost() { return Decimal.pow(100, getBuyableAmount(this.layer, this.id)).times(tmp.bd.upgrades.cheaperBuyables.effect) },
+            cost() {
+                return Decimal.pow(100, getBuyableAmount(this.layer, this.id))
+                .times(tmp.bd.upgrades.cheaperBuyables.effect)
+                .times(tmp.infinity.buyables[3].effect)
+            },
             effect() { return Decimal.pow(10, getBuyableAmount(this.layer, this.id))},
             canAfford() {
                 if(inChallenge('infinity', 41) && (player.bd.c_41_boughtUpgrades.indexOf(this.id) === -1 && player.bd.c_41_boughtUpgrades.length >= 2)) {

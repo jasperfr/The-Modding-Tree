@@ -1,0 +1,59 @@
+@keyframes color {
+    0% {
+        color: #F00;
+    }
+
+    16.66% {
+        color: #FF0;
+    }
+
+    33.33% {
+        color: #0F0;
+    }
+
+    50% {
+        color: #0FF;
+    }
+
+    66.66% {
+        color: #00F;
+    }
+
+    83.33% {
+        color: #F0F;
+    }
+
+    100% {
+        color: #F00;
+    }
+}
+
+@keyframes colorbg {
+    0% {
+        background-color: #F00;
+    }
+
+    16.66% {
+        background-color: #FF0;
+    }
+
+    33.33% {
+        background-color: #0F0;
+    }
+
+    50% {
+        background-color: #0FF;
+    }
+
+    66.66% {
+        background-color: #00F;
+    }
+
+    83.33% {
+        background-color: #F0F;
+    }
+
+    100% {
+        background-color: #F00;
+    }
+}

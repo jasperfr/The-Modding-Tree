@@ -1,0 +1,32 @@
+h {
+    font-size: 16pt;
+}
+
+ch {
+    font-size: 18pt;
+    animation: color 20s linear infinite;
+}
+
+red {
+    color: #f00
+}
+
+green {
+    color: #0f0
+}
+
+blue {
+    color: #00f
+}
+
+.reset.locked {
+    background: #222
+}
+
+.reset.can, .upg.can {
+	border-color: #4ABB5F !important;
+}
+
+dp {
+    color: #52db37;
+}

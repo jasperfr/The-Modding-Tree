@@ -20,6 +20,8 @@ let modInfo = {
 		'layers/booster.js',
 		'layers/galaxy.js',
 		'layers/infinity.js',
+		'layers/chroma.js',
+		'layers/duplicanti.js',
 
 		'layers/challenges/true-antimatter.js',
 		'layers/challenges/2048.js',
@@ -28,6 +30,7 @@ let modInfo = {
 		'layers/misc/crunch.js',
 
 		'layers/side/achievements.js',
+		'layers/side/saves.js',
 		'layers/side/debugger.js'
 		
 	],
@@ -39,11 +42,17 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.3.0",
-	name: "The Bugfix Update",
+	num: "1.4.0",
+	name: "The Broken Update",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v1.4.0</h3><br>
+		- Added Break Infinity upgrades<br>
+		- Fixed most bugs<br>
+		- Added option to toggle elements or numbers on galaxy grid<br>
+		- Added layer saves subtab to quickly jump between layers (for debugging purposes)<br>
+		- Endgame is now 4096 IP<br>
 	<h3>v1.3.0</h3><br>
 		- Fixed challenges<br>
 		- Rebalanced challenges based on cost scaling<br>
@@ -100,7 +109,7 @@ let changelog = `<h1>Changelog:</h1><br>
 		- Added first 2 rows of achievements.<br>
 `
 
-let winText = `Congratulations! You have broken Infinity, and thus the end of the alpha version. More to come eventually.`
+let winText = `Congratulations! You have gained 4096 IP, and thus moved to the end of the alpha version. More to come eventually.`
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
@@ -142,6 +151,7 @@ function getPointGen() {
 		.div(tmp.ad.matter.divider)
 		.times(tmp.d.decrementy.effectAD)
 		.times(1.05 ** player.ach.achievements.length)
+		.times(tmp.infinity.buyables[6].effect)
 	
 	return gain
 }
@@ -158,7 +168,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.infinity.broken;
+	return player.infinity.points.gte(4096);
 }
 
 

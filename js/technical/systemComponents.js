@@ -172,7 +172,7 @@ var systemComponents = {
 				<td><button class="opt" onclick="toggleOpt('forceTooltips'); needsCanvasUpdate = true">Shift-Click to Toggle Tooltips: {{ options.forceTooltips?"ON":"OFF" }}</button></td>
 			</tr>
 			<tr>
-			<td></td>
+			<td><button class="opt" onclick="toggleOpt('toggleGalaxyGridElements')">Galaxy grid: {{ options.toggleGalaxyGridElements?"Elements":"Numbers"}}</button></td>
 			<td><button class="opt" onclick="toggleOpt('toggleButtonAnimations')">Animated buttons: {{ options.toggleButtonAnimations?"ON":"OFF"}}</button></td>
 			<td></td>
 			</tr>

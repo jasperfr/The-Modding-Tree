@@ -6,11 +6,10 @@ var layoutInfo = {
     treeLayout: [
         ['ta', 'c_2048', 'd'],
         ['ad'],
-        ['bd', 'blank', 'g'],
+        ['bd', 'g'],
         ['infinity']
     ]
 }
-
 
 // A "ghost" layer which offsets other layers in the tree
 addNode("blank", {

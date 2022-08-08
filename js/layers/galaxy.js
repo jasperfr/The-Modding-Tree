@@ -1,6 +1,8 @@
-const ELEMENTS = ['', 'H', 'He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ar', 'Fe'];
+const ELEMENTS = ['', 'H', 'He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ar', 'Fe', 'Co', 'Zn', 'Rb', 'Cu', 'Ag', 'Au', 'U', 'Ub'];
 const IRON = 11;
-const ELCOLORS = ['#222222', '#eeeeee', '#98b9ed', '#88878a', '#eb9234', '#6acca8', '#a5e1ee', '#82ed8d', '#e06153', '#e6c019', '#e65529', '#999999'];
+const ELCOLORS = ['#222222', '#eeeeee', '#98b9ed', '#88878a', '#eb9234', '#6acca8', '#a5e1ee', '#82ed8d', '#e06153', '#e6c019', '#e65529', '#999999',
+'#00CCFF', '#888888', '#cc3322', '#ccaa22', '#8888aa', '#88aa88', '#22ff22', '#cc22bb'];
+const BINFTEXT = ['Iron (Fe)', 'Cobalt (Co)', 'Zinc (Zn)', 'Rubidium (Rb)', 'Copper (Cu)', 'Silver (Ag)', 'Gold (Au)', 'Uranium (U)', 'Unobtainium (Ub)']
 
 function resetG() {
     let autoGalaxyUpgrades = 'Locked';
@@ -31,7 +33,9 @@ addLayer('g', {
             'background-position': 'center center',
             'background-size': '100%',
             'border': '1px solid white'
-        } : {}
+        } : {
+            'background-image': 'radial-gradient(circle at center, #e85a74, #dd3ffc)'
+        }
     },
 
     layerShown() {
@@ -118,7 +122,7 @@ addLayer('g', {
             for(let x = 1; x <= tmp.g.grid.rows; x++) {
                 let id = 100 * y + x;
                 let data = getGridData('g', id);
-                if(data != 0 && data != IRON) {
+                if(data != 0 && data != IRON + getBuyableAmount('infinity', 5).toNumber()) {
                     if(output[data] == undefined) {
                         output[data] = [];
                     }
@@ -136,7 +140,7 @@ addLayer('g', {
             return `
                 <tt>You have <gp>${__(self.points,2,1)}</gp> Galaxy Points (GP).</tt> <br>
                 Your current star's power is <gp>${__(tmp.g.starPower,2,0)}</gp>x. <br>
-                Your current star boosts ADs by <gp>${__(tmp.g.multiplier, tmp.g.starPower)}</gp>x!<br>
+                Your current star boosts ADs by <gp>${__(Decimal.pow(tmp.g.multiplier, tmp.g.starPower), 3, 1)}</gp>x!<br>
                 ([total fusion power]<sup>[star power]</sup>)
             `
         }, { 'color': 'silver', 'font-size': '12px' }],
@@ -148,7 +152,7 @@ addLayer('g', {
         ['display-text', function() { return `Merge rate: <b>${__(1 / tmp.g.mergeRate, 2)}</b>/sec ${tmp.g.mergeRate === (1 / 60) ? '(MAX)' : ''}`; }, { 'color': 'silver', 'font-size': '12px' }],
         'blank',
         "grid",
-        ['display-text', function() { return `Use the arrow keys or the mouse to move / merge the atoms around.<br>The multiplier increases with each higher atom,<br>but will <u tooltip="Stars can't fuse iron!">stop</u> at Iron (Fe).`; }, { 'color': 'silver', 'font-size': '12px' }],
+        ['display-text', function() { return `Use the arrow keys or the mouse to move / merge the atoms around.<br>The multiplier increases with each higher atom,<br>but will <u tooltip="Stars can't fuse iron!">stop</u> at ${BINFTEXT[getBuyableAmount('infinity', 5).toNumber()]}.`; }, { 'color': 'silver', 'font-size': '12px' }],
         'blank',
         ['clickable', 'gain'],
         ['row', [
@@ -317,7 +321,7 @@ addLayer('g', {
                             let self = getGridData('g', (100 * y + x));
                             if(self == 0) continue;
                             let other = getGridData('g', (100 * (y - 1) + x));
-                            if(self == other && self != IRON) {
+                            if(self == other && self != IRON + getBuyableAmount('infinity', 5).toNumber()) {
                                 setGridData('g', (100 * (y - 1) + x), other + 1);
                                 setGridData('g', (100 * y + x), 0);
                                 anyMoved = true;
@@ -344,7 +348,7 @@ addLayer('g', {
                             let self = getGridData('g', (100 * y + x));
                             if(self == 0) continue;
                             let other = getGridData('g', (100 * (y + 1) + x));
-                            if(self == other && self != IRON) {
+                            if(self == other && self != IRON + getBuyableAmount('infinity', 5).toNumber()) {
                                 setGridData('g', (100 * (y + 1) + x), other + 1);
                                 setGridData('g', (100 * y + x), 0);
                                 anyMoved = true;
@@ -371,7 +375,7 @@ addLayer('g', {
                             let self = getGridData('g', (100 * y + x));
                             if(self == 0) continue;
                             let other = getGridData('g', (100 * y + (x - 1)));
-                            if(self == other && self != IRON) {
+                            if(self == other && self != IRON + getBuyableAmount('infinity', 5).toNumber()) {
                                 setGridData('g', (100 * y + (x - 1)), other + 1);
                                 setGridData('g', (100 * y + x), 0);
                                 anyMoved = true;
@@ -398,7 +402,7 @@ addLayer('g', {
                             let self = getGridData('g', (100 * y + x));
                             if(self == 0) continue;
                             let other = getGridData('g', (100 * y + (x + 1)));
-                            if(self == other && self != IRON) {
+                            if(self == other && self != IRON + getBuyableAmount('infinity', 5).toNumber()) {
                                 setGridData('g', (100 * y + (x + 1)), other + 1);
                                 setGridData('g', (100 * y + x), 0);
                                 anyMoved = true;
@@ -425,16 +429,16 @@ addLayer('g', {
             return true
         },
         getCanClick(data, id) {
-            return data > 0 && data != IRON
+            return data > 0 && data != IRON + getBuyableAmount('infinity', 5).toNumber()
         },
         onClick(data, id) {
-            if(data == IRON) return;
+            if(data == IRON + getBuyableAmount('infinity', 5).toNumber()) return;
             if(player.g.selectedObjectId == 0) {
                 player.g.selectedObjectId = id;
             } else if(player.g.selectedObjectId == id) {
                 player.g.selectedObjectId = 0;
             } else {
-                if(getGridData('g', player.g.selectedObjectId) == data && data != IRON) {
+                if(getGridData('g', player.g.selectedObjectId) == data && data != IRON + getBuyableAmount('infinity', 5).toNumber()) {
                     setGridData('g', player.g.selectedObjectId, 0);
                     setGridData('g', id, data + 1);
                 }
@@ -443,7 +447,7 @@ addLayer('g', {
         },
         getDisplay(data, id) {
             let multiplier = Decimal.pow(player.g.elementMultiplier, data - 1).divide(5);
-            return `<h2>${ELEMENTS[data]}</h2><p>+${multiplier.toFixed(2)}</p>`;
+            return `<h2>${options.toggleGalaxyGridElements ? ELEMENTS[data] : 2 ** data}</h2><p>+${multiplier.toFixed(2)}</p>`;
         },
         getStyle(data, id) {
             const jss = {
@@ -619,9 +623,10 @@ addLayer('g', {
         11: {
             cost(x) {
                 return new Decimal(3).mul(x).plus(1)
+                    .times(tmp.infinity.buyables[4].effect)
             },
             display() {
-                return `Boost generation by 35%.<br><br>${tmp.g.spawnRate === (1 / 60) ? 'Maxed Out' : `Cost: ${__(this.cost())} GP`}`
+                return `Boost generation by 35%.<br><br>${tmp.g.spawnRate === (1 / 60) ? 'Maxed Out' : `Cost: ${__(this.cost(), 2)} GP`}`
             },
             canAfford() {
                 return tmp.g.spawnRate !== (1 / 60) && player.g.points.gte(this.cost())
@@ -638,9 +643,10 @@ addLayer('g', {
         12: {
             cost(x) {
                 return new Decimal(2).mul(x).plus(1)
+                .times(tmp.infinity.buyables[4].effect)
             },
             display() {
-                return `Boost merge rate by 35%.<br><br>${tmp.g.mergeRate === (1 / 60) ? 'Maxed Out' : `Cost: ${__(this.cost())} GP`}`
+                return `Boost merge rate by 35%.<br><br>${tmp.g.mergeRate === (1 / 60) ? 'Maxed Out' : `Cost: ${__(this.cost(), 2)} GP`}`
             },
             canAfford() {
                 return tmp.g.mergeRate !== (1 / 60) && player.g.points.gte(this.cost())
@@ -656,13 +662,14 @@ addLayer('g', {
         },
         21: {
             cost(x) {
-                return Decimal.pow(10, x.plus(1));
+                return Decimal.pow(10, x.plus(1))
+                .times(tmp.infinity.buyables[4].effect)
             },
             effect() {
                 return ELEMENTS[getBuyableAmount('g', 21).plus(1).toNumber()];
             },
             display() {
-                return `Atoms start 1 tier later.<br>Currently ${this.effect()}.<br>Cost: ${__(this.cost())} GP`
+                return `Atoms start 1 tier later.<br>Currently ${this.effect()}.<br>Cost: ${__(this.cost(), 2)} GP`
             },
             unlocked() {
                 return hasChallenge('infinity', 22);
@@ -681,13 +688,14 @@ addLayer('g', {
         },
         22: {
             cost(x) {
-                return Decimal.pow(10, x);
+                return Decimal.pow(10, x)
+                .times(tmp.infinity.buyables[4].effect)
             },
             effect() {
                 return Decimal.times(getBuyableAmount('g', 22), 10);
             },
             display() {
-                return `+10% chance to spawn another atom.<br>Currently +${this.effect()}%.<br>Cost: ${__(this.cost())} GP`
+                return `+10% chance to spawn another atom.<br>Currently +${this.effect()}%.<br>Cost: ${__(this.cost(), 2)} GP`
             },
             unlocked() {
                 return hasChallenge('infinity', 22);
@@ -709,14 +717,14 @@ addLayer('g', {
                 return new Decimal(1).plus(x);
             },
             display() {
-                return `Explode your current star, giving a +0.45 boost on Star Power. ${hasChallenge('infinity', 32) ? '' : 'You will lose your current star.'}<br><br>Cost: ${__(this.cost())} Fe`
+                return `Explode your current star, giving a +0.45 boost on Star Power. ${hasChallenge('infinity', 32) ? '' : 'You will lose your current star.'}<br><br>Cost: ${__(this.cost())} ${ELEMENTS[IRON + getBuyableAmount('infinity', 5).toNumber()]}`
             },
             canAfford() {
                 let sumOfFe = new Decimal(0);
                 for(let y = 1; y <= tmp.g.grid.cols; y++) {
                     for(let x = 1; x <= tmp.g.grid.rows; x++) {
                         let id = 100 * y + x;
-                        if(getGridData('g', id) == IRON) {
+                        if(getGridData('g', id) == IRON + getBuyableAmount('infinity', 5).toNumber()) {
                             sumOfFe = sumOfFe.plus(1);
                         }
                     }

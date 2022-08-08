@@ -188,7 +188,7 @@ addLayer('c_2048', {
             return false;
         },
         getDisplay(data) {
-            return `<h2>${ELEMENTS[data]}</h2>`;
+            return `<h2>${options.toggleGalaxyGridElements ? ELEMENTS[data] : 2 ** data}</h2>`;
         },
         getStyle(data, id) {
             return {

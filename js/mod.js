@@ -49,7 +49,7 @@ let VERSION = {
 let changelog = `<h1>Changelog:</h1><br>
 	<h3>v1.4.0</h3><br>
 		- Added Break Infinity upgrades<br>
-		- Fixed most bugs<br>
+		- Fixed most bugs concering unlocking layers when exiting challenges (I hope)<br>
 		- Added option to toggle elements or numbers on galaxy grid<br>
 		- Added layer saves subtab to quickly jump between layers (for debugging purposes)<br>
 		- Endgame is now 4096 IP<br>

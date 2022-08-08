@@ -14,6 +14,9 @@ const __in = {
     },
 
     exitChallenge() {
+        player.ad.unlocked = true;
+        player.bd.unlocked = true;
+        player.g.unlocked = true;
         resetAD();
         resetBD();
         resetG();

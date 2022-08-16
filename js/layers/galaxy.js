@@ -1,8 +1,8 @@
-const ELEMENTS = ['', 'H', 'He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ar', 'Fe', 'Co', 'Zn', 'Rb', 'Cu', 'Ag', 'Au', 'U', 'Ub'];
+const ELEMENTS = ['', 'H', 'He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ar', 'Fe', 'Co', 'Cu', 'Zn', 'Rb', 'Ag', 'Au', 'U', 'Ub'];
 const IRON = 11;
 const ELCOLORS = ['#222222', '#eeeeee', '#98b9ed', '#88878a', '#eb9234', '#6acca8', '#a5e1ee', '#82ed8d', '#e06153', '#e6c019', '#e65529', '#999999',
-'#00CCFF', '#888888', '#cc3322', '#ccaa22', '#8888aa', '#88aa88', '#22ff22', '#cc22bb'];
-const BINFTEXT = ['Iron (Fe)', 'Cobalt (Co)', 'Zinc (Zn)', 'Rubidium (Rb)', 'Copper (Cu)', 'Silver (Ag)', 'Gold (Au)', 'Uranium (U)', 'Unobtainium (Ub)']
+'#00CCFF', '#ccaa22', '#888888', '#cc3322', '#8888aa', '#88aa88', '#22ff22', '#cc22bb'];
+const BINFTEXT = ['Iron (Fe)', 'Cobalt (Co)', 'Copper (Cu)', 'Zinc (Zn)', 'Rubidium (Rb)', 'Silver (Ag)', 'Gold (Au)', 'Uranium (U)', 'Unobtainium (Ub)']
 
 function resetG() {
     let autoGalaxyUpgrades = 'Locked';

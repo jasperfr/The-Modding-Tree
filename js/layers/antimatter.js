@@ -482,12 +482,57 @@ function dimBuyable(dimension, cost, multiplier) {
         display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)}` },
         canAfford() { return player.points.gte(this.cost()) },
         buy() {
-            player.points = player.points.sub(this.cost());
-            player.ad.dimensions[dimension] = player.ad.dimensions[dimension].plus(1);
-            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
-            player.ad.style[dimension] = (player.ad.style[dimension] + 1) % 10;
+            if(this.canAfford()) {
+                player.points = player.points.sub(this.cost());
+                player.ad.dimensions[dimension] = player.ad.dimensions[dimension].plus(1);
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+                player.ad.style[dimension] = (player.ad.style[dimension] + 1) % 10;
+            }
         },
-        buyMax() { while(this.canAfford()) { this.buy() } },
+        buyMax() {
+            // Buy up to 10 dimensions first. if it's not 10able.
+            if(player.ad.style[dimension] !== 0 || player.points.gt(1e308)) {
+                for(let i = player.ad.style[dimension]; i < 10; i++) {
+                    if(this.canAfford()) {
+                        player.points = player.points.sub(this.cost());
+                        player.ad.dimensions[dimension] = player.ad.dimensions[dimension].plus(1);
+                        setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+                        player.ad.style[dimension] = (player.ad.style[dimension] + 1) % 10;
+                    } else { return; }
+                }
+            }
+
+            // buy up until the cost scaling afterwards.
+            {
+                const b = Decimal.times(cost, 10);
+                const r = new Decimal(multiplier);
+                const k = getBuyableAmount(this.layer, this.id).div(10);
+                const c = Decimal.min(1e308, player.points);
+                const n = c.times(r.minus(1)).div(b).times(r.pow(k)).plus(1).log(r).floor().minus(k.times(2));
+                const m = b.times(r.pow(k).times(r.pow(n).minus(1)).div(r.minus(1)));
+
+                if(n.gt(0)) {
+                    player.points = player.points.sub(m);
+                    player.ad.dimensions[dimension] = player.ad.dimensions[dimension].plus(n.times(10));
+                    setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(n.times(10)));
+                }
+            }
+
+            // buy up after the cost scaling afterwards.
+            if(player.points.gt(1e308)) {
+                // not implemented yet, the buy up to 10 dimensions first will take care of the rest for now
+            }
+
+            // Buy up to 10 dimensions last.
+            for(let i = player.ad.style[dimension]; i < 10; i++) {
+                if(this.canAfford()) {
+                    player.points = player.points.sub(this.cost());
+                    player.ad.dimensions[dimension] = player.ad.dimensions[dimension].plus(1);
+                    setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+                    player.ad.style[dimension] = (player.ad.style[dimension] + 1) % 10;
+                }
+            }
+        },
         multiplier() { return Decimal.pow(2, this.amount10()) },
         amount10() { return getBuyableAmount(this.layer, this.id).div(10).floor() },
         style() {

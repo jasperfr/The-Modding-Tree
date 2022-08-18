@@ -2,7 +2,7 @@ const ELEMENTS = ['', 'H', 'He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ar', 'Fe
 const IRON = 11;
 const ELCOLORS = ['#222222', '#eeeeee', '#98b9ed', '#88878a', '#eb9234', '#6acca8', '#a5e1ee', '#82ed8d', '#e06153', '#e6c019', '#e65529', '#999999',
 '#00CCFF', '#ccaa22', '#888888', '#cc3322', '#8888aa', '#88aa88', '#22ff22', '#cc22bb'];
-const BINFTEXT = ['Iron (Fe)', 'Cobalt (Co)', 'Copper (Cu)', 'Zinc (Zn)', 'Rubidium (Rb)', 'Silver (Ag)', 'Gold (Au)', 'Uranium (U)', 'Unobtainium (Ub)']
+const BINFTEXT = ['Iron (Fe)', 'Cobalt (Co)', 'Copper (Cu)', 'Zinc (Zn)', 'Rubidium (Rb)', 'Silver (Ag)', 'Gold (Au)', 'Uranium (U)', 'Unobtainium (Ub)', 'Undefinedium (Ud)']
 
 function resetG() {
     let autoGalaxyUpgrades = 'Locked';
@@ -429,7 +429,7 @@ addLayer('g', {
             return true
         },
         getCanClick(data, id) {
-            return data > 0 && data != IRON + getBuyableAmount('infinity', 5).toNumber()
+            return data > 0 && data < IRON + getBuyableAmount('infinity', 5).toNumber()
         },
         onClick(data, id) {
             if(data == IRON + getBuyableAmount('infinity', 5).toNumber()) return;
@@ -438,7 +438,7 @@ addLayer('g', {
             } else if(player.g.selectedObjectId == id) {
                 player.g.selectedObjectId = 0;
             } else {
-                if(getGridData('g', player.g.selectedObjectId) == data && data != IRON + getBuyableAmount('infinity', 5).toNumber()) {
+                if(getGridData('g', player.g.selectedObjectId) == data && data < IRON + getBuyableAmount('infinity', 5).toNumber()) {
                     setGridData('g', player.g.selectedObjectId, 0);
                     setGridData('g', id, data + 1);
                 }
@@ -446,16 +446,30 @@ addLayer('g', {
             }
         },
         getDisplay(data, id) {
+            function romanize (num) {
+                if (isNaN(num))
+                    return NaN;
+                var digits = String(+num).split(""),
+                    key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
+                           "","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
+                           "","I","II","III","IV","V","VI","VII","VIII","IX"],
+                    roman = "",
+                    i = 3;
+                while (i--)
+                    roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+                return Array(+digits.join("") + 1).join("M") + roman;
+            }
+
             let multiplier = Decimal.pow(player.g.elementMultiplier, data - 1).divide(5);
-            return `<h2>${options.toggleGalaxyGridElements ? ELEMENTS[data] : 2 ** data}</h2><p>+${multiplier.toFixed(2)}</p>`;
+            return `<h2>${options.toggleGalaxyGridElements ? ELEMENTS[data] || `Ud-${romanize(data - ELEMENTS.length + 1)}` : 2 ** data}</h2><p>+${__(multiplier, 3, 1)}</p>`;
         },
         getStyle(data, id) {
             const jss = {
                 margin: '1px',
                 borderRadius: 0,
-                color: ELCOLORS[data],
-                borderColor: ELCOLORS[data],
-                backgroundColor: `${ELCOLORS[data]}40`,
+                color: ELCOLORS[data] || '#cc3388',
+                borderColor: ELCOLORS[data]  || '#cc3388',
+                backgroundColor: `${ELCOLORS[data] ? ELCOLORS[data] + '40' : '#cc338840'}`,
                 borderWidth: '2px'
             };
             if(player.g.selectedObjectId == id) {

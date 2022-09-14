@@ -101,8 +101,10 @@ addLayer('ad', {
                 .div(tmp.ad.matter.divider)
                 .times(tmp.d.decrementy.effectAD)
                 .times(tmp.infinity.buyables[6].effect)
+                .times(hasUpgrade('infinity', 'x1e10Boost') ? 1e10 : 1)
                 .times(delta)
             );
+
         };
 
         // Dimension autobuyer
@@ -110,6 +112,11 @@ addLayer('ad', {
             if(getClickableState(this.layer, `ab-${i+1}`) === 'Enabled') {
                 if(hasUpgrade('bd', 'adim-m') || hasUpgrade('infinity', 'keepBuyMax')) buyMaxBuyable(this.layer, `dimension-${i+1}`);
                 else buyBuyable(this.layer, `dimension-${i+1}`);
+            }
+            
+            // INF-STUDY-41
+            if(hasUpgrade('infinity', 'keep10ADonReset')) {
+                player.ad.dimensions[i] = Decimal.max(player.ad.dimensions[i], 10);
             }
         }
         // Tickspeed autobuyer
@@ -162,7 +169,7 @@ addLayer('ad', {
                             ['raw-html', `<div style="width:150px; text-align:left;"><span style="font-weight:bold;">${ORDINAL[i+1]} Dimension</span><br><span style="color:silver;">x${multiplier}</span></div>`, { margin: 'auto 0', 'font-size': '12px' }],
                             ['raw-html', `<div style="width:200px;font-weight:bold;">${amount}</div>`, { margin: 'auto 0', 'font-size': '14px' }],
                             ['buyable', `dimension-${i+1}`, { margin: 'auto 0' }]
-                        ], { width: '100%', margin: 0, 'justify-content': 'space-between', 'background-color' : i % 2 && '#331616' }]);
+                        ], { width: '100%', margin: 0, 'justify-content': 'space-between', 'background-color' : i % 2 && '#0002' }]);
                     }
                     return html;
                 },

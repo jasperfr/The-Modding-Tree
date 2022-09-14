@@ -42,11 +42,18 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.4.0",
-	name: "The Broken Update",
+	num: "1.5.0",
+	name: "The Study Update",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v1.5.0</h3><br>
+		- New styling across the entire game<br>
+		- Revamped the Infinity Study tree to actually be useful<br>
+		- Fixed the bug where the galaxy speed upgrade study doesn't work<br>
+		- Hardcapped cost scaling break infinity button to 1.50x<br>
+		- Balanced out challenges for the infinity studies<br>
+		- Galaxy atoms above are hopefully fixed<br>
 	<h3>v1.4.0</h3><br>
 		- Added Break Infinity upgrades<br>
 		- Fixed most bugs concering unlocking layers when exiting challenges (I hope)<br>
@@ -151,6 +158,7 @@ function getPointGen() {
 		.div(tmp.ad.matter.divider)
 		.times(tmp.d.decrementy.effectAD)
 		.times(1.05 ** player.ach.achievements.length)
+		.times(hasUpgrade('infinity', 'x1e10Boost') ? 1e10 : 1)
 		.times(tmp.infinity.buyables[6].effect)
 	
 	return gain

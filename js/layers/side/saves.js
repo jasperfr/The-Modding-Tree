@@ -5,7 +5,7 @@ addLayer('saves', {
 
     // Snooping as usual, I see?
     layerShown() {
-        return true;
+        return false;
     },
 
     tabFormat: [

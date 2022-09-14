@@ -119,6 +119,8 @@ addLayer('bd', {
             base = base.times(tmp.bd.upgrades.log100boost.effect);
             base = base.times(Decimal.pow(10, getBuyableAmount('bd', 6)))
             if(hasAchievement('ach', 25)) base = base.times(1.1);
+            // INF-STUDY-42
+            if(hasUpgrade('infinity', 'xBoosterPower')) base = base.times(10000);
             base = Decimal.max(base, 0.001);
             return base;
         },
@@ -614,44 +616,44 @@ addLayer('bd', {
             description: `Reduce the power scaling penalty.<br>
             x/((power - cap)<sup>10</sup>) -> <br>
             x/((power - cap)<sup>2</sup>)`,
-            cost: new Decimal(100),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(100) },
             style() { return { height: '100px' } }
         },
         keep50OnReset: {
             description: 'Keep 50% of your Booster Power on reset.',
-            cost: new Decimal(250),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(250) },
             style() { return { height: '100px' } }
         },
         reducePenal2: {
             description: `Reduce the power scaling penalty even more.<br>
             x/((power - cap)<sup>2</sup>) -> <br>
             x/(√(power - cap))`,
-            cost: new Decimal(1000),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(1000) },
             canAfford() { return hasUpgrade(this.layer, 'reducePenal') },
             style() { return { height: '100px' } }
         },
         log10boost: {
             description() { return `BPS gains a multiplier <i>after</i> the scaling nerf based on the log10 of your current BP.<br>
             Currently: ${__(this.effect(),2)}x` },
-            cost: new Decimal(2500),
-            effect() { return hasUpgrade(this.layer, this.id) ? Decimal.plus(1, Decimal.log10(player.bd.points)) : new Decimal(1); },
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(2500) },
+            effect() { return hasUpgrade(this.layer, this.id) ? Decimal.plus(1, Decimal.log10(Decimal.max(1, player.bd.points))) : new Decimal(1); },
             style() { return { height: '100px' } }
         },
         gain10times: {
             description() { return `Gain 10x as much BP per ${inChallenge('infinity', 22) ? '1st' : '8th'} dimensions.` },
-            cost: new Decimal(3500),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(3500) },
             style() { return { height: '100px' } }
         },
         log100boost: {
             description() { return `BPS gains a multiplier <i>after</i> the scaling nerf based on the log100 of your current multiplier.<br>
             Currently: ${__(this.effect(),2)}x` },
-            cost: new Decimal(50000),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(50000) },
             effect() { return hasUpgrade(this.layer, this.id) ? Decimal.plus(1, Decimal.log(tmp.bd.power.multiplier, 100)) : new Decimal(1); },
             style() { return { height: '100px' } }
         },
         cheaperBuyables: {
             description() { return `All buyables are 1,000x cheaper, and unlock a new one.` },
-            cost: new Decimal(1000000),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(1e6) },
             effect() { return hasUpgrade(this.layer, this.id) ? new Decimal(0.001) : new Decimal(1); },
             style() { return { height: '100px' } }
         },
@@ -665,30 +667,30 @@ addLayer('bd', {
 
         'keep-1': {
             description: 'Keep the first Dimension Shift on reset.',
-            cost: new Decimal(10),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(10) },
             style() { return { height: '100px' } }
         },
         'keep-2': {
             description: 'Keep the second Dimension Shift on reset.',
-            cost: new Decimal(100),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(1e2) },
             canAfford() { return hasUpgrade(this.layer, 'keep-1'); },
             style() { return { height: '100px' } }
         },
         'keep-3': {
             description: 'Keep the third Dimension Shift on reset.',
-            cost: new Decimal(1000),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(1e3) },
             canAfford() { return hasUpgrade(this.layer, 'keep-2'); },
             style() { return { height: '100px' } }
         },
         'keep-4': {
             description: 'Keep all Dimension Shifts on reset.',
-            cost: new Decimal(10000),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(1e4) },
             canAfford() { return hasUpgrade(this.layer, 'keep-3'); },
             style() { return { height: '100px' } }
         },
         'adim-m': {
             description() { return `Dimensional Autobuyers will now buy max.${hasUpgrade('infinity', 'keepBuyMax') ? '<br>Bought (Infinity Study 1)' : ''}`},
-            cost: new Decimal(75),
+            cost() { return hasUpgrade('infinity', 'freeBoosterUpgrades') ? 0 : new Decimal(75) },
             canAfford() { return !hasUpgrade('infinity', 'keepBuyMax') },
             style() {
                 if(hasUpgrade('infinity', 'keepBuyMax')) return { height: '100px', 'border-color': '#4ABB5F', 'background-color': '#357541 !important' }

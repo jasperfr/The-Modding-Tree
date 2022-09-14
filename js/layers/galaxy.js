@@ -4,6 +4,29 @@ const ELCOLORS = ['#222222', '#eeeeee', '#98b9ed', '#88878a', '#eb9234', '#6acca
 '#00CCFF', '#ccaa22', '#888888', '#cc3322', '#8888aa', '#88aa88', '#22ff22', '#cc22bb'];
 const BINFTEXT = ['Iron (Fe)', 'Cobalt (Co)', 'Copper (Cu)', 'Zinc (Zn)', 'Rubidium (Rb)', 'Silver (Ag)', 'Gold (Au)', 'Uranium (U)', 'Unobtainium (Ub)', 'Undefinedium (Ud)']
 
+function element(n) {
+    if(n < ELEMENTS.length) return {
+        element: ELEMENTS[n],
+        color: ELCOLORS[n],
+        binftext: BINFTEXT[IRON]
+    }
+    else if(n > 999) return {
+        element: `A${n}`,
+        color: `#fff`,
+        binftext: `A${n}`
+    }
+    else {
+        const y = n.toString().split(''),
+        d = ['nil', 'un', 'bi', 'tri', 'quad', 'pent', 'hex', 'sept', 'oct', 'enn'],
+        f = ['n', 'u', 'b', 't', 'q', 'p', 'h', 's', 'o', 'e'];
+        return {
+            element: y.map(e => f[e]).join(''),
+            color: '#ccc',
+            binftext: `${y.map(e => d[e]).join('')}ium (${y.map(e => f[e]).join('')})`
+        }
+    }
+}
+
 function resetG() {
     let autoGalaxyUpgrades = 'Locked';
     let autoGalaxySupernovas = 'Locked';
@@ -152,7 +175,7 @@ addLayer('g', {
         ['display-text', function() { return `Merge rate: <b>${__(1 / tmp.g.mergeRate, 2)}</b>/sec ${tmp.g.mergeRate === (1 / 60) ? '(MAX)' : ''}`; }, { 'color': 'silver', 'font-size': '12px' }],
         'blank',
         "grid",
-        ['display-text', function() { return `Use the arrow keys or the mouse to move / merge the atoms around.<br>The multiplier increases with each higher atom,<br>but will <u tooltip="Stars can't fuse iron!">stop</u> at ${BINFTEXT[getBuyableAmount('infinity', 5).toNumber()]}.`; }, { 'color': 'silver', 'font-size': '12px' }],
+        ['display-text', function() { return `Use the arrow keys or the mouse to move / merge the atoms around.<br>The multiplier increases with each higher atom,<br>but will <u tooltip="Stars can't fuse iron!">stop</u> at ${element(getBuyableAmount('infinity', 5).toNumber()).binftext ?? 'Iron (Fe)'}.`; }, { 'color': 'silver', 'font-size': '12px' }],
         'blank',
         ['clickable', 'gain'],
         ['row', [
@@ -446,30 +469,16 @@ addLayer('g', {
             }
         },
         getDisplay(data, id) {
-            function romanize (num) {
-                if (isNaN(num))
-                    return NaN;
-                var digits = String(+num).split(""),
-                    key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
-                           "","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
-                           "","I","II","III","IV","V","VI","VII","VIII","IX"],
-                    roman = "",
-                    i = 3;
-                while (i--)
-                    roman = (key[+digits.pop() + (i * 10)] || "") + roman;
-                return Array(+digits.join("") + 1).join("M") + roman;
-            }
-
             let multiplier = Decimal.pow(player.g.elementMultiplier, data - 1).divide(5);
-            return `<h2>${options.toggleGalaxyGridElements ? ELEMENTS[data] || `Ud-${romanize(data - ELEMENTS.length + 1)}` : 2 ** data}</h2><p>+${__(multiplier, 3, 1)}</p>`;
+            return `<h2>${options.toggleGalaxyGridElements ? element(data).element : 2 ** data}</h2><p>+${__(multiplier, 3, 1)}</p>`;
         },
         getStyle(data, id) {
             const jss = {
                 margin: '1px',
                 borderRadius: 0,
-                color: ELCOLORS[data] || '#cc3388',
-                borderColor: ELCOLORS[data]  || '#cc3388',
-                backgroundColor: `${ELCOLORS[data] ? ELCOLORS[data] + '40' : '#cc338840'}`,
+                color: element(data).color,
+                borderColor: element(data).color,
+                backgroundColor: `${element(data).color + '40'}`,
                 borderWidth: '2px'
             };
             if(player.g.selectedObjectId == id) {

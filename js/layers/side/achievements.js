@@ -6,7 +6,7 @@ addLayer('ach', {
 
     multiplier() {
         let gain = 1.05 ** player.ach.achievements.length;
-        if(hasUpgrade('infinity', 'achievementBonus')) gain **= 1.5;
+        if(hasUpgrade('infinity', 'achievementBonus')) gain **= 3;
         return gain;
     },
 
@@ -292,8 +292,8 @@ addLayer('ach', {
         },
         52: {
             name: 'Decrementy Hell',
-            tooltip: '<h4>Decrementy Hell</h4><br><h5>Let your Decrementy exceed e1e12. [UNIMPLEMENTED]</h5>',
-            done() { return false; },
+            tooltip: '<h4>Decrementy Hell</h4><br><h5>Let your Decrementy exceed 1e308.</h5>',
+            done() { return inChallenge('infinity', 51) && player.d.points.gte('1e308'); },
             style: { 'background-position' : '-576px -256px' }
         },
         53: {

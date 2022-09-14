@@ -59,6 +59,11 @@ addLayer('ta', {
             if(getClickableState(this.layer, `ab-${i+1}`) === 'Enabled') {
                 buyMaxBuyable(this.layer, `dimension-${i+1}`);
             }
+            
+            // INF-STUDY-41
+            if(hasUpgrade('infinity', 'keep10ADonReset')) {
+                player.ta.dimensions[i] = Decimal.max(player.ta.dimensions[i], 10);
+            }
         }
         // Tickspeed autobuyer
         if (getClickableState(this.layer, `ab-t`) === 'Enabled') {

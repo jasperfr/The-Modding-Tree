@@ -69,7 +69,7 @@ addLayer('crunch', {
     ],
 
     update() {
-        if(player.infinity.broken) return;
+        if(hasUpgrade('infinity', 'breakInfinity')) return;
         if(player.points.gte(new Decimal('2e1024'))) {
             options.forceOneTab = true;
             player.points = new Decimal('2e1024')
@@ -93,6 +93,19 @@ addLayer('crunch', {
                 }
                 if(inChallenge('infinity', 42)) {
                     completeChallenge('infinity', 42);
+                }
+
+                player.infinity.timeInCurrentInfinity = 0;
+        
+                if(player.infinity.activeChallenge == null) {
+                    if(getClickableState('infinity', 'respecOnNextInfinity') === 'ON') {
+                        player.infinity.studyPoints = tmp.infinity.maxStudyPoints;
+                        player.infinity.upgrades = [];
+                        buyUpgrade('infinity', 'unlockChallenges');
+                        buyUpgrade('infinity', 'breakInfinity');
+                    }
+                } else {
+                    player[this.layer].infinities = player[this.layer].infinities.plus(1);
                 }
 
                 player.infinity.unlocked = true;

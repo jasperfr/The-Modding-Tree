@@ -1,8 +1,10 @@
 const __in = {
     header: ['column', [
-        function() { if(player.infinity.broken) return ['column', ['prestige-button', 'blank']] },
         ['display-text', function() { return `You have <span style="color:orange;font-size:20px;font-weight:bold;">${__(player.infinity.points, 3, 1)}</span> IP.`; }, { 'color': 'silver' }],
         ['display-text', function() { return `You have infinitied <span style="color:orange;font-size:20px;font-weight:bold;">${formatWhole(player.infinity.infinities)}</span> times.`; }, { 'color': 'silver', 'font-size': '12px' }],
+        ['display-text', function() { return `You have <span style="color:orange;font-size:20px;font-weight:bold;">${formatWhole(player.infinity.studyPoints)}</span>/${formatWhole(tmp.infinity.maxStudyPoints)} Study Points.`; }, { 'color': 'silver', 'font-size': '12px' }],
+        'blank',
+        function() { if(hasUpgrade('infinity', 'breakInfinity')) return ['column', ['prestige-button', 'blank']] },
         'blank'
     ]],
 
@@ -67,13 +69,26 @@ addLayer('infinity', {
             'background-size': '250%',
             'border': '1px solid white'
         } : {
-            'background-image': 'radial-gradient(circle at center, #e3bb29, orange)'
+            'background-image': 'linear-gradient(to bottom right, #e3bb29, orange)',
         }
     },
 
     doReset(layer) {
         if(layer !== 'infinity') return;
-        player[this.layer].infinities = player[this.layer].infinities.plus(1);
+
+        player[this.layer].timeInCurrentInfinity = 0;
+
+        if(player.infinity.activeChallenge == null) {
+            if(getClickableState('infinity', 'respecOnNextInfinity') === 'ON') {
+                player.infinity.studyPoints = tmp.infinity.maxStudyPoints;
+                player.infinity.upgrades = [];
+                buyUpgrade('infinity', 'unlockChallenges');
+                buyUpgrade('infinity', 'breakInfinity');
+            }
+        } else {
+            player[this.layer].infinities = player[this.layer].infinities.plus(1);
+        }
+
         resetAD();
         resetBD();
         resetG();
@@ -87,8 +102,13 @@ addLayer('infinity', {
             broken: false,
             points: new Decimal(0),
             infinities: new Decimal(0),
+            studyPoints: new Decimal(0),
             timeInCurrentInfinity: 0
         }
+    },
+
+    maxStudyPoints() {
+        return getBuyableAmount('infinity', 'SPFromAM').plus(getBuyableAmount('infinity', 'SPFromIP')).plus(getBuyableAmount('infinity', 'SPFromFE'))
     },
 
     update(delta) {
@@ -99,52 +119,39 @@ addLayer('infinity', {
         'Infinity Studies': {
             content: [
                 __in.header,
+                ['row', [['buyable', 'SPFromAM'], 'blank', ['buyable', 'SPFromIP'], 'blank', ['buyable', 'SPFromFE']]],
+                'blank',
+                ['row', [['clickable', 'respecOnNextInfinity']]],
+                'blank','blank',
                 ['row', [['upgrade', 'keepBuyMax']]],
                 'blank','blank',
-                ['row', [['upgrade', 'boostTimePlayed']]],
+                ['row', [['upgrade', 'boostTimePlayed'], 'blank', ['upgrade', 'achievementBonus']]],
                 'blank','blank',
-                ['row', [['upgrade', 'achievementBonus'], 'blank', ['upgrade', 'ultraFastSpawnRate']]],
+                ['row', [['upgrade', 'unlockChallenges']]],
                 'blank','blank',
-                ['row', [['upgrade', 'reduceCostScaling']]],
+                ['row', [['upgrade', 'keep10ADonReset'], 'blank', ['upgrade', 'xBoosterPower'], 'blank', ['upgrade', 'ultraFastSpawnRate']]],
                 'blank','blank',
-                ['row', [['upgrade', 'infChallenge1']]],
+                ['row', [['upgrade', 'x1e10Boost'], 'blank', ['upgrade', 'freeBoosterUpgrades'], 'blank', ['upgrade', 'ultraFastMergeRate']]],
                 'blank','blank',
-                // ['row', [['upgrade', 'boostInfinities'], 'blank', ['upgrade', 'gainMoreBP'], 'blank', ['upgrade', 'log10EffectGP']]],
-                // 'blank',
-                // ['row', [['upgrade', 'dimPower10'], 'blank', ['upgrade', 'boostUnspentBP'], 'blank', ['upgrade', 'startAtC']]],
-                // 'blank',
-                // ['row', [['upgrade', 'increaseTickspeed'], 'blank', ['upgrade', 'bpsBoostsItself'], 'blank', ['upgrade', 'startAt308']]],
-                // 'blank','blank',
-                // ['row', [['upgrade', 'infChallenge2']]],
-                // 'blank','blank',
-                // ['row', [['upgrade', 'unlockDuplicanti']]],
-                // 'blank','blank',
-                // ['row', [['upgrade', 'furtherReduceCostScaling']]],
-                // 'blank','blank',
-                // ['row', [['upgrade', 'activeBoostIP'], 'blank', ['upgrade', 'passiveBoostIP'], 'blank', ['upgrade', 'idleBoostIP']]],
-                // 'blank','blank',
-                // ['row',[['upgrade', 'activeBoostBP'], 'blank', ['upgrade', 'passiveBoostBP'], 'blank', ['upgrade', 'idleBoostBP']]],
-                // 'blank','blank',
-                // ['row', [['upgrade', 'activeBoostDuplicanti'], 'blank', ['upgrade', 'passiveBoostDuplicanti'], 'blank', ['upgrade', 'idleBoostDuplicanti']]],
-                // 'blank','blank',
-                // ['row', [['upgrade', 'infChallenge3'], 'blank', ['upgrade', 'infChallenge5'], 'blank', ['upgrade', 'infChallenge4']]],
-                // 'blank','blank',
-                // ['row', [['upgrade', 'furtherReduceCostScalingMore']]],
+                ['row', [['upgrade', 'breakInfinity']]],
+                'blank','blank',
+                ['row', [['upgrade', 'unlockInfinityDims']]],
+                'blank','blank',
+                // ['row', [['upgrade', 'unlockIncrementy'], 'blank', ['upgrade', 'unlockUniverses']]],
                 // 'blank','blank',
                 // ['row', [['upgrade', 'collapseInfinity']]],
                 // 'blank','blank',
             ]
         },
         'Challenges': {
+            unlocked() { return hasUpgrade('infinity', 'unlockChallenges') },
             content: [
                 __in.header,
-                ['raw-html', '<h1>Challenges</h1>'],
-                'blank',
-                'blank',
                 'challenges'
             ]
         },
         'Break': {
+            unlocked() { return hasUpgrade('infinity', 'breakInfinity') },
             content: [
                 __in.header,
                 ['clickable', 'break-infinity'],
@@ -195,9 +202,9 @@ addLayer('infinity', {
         21: {
             name: 'Boostless',
             challengeDescription: 'The Booster Layer is disabled.<br>GP generation starts at 1e100 AM.',
-            goalDescription: '1e512 Antimatter<br>',
+            goalDescription: '7e777 Antimatter<br>',
             rewardDescription: 'Dimensional Shifts and boosts reset nothing (except boosts to shifts).',
-            canComplete: function() { return player.points.gte('1e512') },
+            canComplete: function() { return player.points.gte('7e777') },
             onEnter() {
                 __in.enterChallenge();
             },
@@ -208,9 +215,9 @@ addLayer('infinity', {
         22: {
             name: 'Starless',
             challengeDescription: 'The Galaxy Layer is disabled.<br>BP generation is based on your <b>super square rooted</b> 1st Dimensions instead.',
-            goalDescription: '1e700 Antimatter<br>',
+            goalDescription: '7e777 Antimatter<br>',
             rewardDescription: 'Galaxial shifts reset nothing and unlock 2 more Galaxy Upgrades.',
-            canComplete: function() { return player.points.gte('1e700') },
+            canComplete: function() { return player.points.gte('7e777') },
             onEnter() {
                 __in.enterChallenge();
                 player.g.unlocked = false;
@@ -224,7 +231,7 @@ addLayer('infinity', {
             challengeDescription: 'Booster and Galaxy layers are disabled.<br>',
             goalDescription: '1e100 Antimatter<br>',
             rewardDescription: 'Unlock autobuyers for Booster Upgrades.',
-            canComplete: function() { return player.points.gte('1e100') },
+            canComplete: function() { return player.points.gte('4e444') },
             onEnter() {
                 __in.enterChallenge();
                 player.bd.unlocked = false;
@@ -281,9 +288,9 @@ addLayer('infinity', {
         51: {
             name: 'The Ultimate Challenge',
             challengeDescription: 'There is raising decrementy that divides ALL production multipliers. Each challenge completion nerfs this raise. When Decrementy reaches 1.79e308, it will explode exponentially. Galaxy points are gained <b>instantly.</b><br>',
-            goalDescription: '1e450 Antimatter<br>',
+            goalDescription: '6e666 Antimatter<br>',
             rewardDescription: 'Unlock the power to Break Infinity.',
-            canComplete: function() { return player.points.gte('1e450') },
+            canComplete: function() { return player.points.gte('6e666') },
             style: function() { return { 'width': '680px' } },
             onEnter() {
                 __in.enterChallenge();
@@ -296,223 +303,142 @@ addLayer('infinity', {
 
     upgrades: {
         keepBuyMax: {
-            description() { return `Keep your "Autobuyers Buy Max" upgrade.` },
+            fullDisplay() { return `Keep your "Autobuyers Buy Max" upgrade.<br><br>Free` },
             cost: 0,
             style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['boostTimePlayed']
-        },
-        boostTimePlayed: {
-            effect() { return Decimal.max(1.0, Decimal.pow(player.timePlayed / 10, 0.25)) },
-            description() { return `Antimatter Dimensions gain a multiplier based on time played.<br>Currently: ${mixedStandardFormat(this.effect(), 2, 0)}x`  },
-            cost: 1,
-            style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['achievementBonus', 'ultraFastSpawnRate']
+            branches: ['boostTimePlayed', 'achievementBonus']
         },
 
-        achievementBonus: {
-            description() { return `Achievement bonus is raised to the power of 1.5.`  },
-            cost: 2,
+        boostTimePlayed: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'keepBuyMax'); },
+            effect() { return Decimal.max(1.0, Decimal.pow(player.timePlayed, 0.5)) },
+            fullDisplay() { return `Antimatter Dimensions gain a multiplier based on time played.<br>Currently: ${mixedStandardFormat(this.effect(), 2, 0)}x<br><br>Cost: ${this.price} SP`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 2,
             style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['reduceCostScaling']
+            branches: ['unlockChallenges']
+        },
+        achievementBonus: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'keepBuyMax'); },
+            fullDisplay() { return `Achievement bonus is raised to the power of 3.<br>Currently: ${mixedStandardFormat(tmp.ach.multiplier, 3, 1)}x to Antimatter Dimensions.<br><br>Cost: ${this.price} SP`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 2,
+            style: { height: '100px', border: '2px solid orange !important' },
+            branches: ['unlockChallenges']
+        },
+        unlockChallenges: {
+            canAfford() { return tmp[this.layer].maxStudyPoints.gte(this.price); },
+            fullDisplay() { return `Unlock challenges.<br><br>Need ${this.price} total SP`  },
+            onPurchase() { },
+            price: 5,
+            style: { height: '100px', border: '2px solid orange !important' },
+            branches: ['keep10ADonReset', 'xBoosterPower', 'ultraFastSpawnRate']
+        },
+
+        keep10ADonReset: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && (hasUpgrade('infinity', 'achievementBonus') || hasUpgrade('infinity', 'boostTimePlayed')); },
+            fullDisplay() { return `Keep 10 of each Antimatter Dimension on reset.<br><br>Cost: ${this.price} SP`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 3,
+            style: { height: '100px', border: '2px solid #992c2c !important' },
+            branches: ['x1e10Boost']
+        },
+        x1e10Boost: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'keep10ADonReset'); },
+            fullDisplay() { return `Antimatter Dimensions gain a 1e10x boost each.<br><br>Cost: ${this.price} SP`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 3,
+            style: { height: '100px', border: '2px solid #992c2c !important' },
+            branches: ['breakInfinity']
+        },
+        xBoosterPower: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && (hasUpgrade('infinity', 'achievementBonus') || hasUpgrade('infinity', 'boostTimePlayed')); },
+            fullDisplay() { return `x10,000 to Booster Power gain.<br><br>Cost: ${this.price} SP`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 3,
+            style: { height: '100px', border: '2px solid #63b8ff !important' },
+            branches: ['freeBoosterUpgrades']
+        },
+
+        freeBoosterUpgrades: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'xBoosterPower'); },
+            fullDisplay() { return `All booster upgrades are free.<br><br>Cost: ${this.price} SP`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 3,
+            style: { height: '100px', border: '2px solid #63b8ff !important' },
+            branches: ['breakInfinity']
         },
         ultraFastSpawnRate: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && (hasUpgrade('infinity', 'achievementBonus') || hasUpgrade('infinity', 'boostTimePlayed')); },
             effect() { return Decimal.max(1, Decimal.minus(100, Decimal.pow(Decimal.div(player.infinity.timeInCurrentInfinity, 10), 2.5))) },
-            description() { return `The Galaxy Layer's starting generation speed is 100x faster, but drops exponentially.<br>Currently ${__(this.effect(), 2, 0)}x`  },
-            cost: 2,
-            style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['reduceCostScaling']
-        },
-
-        reduceCostScaling: {
-            description() { return `Locked until next update`  },
-            cost: 1e300,
-            style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['infChallenge1']
-        },
-
-        infChallenge1: {
-            description() { return `To be continued...`  },
-            cost: 1e300,
-            style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['boostInfinities', 'gainMoreBP', 'log10EffectGP']
-        },
-
-        boostInfinities: {
-            effect() { return Decimal.plus(5.0, Decimal.times(player.infinity.infinities, 0.55)) },
-            description() { return `Antimatter Dimensions gain a multiplier based on infinities.<br>Currently: ${mixedStandardFormat(this.effect(), 2, 0)}x`  },
-            cost: 4,
-            style: { height: '100px', border: '2px solid #58bf72 !important' },
-            branches: ['dimPower10']
-        },
-        gainMoreBP: {
-            effect() { return new Decimal(10) },
-            description() { return `Gain 10x as much Booster Points.` },
-            cost: 3,
-            style: { height: '100px', border: '2px solid #63b8ff !important' },
-            branches: ['boostUnspentBP']
-        },
-        log10EffectGP: {
-            effect() { return player.g.points },
-            description() { return `Unspent Galaxy Points boost Antimatter Dimensions.<br>Currently: ${___(this.effect(), 2, 0)}x` },
-            cost: 4,
+            fullDisplay() { return `The Galaxy Layer's starting generation speed is 100x faster, but drops exponentially.<br>Currently ${__(this.effect(), 2, 0)}x<br><br>Cost: ${this.price} SP`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 3,
             style: { height: '100px', border: '2px solid #dd3ffc !important' },
-            branches: ['startAtC']
+            branches: ['ultraFastMergeRate']
+        },
+        ultraFastMergeRate: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'ultraFastSpawnRate'); },
+            effect() { return Decimal.max(1, Decimal.minus(100, Decimal.pow(Decimal.div(player.infinity.timeInCurrentInfinity, 10), 2.5))) },
+            fullDisplay() { return `The same applies to the Galaxy layer's merge speed.<br>Currently ${__(this.effect(), 2, 0)}x<br><br>Cost: ${this.price} SP`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 3,
+            style: { height: '100px', border: '2px solid #dd3ffc !important' },
+            branches: ['breakInfinity']
         },
 
-        dimPower10: {
-            description() { return `Dimension Boost Power becomes 10x.`  },
-            cost: 5,
-            style: { height: '100px', border: '2px solid #58bf72 !important' },
-            branches: ['increaseTickspeed']
-        },
-        boostUnspentBP: {
-            effect() { return Decimal.log10(Decimal.plus(10, player.bd.points)) },
-            description() { return `Antimatter Dimensions gain a boost based on the log10 of your unspent BP. Currently ${___(this.effect(), 2, 0)}x` },
-            cost: 6,
-            style: { height: '100px', border: '2px solid #63b8ff !important' },
-            branches: ['bpsBoostsItself']
-        },
-        startAtC: {
-            description() { return `Star generation starts at Carbon (C).` },
-            cost: 5,
-            style: { height: '100px', border: '2px solid #dd3ffc !important' },
-            branches: ['startAt308']
+        breakInfinity: {
+            canAfford() { return Object.values(player.infinity.challenges).filter(e => e == 1).length === 9; },
+            fullDisplay() { return `Break Infinity<br><br>Requires all challenges completed.`  },
+            onPurchase() { },
+            price: 0,
+            style: { height: '100px', border: '2px solid orange !important' },
+            branches: ['unlockInfinityDims']
         },
 
-        increaseTickspeed: {
-            description() { return `Increase tickspeed to 1.25x.`  },
-            cost: 3,
-            style: { height: '100px', border: '2px solid #58bf72 !important' },
-            branches: ['infChallenge2']
-        },
-        bpsBoostsItself: {
-            effect() { return Decimal.log10(Decimal.plus(10, player.bd.points)) },
-            description() { return `BP/s boosts itself. Currently ${___(this.effect(), 2, 0)}x` },
-            cost: 6,
-            style: { height: '100px', border: '2px solid #63b8ff !important' },
-            branches: ['infChallenge2']
-        },
-        startAt308: {
-            description() { return `GP generation starts at e308 instead of e512.` },
-            cost: 5,
-            style: { height: '100px', border: '2px solid #dd3ffc !important' },
-            branches: ['infChallenge2']
-        },
-        
-        infChallenge2: {
-            description() { return `Infinity Challenge II (0/5)<br>Requirement: Use the Antimatter Dimension path (left)`  },
-            cost: 10,
+        pickAnotherPath: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'breakInfinity') },
+            fullDisplay() { return `Pick another path from the second split.<br><br>Cost: ${this.price} SP`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 10,
             style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['unlockDuplicanti']
-        },
-        
-        unlockDuplicanti: {
-            description() { return `Unlock Duplicanti`  },
-            cost: 25,
-            style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['furtherReduceCostScaling']
-        },
-        
-        furtherReduceCostScaling: {
-            description() { return `Further reduce the cost scaling.<br>((b⋅m<sup>1.8a</sup>)/1e308 -> (b⋅m<sup>1.5a</sup>)/1e308)`  },
-            cost: 1e5,
-            style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['activeBoostIP', 'passiveBoostIP', 'idleBoostIP']
+            branches: ['unlockIncrementy']
         },
 
-        activeBoostIP: {
-            effect() { return new Decimal(1.0) },
-            description() { return `Multiplier to IP generation, which decays over time<br>Currently ${___(this.effect(), 2, 0)}x`  },
-            cost: 1e10,
-            style: { height: '100px', border: '2px solid #b03131 !important' },
-            branches: ['activeBoostBP']
-        },
-        passiveBoostIP: {
-            description() { return `IP generation x100.` },
-            cost: 1e10,
-            style: { height: '100px', border: '2px solid #dd3ffc !important' },
-            branches: ['passiveBoostBP']
-        },
-        idleBoostIP: {
-            effect() { return new Decimal(1.0) },
-            description() { return `Multiplier to IP generation, which increases over time<br>Currently ${___(this.effect(), 2, 0)}x`  },
-            cost: 1e10,
-            style: { height: '100px', border: '2px solid #63b8ff !important' },
-            branches: ['idleBoostBP']
+        unlockInfinityDims: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'breakInfinity') },
+            fullDisplay() { return `Unlock Infinity Dimensions.<br><br>Soon`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 1e308,
+            style: { height: '100px', border: '2px solid orange !important' },
+            branches: ['unlockIncrementy', 'unlockUniverses']
         },
 
-        activeBoostBP: {
-            description() { return `BP/s multiplier based on your fastest Booster Time this Infinity.` },
-            cost: 1e10,
-            style: { height: '100px', border: '2px solid #b03131 !important' },
-            branches: ['activeBoostDuplicanti']
+        unlockIncrementy: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'breakInfinity') },
+            fullDisplay() { return `Unlock Incrementy.<br><br>Soon`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 1e308,
+            style: { height: '100px', border: '2px solid blue !important' },
+            branches: ['collapseInfinity']
         },
-        passiveBoostBP: {
-            effect() { return new Decimal(1.0) },
-            description() { return `BP/s multiplier x100.`  },
-            cost: 1e10,
-            style: { height: '100px', border: '2px solid #dd3ffc !important' },
-            branches: ['passiveBoostDuplicanti']
-        },
-        idleBoostBP: {
-            description() { return `BP/s multiplier slowly increases, but drops at BP gain.` },
-            cost: 1e10,
-            style: { height: '100px', border: '2px solid #63b8ff !important' },
-            branches: ['idleBoostDuplicanti']
-        },
-        
-        activeBoostDuplicanti: {
-            description() { return `Auto-fold Duplicanti disabled, but Duplicanti tickspeed upgrades are 50% more powerful.` },
-            cost: 1e20,
-            style: { height: '100px', border: '2px solid #b03131 !important' },
-            branches: ['infChallenge3', 'infChallenge5']
-        },
-        passiveBoostDuplicanti: {
-            effect() { return new Decimal(1.0) },
-            description() { return `Duplicanti tickspeed upgrades are 40% more powerful.`  },
-            cost: 1e20,
-            style: { height: '100px', border: '2px solid #dd3ffc !important' },
-            branches: ['infChallenge5']
-        },
-        idleBoostDuplicanti: {
-            description() { return `Duplicanti folds 50% slower, but their tickspeed upgrades are 50% more powerful.` },
-            cost: 1e20,
-            style: { height: '100px', border: '2px solid #63b8ff !important' },
-            branches: ['infChallenge4', 'infChallenge5']
-        },
-
-        infChallenge3: {
-            description() { return `Infinity Challenge 3 (0/5)<br>Requirement: Fastest BP time ≥ 200ms`  },
-            cost: 1e50,
-            style: { height: '100px', border: '2px solid orange !important' }
-        },
-        infChallenge4: {
-            description() { return `Infinity Challenge 4 (0/5)<br>Requirement: Slowest BP time ≥ 10 minutes`  },
-            cost: 1e50,
-            style: { height: '100px', border: '2px solid orange !important' }
-        },
-        infChallenge5: {
-            description() { return `Infinity Challenge 5 (0/5)<br>Requirement: 1e100 IP`  },
-            cost: 1e100,
-            style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['furtherReduceCostScalingMore']
-        },
-        
-        furtherReduceCostScalingMore: {
-            description() { return `Further reduce the cost scaling.<br>((b⋅m<sup>1.5a</sup>)/1e308 -> (b⋅m<sup>1.25a</sup>)/1e308)`  },
-            cost: 1e200,
-            style: { height: '100px', border: '2px solid orange !important' },
+        unlockUniverses: {
+            canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'breakInfinity') },
+            fullDisplay() { return `Unlock Universes.<br><br>Soon`  },
+            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+            price: 1e308,
+            style: { height: '100px', border: '2px solid white !important' },
             branches: ['collapseInfinity']
         },
 
         collapseInfinity: {
-            effect() { return Math.floor(Math.random() * 5) - Math.floor(Math.random() * 5) },
+            effect() { return Math.floor(Math.random() * 2) - Math.floor(Math.random() * 2) },
             description() { return `Perform the Universal Collapse`  },
             cost: 1.79e308,
             style() { return {
-                height: '200px',
-                width: '400px',
-                fontSize: '24pt',
+                height: '150px',
+                width: '300px',
+                fontSize: '16pt',
                 border: '2px solid orange !important',
                 transform: `translateX(${this.effect()}px) translateY(${this.effect()}px)`,
                 zIndex: '100',
@@ -521,39 +447,30 @@ addLayer('infinity', {
         },
     },
 
-    clickables: {
-        'break-infinity': {
-            effect() { return Math.floor(Math.random() * 2) - Math.floor(Math.random() * 2) },
-            display() {
-                if(sumValues(player.infinity.challenges).toNumber() === 9) {
-                    return `<h1>BREAK INFINITY</h1><br><br>There is no going back!`
-                }
-                return `<h1>BREAK INFINITY</h1><br><br>Requires all challenge completions.<br>You are not worthy yet.<br>(${sumValues(player.infinity.challenges).toNumber()}/9 Completions)`;
-            },
-            canClick() {
-                return sumValues(player.infinity.challenges).toNumber() === 9;
-            },
-            onClick() {
-                player.infinity.broken = true;
-            },
-            unlocked() {
-                return !player.infinity.broken;
-            },
-            style() {
-                return {
-                    width: '600px',
-                    height: '300px',
-                    transform: `translateX(${this.effect()}px) translateY(${this.effect()}px)`,
-                    'font-size': '20pt',
-                    'transition-duration': '0s'
-                }
-            }
-        }
-    },
-
     buyables: {
+        'SPFromAM': {
+            cost() { return Decimal.pow(1e200, getBuyableAmount(this.layer, this.id).plus(1)) },
+            canAfford() { return player.points.gte(this.cost()) },
+            display() { return `Get a Study Point from your Antimatter amount.<br>Next at ${__(this.cost(), 0, 1)} AM` },
+            buy() { player.infinity.studyPoints = player.infinity.studyPoints.plus(1); player.points = player.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            style() { return { height: '60px' } }
+        },
+        'SPFromIP': {
+            cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id)) },
+            canAfford() { return player.infinity.points.gte(this.cost()) },
+            display() { return `Get a Study Point from your Infinity Points.<br>Next at ${__(this.cost(), 0, 1)} IP` },
+            buy() { player.infinity.studyPoints = player.infinity.studyPoints.plus(1); player.infinity.points = player.infinity.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
+            style() { return { height: '60px' } }
+        },
+        'SPFromFE': {
+            cost() { return 0 },
+            canAfford() { return false },
+            display() { return `Get a Study Point from your Incrementy amount.<br>Locked` },
+            buy() {  },
+            style() { return { height: '60px' } }
+        },
+
         1: {
-            unlocked() { return player.infinity.broken; },
             cost() { return Decimal.pow(4, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
             effect() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(1))},
@@ -562,17 +479,15 @@ addLayer('infinity', {
             style() { return { height: '120px' } }
         },
         2: {
-            unlocked() { return player.infinity.broken; },
             cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
-            canAfford() { return player.infinity.points.gte(this.cost()); },
+            canAfford() { return getBuyableAmount('infinity', 2).lt(10) && player.infinity.points.gte(this.cost()); },
             effect() { return new Decimal(2).minus(getBuyableAmount(this.layer, this.id).times(0.05)) },
             effectNext() { return new Decimal(2).minus((getBuyableAmount(this.layer, this.id).plus(1)).times(0.05)) },
-            display() { return `Reduce the AD cost scaling.<br>Currently ${__(this.effect(), 2)}.<br>Next ${__(this.effect(), 2)} -> ${__(this.effectNext(), 2)}<br><br>Cost: ${__(this.cost(), 3, 1)} IP` },
+            display() { return `Reduce the AD cost scaling.<br>Currently ${__(this.effect(), 2)}.<br>${getBuyableAmount('infinity', 2).lt(10) ? `Next ${__(this.effect(), 2)} -> ${__(this.effectNext(), 2)}` : 'Maxed Out'}<br><br>Cost: ${__(this.cost(), 3, 1)} IP` },
             buy() { player.infinity.points = player.infinity.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { height: '120px' } }
         },
         3: {
-            unlocked() { return player.infinity.broken; },
             cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
             effect() { return Decimal.pow(0.1, getBuyableAmount(this.layer, this.id))},
@@ -581,7 +496,6 @@ addLayer('infinity', {
             style() { return { height: '120px' } }
         },
         4: {
-            unlocked() { return player.infinity.broken; },
             cost() { return Decimal.pow(2, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
             effect() { return Decimal.pow(0.1, getBuyableAmount(this.layer, this.id))},
@@ -590,7 +504,6 @@ addLayer('infinity', {
             style() { return { height: '120px' } }
         },
         5: {
-            unlocked() { return player.infinity.broken; },
             cost() { return Decimal.times(10, Decimal.pow(10, getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
             effect() { return getBuyableAmount(this.layer, this.id) },
@@ -599,7 +512,6 @@ addLayer('infinity', {
             style() { return { height: '120px' } }
         },
         6: {
-            unlocked() { return player.infinity.broken; },
             cost() { return Decimal.pow(100, getBuyableAmount(this.layer, this.id).plus(getBuyableAmount(this.layer, this.id))) },
             canAfford() { return player.infinity.points.gte(this.cost()); },
             effect() { return Decimal.pow('1e10', getBuyableAmount(this.layer, this.id)) },
@@ -607,6 +519,14 @@ addLayer('infinity', {
             buy() { player.infinity.points = player.infinity.points.minus(this.cost()); setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1)) },
             style() { return { height: '120px' } }
         },
+    },
+
+    clickables: {
+        respecOnNextInfinity: {
+            onClick() { setClickableState(this.layer, this.id, getClickableState(this.layer, this.id) === 'OFF' ? 'ON' : 'OFF') }, 
+            canClick() { return true; },
+            display() { return `Respec SP on next Infinity<br>(or challenge enter/exit): ${getClickableState(this.layer, this.id)}` }
+        }
     }
 
 });

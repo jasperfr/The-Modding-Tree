@@ -6,7 +6,7 @@ var layoutInfo = {
     treeLayout: [
         ['ta', 'c_2048', 'd'],
         ['ad'],
-        ['bd', 'g'],
+        ['bd', 'blank', 'g'],
         ['infinity']
     ]
 }

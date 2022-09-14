@@ -5,7 +5,14 @@ body {
 	--background: #0f0f0f;
 	--color: #dfdfdf;
 	--points: #ffffff;
-	background: var(--background)
+	background-image: url('../resources/shot-by-cerqueira-0o_GEzyargo-unsplash.jpg');
+	background-size: cover;
+	backdrop-filter: brightness(0.4) blur(1px);
+}
+
+.vl {
+	border-left: 2px solid #0002 !important;
+	border: 2px solid #0002;
 }
 
 /* General text */

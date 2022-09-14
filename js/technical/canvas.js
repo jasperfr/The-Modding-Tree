@@ -57,7 +57,7 @@ function drawComponentBranches(layer, data, prefix) {
 function drawTreeBranch(num1, data, prefix) { // taken from Antimatter Dimensions & adjusted slightly
 	let num2 = data
 	let color_id = 1
-	let width = 15
+	let width = 20
 	if (Array.isArray(data)){
 		num2 = data[0]
 		color_id = data[1]

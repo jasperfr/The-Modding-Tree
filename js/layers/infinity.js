@@ -229,7 +229,7 @@ addLayer('infinity', {
         31: {
             name: 'Drought',
             challengeDescription: 'Booster and Galaxy layers are disabled.<br>',
-            goalDescription: '1e100 Antimatter<br>',
+            goalDescription: '4e444 Antimatter<br>',
             rewardDescription: 'Unlock autobuyers for Booster Upgrades.',
             canComplete: function() { return player.points.gte('4e444') },
             onEnter() {

@@ -1,7 +1,8 @@
 const ELEMENTS = ['', 'H', 'He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ar', 'Fe', 'Co', 'Cu', 'Zn', 'Rb', 'Ag', 'Au', 'U', 'Ub'];
+//                 0   1    2     3    4    5    6     7     8     9    10    11    12    13    14    15    16    17    18   19
 const IRON = 11;
-const ELCOLORS = ['#222222', '#eeeeee', '#98b9ed', '#88878a', '#eb9234', '#6acca8', '#a5e1ee', '#82ed8d', '#e06153', '#e6c019', '#e65529', '#999999',
-'#00CCFF', '#ccaa22', '#888888', '#cc3322', '#8888aa', '#88aa88', '#22ff22', '#cc22bb'];
+//                 0          1  H       2  He      3  C       4  N       5  O       6  Ne      7  Mg      8  Si      9  S       10 Ar      11 Fe     12 Co      13 Cu      14 Zn      15 Rb      16 Ag      17 Au      18 U       19 Ub
+const ELCOLORS = ['#222222', '#eeeeee', '#98b9ed', '#88878a', '#eb9234', '#6acca8', '#a5e1ee', '#82ed8d', '#e06153', '#e6c019', '#e65529', '#999999','#00CCFF', '#ccaa22', '#888888', '#cc3322', '#ffd700', '#88aa88', '#22ff22', '#cc22bb'];
 const BINFTEXT = ['Iron (Fe)', 'Cobalt (Co)', 'Copper (Cu)', 'Zinc (Zn)', 'Rubidium (Rb)', 'Silver (Ag)', 'Gold (Au)', 'Uranium (U)', 'Unobtainium (Ub)', 'Undefinedium (Ud)']
 
 function element(n) {
@@ -10,19 +11,36 @@ function element(n) {
         color: ELCOLORS[n],
         binftext: BINFTEXT[IRON]
     }
-    else if(n > 999) return {
-        element: `A${n}`,
-        color: `#fff`,
-        binftext: `A${n}`
-    }
-    else {
-        const y = n.toString().split(''),
-        d = ['nil', 'un', 'bi', 'tri', 'quad', 'pent', 'hex', 'sept', 'oct', 'enn'],
-        f = ['n', 'u', 'b', 't', 'q', 'p', 'h', 's', 'o', 'e'];
-        return {
-            element: y.map(e => f[e]).join(''),
-            color: '#ccc',
-            binftext: `${y.map(e => d[e]).join('')}ium (${y.map(e => f[e]).join('')})`
+    else{
+        n=4*n+20
+        if(n > 999) return {
+            element: `A${n}`,
+            color: `#ffffff`,
+            binftext: `A${n}`
+        }
+        else {
+            const y = n.toString().split(''),
+            d = ['nil', 'un', 'bi', 'tri', 'quad', 'pent', 'hex', 'sept', 'oct', 'enn'],
+            f = ['n', 'u', 'b', 't', 'q', 'p', 'h', 's', 'o', 'e'];
+            var el = y.map(e => f[e]).join('');
+            var bi = '';
+            for (let i = 0; i < y.length; i++) {
+                if (i+1 === y.length && (y[i] === 2 || y[i] === 3)) {
+                    bi = bi + d[i].slice(0,d[y[i]].length);
+                    continue;
+                }
+                else if (i+1 < y.length && (y[i] === 9 && y[i+1] === 0)){
+                    bi = bi + d[i].slice(0,d[y[i]].length);
+                    continue;
+                }
+                bi = bi + d[i];
+            }
+            bi = bi + 'ium'
+            return {
+                element: el.charAt(0).toUpperCase() + el.slice(1),
+                color: '#cccccc',
+                binftext: bi.charAt(0).toUpperCase() + bi.slice(1) + '(' + el + ')'
+            }
         }
     }
 }
@@ -747,7 +765,7 @@ addLayer('g', {
                 for(let y = 1; y <= tmp.g.grid.cols; y++) {
                     for(let x = 1; x <= tmp.g.grid.rows; x++) {
                         let id = 100 * y + x;
-                        if(getGridData('g', id) == IRON + getBuyableAmount('infinity', 5).toNumber()) {
+                        if(getGridData('g', id) >= IRON + getBuyableAmount('infinity', 5).toNumber()) {
                             sumOfFe = sumOfFe.plus(1);
                         }
                     }

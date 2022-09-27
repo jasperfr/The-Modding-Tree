@@ -70,7 +70,10 @@ addLayer('crunch', {
 
     update() {
         if(hasUpgrade('infinity', 'breakInfinity')) return;
-        if(player.points.gte(new Decimal('2e1024'))) {
+        if(
+           (player.infinity.activeChallenge != null && player.points.gte(new Decimal('2e1024')))
+        || (player.infinity.infinities.lte(10) && player.points.gte(new Decimal('2e1024')))
+        ) {
             options.forceOneTab = true;
             player.points = new Decimal('2e1024')
             showTab('crunch');
@@ -104,8 +107,6 @@ addLayer('crunch', {
                         buyUpgrade('infinity', 'unlockChallenges');
                         buyUpgrade('infinity', 'breakInfinity');
                     }
-                } else {
-                    player[this.layer].infinities = player[this.layer].infinities.plus(1);
                 }
 
                 player.infinity.unlocked = true;

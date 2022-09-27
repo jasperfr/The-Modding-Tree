@@ -135,11 +135,19 @@ addLayer('g', {
     },
 
     spawnRate() {
-        return Decimal.max(1 / 60, Decimal.div(Decimal.mul(10, Decimal.pow(0.65, getBuyableAmount('g', 11))), hasUpgrade('infinity', 'ultraFastSpawnRate') ? tmp.infinity.upgrades['ultraFastSpawnRate'].effect : 1)).toNumber();
+        return Decimal.max(
+        1 / 60,
+        Decimal.div(Decimal.mul(10, Decimal.pow(0.65, getBuyableAmount('g', 11))),
+        hasUpgrade('infinity', 'ultraFastSpawnRate') ? tmp.infinity.upgrades['ultraFastSpawnRate'].effect : 1))
+        .toNumber();
     },
 
     mergeRate() {
-        return Decimal.max(1 / 60, Decimal.mul(20, Decimal.pow(0.65, getBuyableAmount('g', 12)))).toNumber();
+        return Decimal.max(
+            1 / 60,
+            Decimal.mul(20, Decimal.pow(0.65, getBuyableAmount('g', 12))),
+            hasUpgrade('infinity', 'ultraFastMergeRate') ? tmp.infinity.upgrades['ultraFastMergeRate'].effect : 1)
+            .toNumber();
     },
 
     multiplier() {

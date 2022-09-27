@@ -1,5 +1,10 @@
 const __in = {
     header: ['column', [
+        function() {    
+            if(!hasUpgrade('infinity', 'breakInfinity') && player.infinity.infinities.gt(10) && player.points.gte(new Decimal('2e1024'))) {
+                return ['column', [['clickable', 'crunch'], 'blank']]
+            }
+        },
         ['display-text', function() { return `You have <span style="color:orange;font-size:20px;font-weight:bold;">${__(player.infinity.points, 3, 1)}</span> IP.`; }, { 'color': 'silver' }],
         ['display-text', function() { return `You have infinitied <span style="color:orange;font-size:20px;font-weight:bold;">${formatWhole(player.infinity.infinities)}</span> times.`; }, { 'color': 'silver', 'font-size': '12px' }],
         ['display-text', function() { return `You have <span style="color:orange;font-size:20px;font-weight:bold;">${formatWhole(player.infinity.studyPoints)}</span>/${formatWhole(tmp.infinity.maxStudyPoints)} Study Points.`; }, { 'color': 'silver', 'font-size': '12px' }],
@@ -100,6 +105,7 @@ addLayer('infinity', {
         return {
             unlocked: false,
             broken: false,
+
             points: new Decimal(0),
             infinities: new Decimal(0),
             studyPoints: new Decimal(0),
@@ -112,6 +118,11 @@ addLayer('infinity', {
     },
 
     update(delta) {
+
+        if(!hasUpgrade('infinity', 'breakInfinity') && player.infinity.infinities.gt(10) && player.points.gte(new Decimal('2e1024'))) {
+            player.points = new Decimal('2e1024');
+        }
+
         player.infinity.timeInCurrentInfinity += delta;
     },
 
@@ -522,6 +533,31 @@ addLayer('infinity', {
     },
 
     clickables: {
+        crunch: {
+            onClick() {
+                // Reset study points
+                if(getClickableState('infinity', 'respecOnNextInfinity') === 'ON') {
+                    player.infinity.studyPoints = tmp.infinity.maxStudyPoints;
+                    player.infinity.upgrades = [];
+                    buyUpgrade('infinity', 'unlockChallenges');
+                    buyUpgrade('infinity', 'breakInfinity');
+                }
+
+                player.infinity.timeInCurrentInfinity = 0;
+                player.infinity.points = player.infinity.points.plus(1);
+                player.infinity.infinities = player.infinity.infinities.plus(1);
+                
+                resetAD();
+                resetBD();
+                resetG();
+
+                player.points = new Decimal(100);
+            },
+            canClick() { return true; },
+            display() { return `The universe collapsed! Perform the<br><h2>Big Crunch</h2><br>(${TIME(player.infinity.timeInCurrentInfinity)} this Infinity)` },
+            style() { return { 'font-size': '16px', 'height': '100px', 'width': '400px', 'border-color': 'orange !important' }}
+        },
+
         respecOnNextInfinity: {
             onClick() { setClickableState(this.layer, this.id, getClickableState(this.layer, this.id) === 'OFF' ? 'ON' : 'OFF') }, 
             canClick() { return true; },

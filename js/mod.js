@@ -19,6 +19,7 @@ let modInfo = {
 		'layers/antimatter.js',
 		'layers/booster.js',
 		'layers/galaxy.js',
+		'layers/galaxy-extended.js',
 		'layers/infinity.js',
 		'layers/chroma.js',
 		'layers/duplicanti.js',
@@ -160,6 +161,7 @@ function getPointGen() {
 		.times(1.05 ** player.ach.achievements.length)
 		.times(hasUpgrade('infinity', 'x1e10Boost') ? 1e10 : 1)
 		.times(tmp.infinity.buyables[6].effect)
+		.times(tmp.infinity.power.multiplier)
 	
 	return gain
 }

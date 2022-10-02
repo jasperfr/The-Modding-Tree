@@ -1,50 +1,3 @@
-const ELEMENTS = ['', 'H', 'He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ar', 'Fe', 'Co', 'Cu', 'Zn', 'Rb', 'Ag', 'Au', 'U', 'Ub'];
-//                 0   1    2     3    4    5    6     7     8     9    10    11    12    13    14    15    16    17    18   19
-const IRON = 11;
-//                 0          1  H       2  He      3  C       4  N       5  O       6  Ne      7  Mg      8  Si      9  S       10 Ar      11 Fe     12 Co      13 Cu      14 Zn      15 Rb      16 Ag      17 Au      18 U       19 Ub
-const ELCOLORS = ['#222222', '#eeeeee', '#98b9ed', '#88878a', '#eb9234', '#6acca8', '#a5e1ee', '#82ed8d', '#e06153', '#e6c019', '#e65529', '#999999','#00CCFF', '#ccaa22', '#888888', '#cc3322', '#ffd700', '#88aa88', '#22ff22', '#cc22bb'];
-const BINFTEXT = ['Iron (Fe)', 'Cobalt (Co)', 'Copper (Cu)', 'Zinc (Zn)', 'Rubidium (Rb)', 'Silver (Ag)', 'Gold (Au)', 'Uranium (U)', 'Unobtainium (Ub)', 'Undefinedium (Ud)']
-
-function element(n) {
-    if(n < ELEMENTS.length) return {
-        element: ELEMENTS[n],
-        color: ELCOLORS[n],
-        binftext: BINFTEXT[IRON]
-    }
-    else{
-        n=4*n+20
-        if(n > 999) return {
-            element: `A${n}`,
-            color: `#ffffff`,
-            binftext: `A${n}`
-        }
-        else {
-            const y = n.toString().split(''),
-            d = ['nil', 'un', 'bi', 'tri', 'quad', 'pent', 'hex', 'sept', 'oct', 'enn'],
-            f = ['n', 'u', 'b', 't', 'q', 'p', 'h', 's', 'o', 'e'];
-            var el = y.map(e => f[e]).join('');
-            var bi = '';
-            for (let i = 0; i < y.length; i++) {
-                if (i+1 === y.length && (y[i] === 2 || y[i] === 3)) {
-                    bi = bi + d[i].slice(0,d[y[i]].length);
-                    continue;
-                }
-                else if (i+1 < y.length && (y[i] === 9 && y[i+1] === 0)){
-                    bi = bi + d[i].slice(0,d[y[i]].length);
-                    continue;
-                }
-                bi = bi + d[i];
-            }
-            bi = bi + 'ium'
-            return {
-                element: el.charAt(0).toUpperCase() + el.slice(1),
-                color: '#cccccc',
-                binftext: bi.charAt(0).toUpperCase() + bi.slice(1) + '(' + el + ')'
-            }
-        }
-    }
-}
-
 function resetG() {
     let autoGalaxyUpgrades = 'Locked';
     let autoGalaxySupernovas = 'Locked';
@@ -58,13 +11,13 @@ function resetG() {
     setClickableState('bd', 'autoSupernova', autoGalaxySupernovas);
 }
 
-addLayer('g', {
+addLayer('g+', {
 
     /* === Base information === */
-    name: 'Galaxies',
-    symbol() { return options.toggleButtonAnimations ? '' : 'G' },
+    name: 'Galaxies+',
+    symbol() { return options.toggleButtonAnimations ? '' : 'G+' },
     color: '#dd3ffc',
-    tooltip: 'Galaxies',
+    tooltip: 'Galaxies+',
     resource: 'GP',
 
     nodeStyle() {
@@ -80,12 +33,7 @@ addLayer('g', {
     },
 
     layerShown() {
-        if(inChallenge('infinity', 11)) return false;   // true AD
-        if(inChallenge('infinity', 12)) return false;   // 2048
-        if(inChallenge('infinity', 21)) return player.g.unlocked;    // boostless
-        if(inChallenge('infinity', 22)) return false;   // starless
-        if(inChallenge('infinity', 31)) return false;   // drought
-        return player.g.unlocked;
+        return hasUpgrade('infinity', 'extendGalaxies');
     },
 
     /* === Data information === */
@@ -118,8 +66,6 @@ addLayer('g', {
 
     points: {
         gain() {
-            if(hasUpgrade('infinity', 'extendGalaxies')) return new Decimal(0);
-            
             if(inChallenge('infinity', 22)) return new Decimal(0);
             if(inChallenge('infinity', 21)) {
                 if(player.points.lt('1e100')) return new Decimal(0);
@@ -137,8 +83,6 @@ addLayer('g', {
     },
 
     spawnRate() {
-        if(hasUpgrade('infinity', 'extendGalaxies')) return 0;
-
         return Decimal.max(
         1 / 60,
         Decimal.div(Decimal.mul(10, Decimal.pow(0.65, getBuyableAmount('g', 11))),
@@ -147,8 +91,6 @@ addLayer('g', {
     },
 
     mergeRate() {
-        if(hasUpgrade('infinity', 'extendGalaxies')) return 0;
-
         return Decimal.max(
             1 / 60,
             Decimal.mul(20, Decimal.pow(0.65, getBuyableAmount('g', 12))),
@@ -157,8 +99,6 @@ addLayer('g', {
     },
 
     multiplier() {
-        if(hasUpgrade('infinity', 'extendGalaxies')) return new Decimal(1.0);
-
         if(!player.g.unlocked) return new Decimal(1.0);
         let sum = new Decimal(1);
         for(let y = 1; y <= tmp.g.grid.cols; y++) {

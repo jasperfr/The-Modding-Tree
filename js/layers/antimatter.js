@@ -102,6 +102,7 @@ addLayer('ad', {
                 .times(tmp.d.decrementy.effectAD)
                 .times(tmp.infinity.buyables[6].effect)
                 .times(hasUpgrade('infinity', 'x1e10Boost') ? 1e10 : 1)
+                .times(tmp.infinity.power.multiplier)
                 .times(delta)
             );
 
@@ -163,6 +164,7 @@ addLayer('ad', {
                             .div(tmp.ad.matter.divider)
                             .times(tmp.d.decrementy.effectAD)
                             .times(tmp.infinity.buyables[6].effect)
+                            .times(tmp.infinity.power.multiplier)
                             , 1);
                         let amount = mixedStandardFormat(player.ad.dimensions[i], 2, true);
                         html[1].push(['row', [

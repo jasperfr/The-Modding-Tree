@@ -9,6 +9,17 @@ const __in = {
         ['display-text', function() { return `You have infinitied <span style="color:orange;font-size:20px;font-weight:bold;">${formatWhole(player.infinity.infinities)}</span> times.`; }, { 'color': 'silver', 'font-size': '12px' }],
         ['display-text', function() { return `You have <span style="color:orange;font-size:20px;font-weight:bold;">${formatWhole(player.infinity.studyPoints)}</span>/${formatWhole(tmp.infinity.maxStudyPoints)} Study Points.`; }, { 'color': 'silver', 'font-size': '12px' }],
         'blank',
+        
+        function() {
+            if(hasUpgrade('infinity', 'unlockInfinityDims'))
+                return ['column', [
+                    ['display-text', `You have <span style="color:orange;font-size:20px;font-weight:bold;">${mixedStandardFormat(player.infinity.power, 2)}</span> Infinity Power.`, { 'color': 'silver' }],
+                    ['display-text', `Your Infinity Power multiplies all ADs by x<span style="color:orange;font-size:20px;">${format(tmp.infinity.power.multiplier)}</span>.`, { 'color': 'silver', 'font-size': '12px' }],
+                    ['display-text', `You are getting <span style="font-size:12px;">${__(tmp.infinity.power.generation, 2, 0)}</span> Infinity Power per second.`, { 'color': 'silver', 'font-size': '10px' }],
+                    'blank'
+                ]]
+        },
+        
         function() { if(hasUpgrade('infinity', 'breakInfinity')) return ['column', ['prestige-button', 'blank']] },
         'blank'
     ]],
@@ -109,7 +120,10 @@ addLayer('infinity', {
             points: new Decimal(0),
             infinities: new Decimal(0),
             studyPoints: new Decimal(0),
-            timeInCurrentInfinity: 0
+            timeInCurrentInfinity: 0,
+
+            power: new Decimal(0),
+            dimensions: Array(8).fill(0).map(() => new Decimal(0)),
         }
     },
 
@@ -117,7 +131,42 @@ addLayer('infinity', {
         return getBuyableAmount('infinity', 'SPFromAM').plus(getBuyableAmount('infinity', 'SPFromIP')).plus(getBuyableAmount('infinity', 'SPFromFE'))
     },
 
+    power: {
+        multiplier() {
+            return Decimal.pow(player.infinity.power, 2);
+        },
+
+        generation() {
+            let multiplier = tmp.infinity.buyables[`dimension-1`].multiplier;
+            let gain = player.infinity.dimensions[0]
+            .times(multiplier);
+            return gain;
+        }
+    },
+
     update(delta) {
+
+        if(hasUpgrade('infinity', 'unlockInfinityDims')) {
+            // Update dimensions
+            for(let i = 0; i < 6; i++) {
+                let multiplier = tmp.infinity.buyables[`dimension-${i+2}`].multiplier;
+                let gain = player.infinity.dimensions[i + 1]
+                .times(multiplier)
+                .times(delta);
+
+                player.infinity.dimensions[i] = player.infinity.dimensions[i].plus(gain);
+            }
+
+            // Update infinity power
+            {
+                let multiplier = tmp.infinity.buyables[`dimension-1`].multiplier;
+                let gain = player.infinity.dimensions[0]
+                .times(multiplier)
+                .times(delta);
+
+                player.infinity.power = player.infinity.power.plus(gain);
+            }
+        }
 
         if(!hasUpgrade('infinity', 'breakInfinity') && player.infinity.infinities.gt(10) && player.points.gte(new Decimal('2e1024'))) {
             player.points = new Decimal('2e1024');
@@ -146,6 +195,8 @@ addLayer('infinity', {
                 'blank','blank',
                 ['row', [['upgrade', 'breakInfinity']]],
                 'blank','blank',
+                ['row', [['upgrade', 'extendGalaxies']]],
+                'blank','blank',
                 ['row', [['upgrade', 'unlockInfinityDims']]],
                 'blank','blank',
                 // ['row', [['upgrade', 'unlockIncrementy'], 'blank', ['upgrade', 'unlockUniverses']]],
@@ -169,6 +220,26 @@ addLayer('infinity', {
                 ['row', [['buyable', 1], ['buyable', 2]]],
                 ['row', [['buyable', 3], ['buyable', 4]]],
                 ['row', [['buyable', 5], ['buyable', 6]]]
+            ]
+        },
+        'Infinity Dimensions': {
+            unlocked() { return hasUpgrade('infinity', 'unlockInfinityDims') },
+            content: [
+                __in.header,
+                // Dimensions
+                function() {
+                    const html = ['column', []];
+                    for(let i = 0; i < 7; i++) {
+                        let multiplier = mixedStandardFormat(tmp.infinity.buyables[`dimension-${i+1}`].multiplier, 1);
+                        let amount = mixedStandardFormat(player.infinity.dimensions[i], 2, 0);
+                        html[1].push(['row', [
+                            ['raw-html', `<div style="width:250px; text-align:left;"><span style="font-weight:bold;">${ORDINAL[i+1]} Infinity Dimension</span><br><span style="color:silver;">x${multiplier}</span></div>`, { margin: 'auto 0', 'font-size': '12px' }],
+                            ['raw-html', `<div style="width:200px;font-weight:bold;">${amount}</div>`, { margin: 'auto 0', 'font-size': '14px' }],
+                            ['buyable', `dimension-${i+1}`, { margin: 'auto 0' }]
+                        ], { width: '100%', margin: 0, 'justify-content': 'space-between', 'background-color' : i % 2 && '#0002' }]);
+                    }
+                    return html;
+                },
             ]
         }
     },
@@ -413,14 +484,23 @@ addLayer('infinity', {
             onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
             price: 10,
             style: { height: '100px', border: '2px solid orange !important' },
-            branches: ['unlockIncrementy']
+            branches: ['unlockInfinityDims']
         },
 
+        // extendGalaxies: {
+        //     canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'breakInfinity') },
+        //     fullDisplay() { return `Extend the Galaxy Layer.<br><br>Requires ${this.price} SP`  },
+        //     onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
+        //     price: 20,
+        //     style: { height: '100px', border: '2px solid orange !important' },
+        //     branches: ['unlockInfinityDims']
+        // },
+
         unlockInfinityDims: {
-            canAfford() { return player.infinity.studyPoints.gte(this.price) && hasUpgrade('infinity', 'breakInfinity') },
-            fullDisplay() { return `Unlock Infinity Dimensions.<br><br>Soon`  },
-            onPurchase() { player.infinity.studyPoints = player.infinity.studyPoints.minus(this.price); },
-            price: 1e308,
+            canAfford() { return player.infinity.points.gte(this.price) && hasUpgrade('infinity', 'breakInfinity') },
+            fullDisplay() { return `Unlock Infinity Dimensions.<br><br>Costs ${this.price} IP`  },
+            onPurchase() { },
+            price: 2**16,
             style: { height: '100px', border: '2px solid orange !important' },
             branches: ['unlockIncrementy', 'unlockUniverses']
         },
@@ -459,6 +539,15 @@ addLayer('infinity', {
     },
 
     buyables: {
+        'dimension-1': infinityDimBuyable(0, 2**16,  2**2),
+        'dimension-2': infinityDimBuyable(1, 2**32,  2**4),
+        'dimension-3': infinityDimBuyable(2, 2**48,  2**6),
+        'dimension-4': infinityDimBuyable(3, 2**64,  2**8),
+        'dimension-5': infinityDimBuyable(4, 2**80,  2**10),
+        'dimension-6': infinityDimBuyable(5, 2**96,  2**12),
+        'dimension-7': infinityDimBuyable(6, 2**128,  2**14),
+        'dimension-8': infinityDimBuyable(7, 2**144, 2**16),
+
         'SPFromAM': {
             cost() { return Decimal.pow(1e200, getBuyableAmount(this.layer, this.id).plus(1)) },
             canAfford() { return player.points.gte(this.cost()) },
@@ -566,3 +655,36 @@ addLayer('infinity', {
     }
 
 });
+
+/*
+    i seriously hate updating this mod - jaspertje1, 2-10-2022
+    thank god this doesnt use the shitty 10 cost formula I despise
+*/
+function infinityDimBuyable(dimension, cost, multiplier) {
+    return {
+        cost() { return Decimal.times(cost, Decimal.pow(multiplier, this.amount())); },
+        display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)}` },
+        canAfford() { return player.infinity.points.gte(this.cost()) },
+        buy() {
+            if(this.canAfford()) {
+                player.infinity.points = player.infinity.points.sub(this.cost());
+                player.infinity.dimensions[dimension] = player.infinity.dimensions[dimension].plus(1);
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(1));
+            }
+        },
+        buyMax() {
+            // i'm not going through all this shit again here's a while loop screw you
+            while(this.canAfford()) {
+                this.buy();
+            }
+        },
+        multiplier() { return Decimal.pow(2.5, this.amount()) },
+        amount() { return getBuyableAmount(this.layer, this.id) },
+        style() {
+            return {
+                'border-color': 'orange',
+                'width': '150px',
+            }
+        }
+    }
+}

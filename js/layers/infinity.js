@@ -133,7 +133,7 @@ addLayer('infinity', {
 
     power: {
         multiplier() {
-            return Decimal.pow(player.infinity.power, 2);
+            return Decimal.max(1, Decimal.pow(player.infinity.power, 2));
         },
 
         generation() {

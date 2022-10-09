@@ -206,7 +206,18 @@ addLayer('infinity', {
             ]
         },
         'Challenges': {
-            unlocked() { return hasUpgrade('infinity', 'unlockChallenges') },
+            unlocked() {
+                return hasUpgrade('infinity', 'unlockChallenges')
+                || inChallenge('infinity', 11)
+                || inChallenge('infinity', 12)
+                || inChallenge('infinity', 21)
+                || inChallenge('infinity', 22)
+                || inChallenge('infinity', 31)
+                || inChallenge('infinity', 32)
+                || inChallenge('infinity', 41)
+                || inChallenge('infinity', 42)
+                || inChallenge('infinity', 51)
+            },
             content: [
                 __in.header,
                 'challenges'

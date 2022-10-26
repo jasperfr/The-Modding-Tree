@@ -214,13 +214,13 @@ addLayer('g', {
             ]];
             else return ['column', [
                 ["bar", "interval"],
-                ['display-text', function() { return `Spawn rate: <b>${__(1 / tmp.g.spawnRate, 2)}</b>/sec ${tmp.g.spawnRate === (1 / 60) ? '(MAX)' : ''}`; }, { 'color': 'silver', 'font-size': '12px' }],
+                ['display-text', `Spawn rate: <b>${__(1 / tmp.g.spawnRate, 2)}</b>/sec ${tmp.g.spawnRate === (1 / 60) ? '(MAX)' : ''}`, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
                 ["bar", "merge"],
-                ['display-text', function() { return `Merge rate: <b>${__(1 / tmp.g.mergeRate, 2)}</b>/sec ${tmp.g.mergeRate === (1 / 60) ? '(MAX)' : ''}`; }, { 'color': 'silver', 'font-size': '12px' }],
+                ['display-text', `Merge rate: <b>${__(1 / tmp.g.mergeRate, 2)}</b>/sec ${tmp.g.mergeRate === (1 / 60) ? '(MAX)' : ''}`, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
                 "grid",
-                ['display-text', function() { return `Use the arrow keys or the mouse to move / merge the atoms around.<br>The multiplier increases with each higher atom,<br>but will <u tooltip="Stars can't fuse iron!">stop</u> at ${element(getBuyableAmount('infinity', 5).toNumber()).binftext ?? 'Iron (Fe)'}.`; }, { 'color': 'silver', 'font-size': '12px' }],
+                ['display-text',`Use the arrow keys or the mouse to move / merge the atoms around.<br>The multiplier increases with each higher atom,<br>but will <u tooltip="Stars can't fuse iron!">stop</u> at ${element(getBuyableAmount('infinity', 5).toNumber()).binftext ?? 'Iron (Fe)'}.`, { 'color': 'silver', 'font-size': '12px' }],
                 'blank',
                 ['clickable', 'gain'],
                 ['row', [
@@ -233,7 +233,7 @@ addLayer('g', {
                 ]],
                 ['clickable', 'auto'],
                 'blank',
-                ['display-text', function() { return `Supernovas (${getBuyableAmount('g', 13)})` }, { 'color': 'white', 'font-size': '14px' }],
+                ['display-text', `Supernovas (${getBuyableAmount('g', 13)})`, { 'color': 'white', 'font-size': '14px' }],
                 'blank',
                 ['row', [
                     ['buyable', 13],

@@ -323,16 +323,10 @@ addLayer('ach', {
             style: { 'background-position' : '-576px -320px' }
         },
         56: {
-            name: 'On second thought',
-            tooltip: '<h4>On second thought</h4><br><h5>Fix Infinity. [UNIMPLEMENTED]</h5>',
-            done() { return false; },
-            style: { 'background-position' : '-640px -320px' }
-        },
-        57: {
-            name: 'AAAAHHHH',
-            tooltip: '<h4>AAAAHHHH</h4><br><h5>Fix infinity after nerfing the cost scaling to 1.0x. [UNIMPLEMENTED]</h5>',
-            done() { return false; },
-            style: { 'background-position' : '-704px -256px' }
+            name: 'Speedy Crunch',
+            tooltip: '<h4>Speedy Crunch</h4><br><h5>Big Crunch in under a minute. Reward: x2 to IP gain.</h5>',
+            done() { return player.infinity.fastestCrunch.lte(60); },
+            style: { 'background-position' : '-576px -512px' }
         },
         57: {
             name: 'I still hate this mechanic',
@@ -347,7 +341,7 @@ addLayer('ach', {
                         && hasChallenge('infinity', 42)
                         && inChallenge('infinity', 12); },
             style: { 'background-position' : '-768px 0px' }
-        }
+        },
     }
 
 });

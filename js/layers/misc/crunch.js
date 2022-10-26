@@ -98,6 +98,7 @@ addLayer('crunch', {
                     completeChallenge('infinity', 42);
                 }
 
+                player.infinity.fastestCrunch = Decimal.min(player.infinity.fastestCrunch, player.infinity.timeInCurrentInfinity);
                 player.infinity.timeInCurrentInfinity = 0;
         
                 if(player.infinity.activeChallenge == null) {
@@ -110,7 +111,7 @@ addLayer('crunch', {
                 }
 
                 player.infinity.unlocked = true;
-                player.infinity.points = player.infinity.points.plus(1);
+                player.infinity.points = player.infinity.points.plus(hasAchievement('ach', 56) ? 2 : 1);
                 player.infinity.infinities = player.infinity.infinities.plus(1);
                 resetAD();
                 resetBD();

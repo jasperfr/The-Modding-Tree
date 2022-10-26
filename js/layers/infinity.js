@@ -61,6 +61,7 @@ addLayer('infinity', {
     baseAmount() { return player.points; },
     gainMult() {
         return new Decimal(1)
+        .times(hasAchievement('ach', 56) ? 2 : 1)
         .times(tmp.infinity.buyables[1].effect);
     },
     gainExp() { return new Decimal(1); },
@@ -121,6 +122,7 @@ addLayer('infinity', {
             infinities: new Decimal(0),
             studyPoints: new Decimal(0),
             timeInCurrentInfinity: 0,
+            fastestCrunch: new Decimal('1e1024'),
 
             power: new Decimal(0),
             dimensions: Array(8).fill(0).map(() => new Decimal(0)),
@@ -635,6 +637,8 @@ addLayer('infinity', {
     clickables: {
         crunch: {
             onClick() {
+                player.infinity.fastestCrunch = Decimal.min(player.infinity.fastestCrunch, player.infinity.timeInCurrentInfinity);
+
                 // Reset study points
                 if(getClickableState('infinity', 'respecOnNextInfinity') === 'ON') {
                     player.infinity.studyPoints = tmp.infinity.maxStudyPoints;
@@ -644,7 +648,7 @@ addLayer('infinity', {
                 }
 
                 player.infinity.timeInCurrentInfinity = 0;
-                player.infinity.points = player.infinity.points.plus(1);
+                player.infinity.points = player.infinity.points.plus(hasAchievement('ach', 56) ? 2 : 1);
                 player.infinity.infinities = player.infinity.infinities.plus(1);
                 
                 resetAD();

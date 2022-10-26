@@ -92,7 +92,7 @@ addLayer('g', {
     startData() {
         return {
             unlocked: false,
-            extended: true,
+            extended: false,
 
             points: new Decimal(0),
             interval: 0,

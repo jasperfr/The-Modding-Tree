@@ -11,11 +11,11 @@ function resetG() {
     setClickableState('bd', 'autoSupernova', autoGalaxySupernovas);
 }
 
-addLayer('g+', {
+addLayer('wdwd', {
 
     /* === Base information === */
     name: 'Galaxies+',
-    symbol() { return options.toggleButtonAnimations ? '' : 'G+' },
+    symbol() { return options.toggleButtonAnimations ? '' : 'NO' },
     color: '#dd3ffc',
     tooltip: 'Galaxies+',
     resource: 'GP',

@@ -62,7 +62,7 @@ addLayer('g', {
 
     /* === Base information === */
     name: 'Galaxies',
-    symbol() { return options.toggleButtonAnimations ? '' : 'G' },
+    symbol() { return options.toggleButtonAnimations ? '' : ('G' + (player.g.extended ? '+' : '')) },
     color: '#dd3ffc',
     tooltip: 'Galaxies',
     resource: 'GP',
@@ -92,6 +92,7 @@ addLayer('g', {
     startData() {
         return {
             unlocked: false,
+            extended: true,
 
             points: new Decimal(0),
             interval: 0,
@@ -202,37 +203,48 @@ addLayer('g', {
             `
         }, { 'color': 'silver', 'font-size': '12px' }],
         'blank',
-        ["bar", "interval"],
-        ['display-text', function() { return `Spawn rate: <b>${__(1 / tmp.g.spawnRate, 2)}</b>/sec ${tmp.g.spawnRate === (1 / 60) ? '(MAX)' : ''}`; }, { 'color': 'silver', 'font-size': '12px' }],
-        'blank',
-        ["bar", "merge"],
-        ['display-text', function() { return `Merge rate: <b>${__(1 / tmp.g.mergeRate, 2)}</b>/sec ${tmp.g.mergeRate === (1 / 60) ? '(MAX)' : ''}`; }, { 'color': 'silver', 'font-size': '12px' }],
-        'blank',
-        "grid",
-        ['display-text', function() { return `Use the arrow keys or the mouse to move / merge the atoms around.<br>The multiplier increases with each higher atom,<br>but will <u tooltip="Stars can't fuse iron!">stop</u> at ${element(getBuyableAmount('infinity', 5).toNumber()).binftext ?? 'Iron (Fe)'}.`; }, { 'color': 'silver', 'font-size': '12px' }],
-        'blank',
-        ['clickable', 'gain'],
-        ['row', [
-            ['buyable', 11],
-            ['buyable', 12],
-        ]],
-        ['row', [
-            ['buyable', 21],
-            ['buyable', 22],
-        ]],
-        ['clickable', 'auto'],
-        'blank',
-        ['display-text', function() { return `Supernovas (${getBuyableAmount('g', 13)})` }, { 'color': 'white', 'font-size': '14px' }],
-        'blank',
-        ['row', [
-            ['buyable', 13],
-        ]],
-        ['clickable', 'autoSupernova'],
-        'blank'
+        function() {
+
+            let minimalAtom = getBuyableAmount('g', 21).plus(1).toNumber();
+            let label = element(minimalAtom).element;
+
+            if(player.g.extended) return ['column', [
+                ['display-text', `Spawn rate: <b>${__(1 / tmp.g.spawnRate, 2)}</b> ${label}/sec`, { 'color': 'silver', 'font-size': '12px' }],
+                ['display-text', `Extended Galaxies auto-merge.`, { 'color': 'silver', 'font-size': '12px' }],
+            ]];
+            else return ['column', [
+                ["bar", "interval"],
+                ['display-text', function() { return `Spawn rate: <b>${__(1 / tmp.g.spawnRate, 2)}</b>/sec ${tmp.g.spawnRate === (1 / 60) ? '(MAX)' : ''}`; }, { 'color': 'silver', 'font-size': '12px' }],
+                'blank',
+                ["bar", "merge"],
+                ['display-text', function() { return `Merge rate: <b>${__(1 / tmp.g.mergeRate, 2)}</b>/sec ${tmp.g.mergeRate === (1 / 60) ? '(MAX)' : ''}`; }, { 'color': 'silver', 'font-size': '12px' }],
+                'blank',
+                "grid",
+                ['display-text', function() { return `Use the arrow keys or the mouse to move / merge the atoms around.<br>The multiplier increases with each higher atom,<br>but will <u tooltip="Stars can't fuse iron!">stop</u> at ${element(getBuyableAmount('infinity', 5).toNumber()).binftext ?? 'Iron (Fe)'}.`; }, { 'color': 'silver', 'font-size': '12px' }],
+                'blank',
+                ['clickable', 'gain'],
+                ['row', [
+                    ['buyable', 11],
+                    ['buyable', 12],
+                ]],
+                ['row', [
+                    ['buyable', 21],
+                    ['buyable', 22],
+                ]],
+                ['clickable', 'auto'],
+                'blank',
+                ['display-text', function() { return `Supernovas (${getBuyableAmount('g', 13)})` }, { 'color': 'white', 'font-size': '14px' }],
+                'blank',
+                ['row', [
+                    ['buyable', 13],
+                ]],
+                ['clickable', 'autoSupernova'],
+                'blank'
+            ]];
+        }
     ],
 
     update(tick) {
-
         player.g.timeInCurrentAD += tick;
 
         // not sure if this is a good idea tbh

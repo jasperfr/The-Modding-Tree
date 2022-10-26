@@ -488,7 +488,7 @@ function dimBuyable(dimension, cost, multiplier) {
                 return Decimal.times(cost, Decimal.pow(multiplier, this.amount10().times(costScaling))).div('1e308')
             }
         },
-        display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)}` },
+        display() { return `Cost: ${mixedStandardFormat(this.cost(), 2, true)} [${getBuyableAmount(this.layer, this.id)}]` },
         canAfford() { return player.points.gte(this.cost()) },
         buy() {
             if(this.canAfford()) {
@@ -512,7 +512,7 @@ function dimBuyable(dimension, cost, multiplier) {
             }
 
             // buy up until the cost scaling afterwards.
-            {
+            if(player.points.lte(1e308)) {
                 const b = Decimal.times(cost, 10);
                 const r = new Decimal(multiplier);
                 const k = getBuyableAmount(this.layer, this.id).div(10);
@@ -528,8 +528,19 @@ function dimBuyable(dimension, cost, multiplier) {
             }
 
             // buy up after the cost scaling afterwards.
-            if(player.points.gt(1e308)) {
-                // not implemented yet, the buy up to 10 dimensions first will take care of the rest for now
+            else if(player.points.gt(1e308)) {
+                const b = Decimal.times(cost, 10).div(1e308);
+                const r = new Decimal(multiplier);
+                const k = getBuyableAmount(this.layer, this.id).div(10).times(Decimal.minus(2, getBuyableAmount('infinity', 2).times(0.05))).floor();
+                const c = player.points;
+                const n = c.times(r.minus(1)).div(b).times(r.pow(k)).plus(1).log(r).floor().minus(k.times(2));
+                const m = b.times(r.pow(k).times(r.pow(n).minus(1)).div(r.minus(1)));
+
+                if(n.gt(0)) {
+                    player.points = player.points.sub(m);
+                    player.ad.dimensions[dimension] = player.ad.dimensions[dimension].plus(n.times(10));
+                    setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).plus(n.times(10)));
+                }
             }
 
             // Buy up to 10 dimensions last.

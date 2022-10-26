@@ -43,11 +43,13 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.5.0",
-	name: "The Study Update",
+	num: "1.6.0",
+	name: "The Maximum Update",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v1.6.0</h3><br>
+		- Buy Max is finally fixed!<br>
 	<h3>v1.5.0</h3><br>
 		- New styling across the entire game<br>
 		- Revamped the Infinity Study tree to actually be useful<br>

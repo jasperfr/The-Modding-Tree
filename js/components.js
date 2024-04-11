@@ -9,6 +9,14 @@ function loadVue() {
 		`
 	})
 
+	// Smaller text.
+	Vue.component('display-small', {
+		props: ['layer', 'data'],
+		template: `
+			<span class="instant" style="font-size:10pt;color:silver;" v-html="data"></span>
+		`
+	})
+
 // data = a function returning the content (actually HTML)
 	Vue.component('raw-html', {
 			props: ['layer', 'data'],
@@ -54,6 +62,55 @@ function loadVue() {
 			</div>
 		</div>
 		`
+	})
+
+
+	/*
+
+	
+	<div v-if="!Array.isArray(item)" v-bind:is="item" :layer= "layer" v-bind:style="tmp[layer].componentStyles[item]" :key="key + '-' + index"></div>
+	<div v-else-if="item.length==3" v-bind:style="[tmp[layer].componentStyles[item[0]], (item[2] ? item[2] : {})]" v-bind:is="item[0]" :layer= "layer" :data= "item[1]" :key="key + '-' + index"></div>
+	<div v-else-if="item.length==2" v-bind:is="item[0]" :layer= "layer" :data= "item[1]" v-bind:style="tmp[layer].componentStyles[item[0]]" :key="key + '-' + index"></div>
+
+	*/
+	
+
+	// Custom AD components.
+	Vue.component('dimension', {
+		props: ['layer', 'data'],
+		computed: {
+			key() { return this.$vnode.key },
+		},
+		template: `
+		<div class="upgTable instant">
+			<div class="upgRow antimatter-dimension">
+				<div class="dimension-title">
+					<span>{{ORDINAL[data[0]]}} Dimension</span>
+					<span>x{{mixedStandardFormat(data[2], 1)}}</span>
+				</div>
+				<div class="dimension-amount" v-html="mixedStandardFormat(data[1], 3)"/>
+				<buyable :layer="layer" :data="'dimension-'+data[0]"/>
+			</div>
+		</div>`
+	})
+
+	Vue.component('autobuyer', {
+		props: ['layer', 'data'],
+		computed: {
+			key() { return this.$vnode.key },
+		},
+		template: `
+		<div class="upgTable instant">
+			<div class="upgRow autobuyer">
+				<div class="dimension-title wide">
+					<span>{{data[0]}} Autobuyer</span>
+					<span>Interval: {{mixedStandardFormat(buyableEffect(layer, data[1]), 1)}} ms</span>
+					<span>Locked</span>
+				</div>
+				<buyable :layer="layer" :data="data[1]"/>
+				<clickable :layer="layer" :data="data[2]"/>
+			</div>
+		</div>`
 	})
 
 	// data = an array of Components to be displayed in a column

@@ -1,3 +1,122 @@
+/* body {
+    background: linear-gradient(180deg, #000000 0%, #000000 40%, #992c2c);
+    background-size: 400% 400%;
+
+    -webkit-animation: AnimationName 8s ease infinite;
+    -moz-animation: AnimationName 8s ease infinite;
+    animation: AnimationName 8s ease infinite;
+} */
+div.col.right {
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+div.col.right:has(ta):before {
+    content: "";
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    z-index: -1;
+    background-image: url('../resources/bg_ad.png');
+    transform: rotate(-5deg);
+    animation: zoop 5000ms infinite linear;
+    filter: brightness(0.4) saturate(30%);
+}
+
+div.col.right:has(tb):before {
+    content: "";
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    z-index: -1;
+    background-image: url('../resources/bg_bd.png');
+    transform: rotate(-5deg);
+    animation: zoop 5000ms infinite linear;
+    filter: brightness(0.4) saturate(30%);
+}
+
+@keyframes zoop {
+    0% {
+        top: -50%;
+        left: -50%;
+    }
+    100% {
+        top: -74.45%;
+        left: -79.25%;
+    }
+}
+
+@-webkit-keyframes AnimationName {
+    0%{background-position:50% 0%}
+    50%{background-position:50% 50%}
+    100%{background-position:50% 0%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:50% 0%}
+    50%{background-position:50% 50%}
+    100%{background-position:50% 0%}
+}
+@keyframes AnimationName {
+    0%{background-position:50% 0%}
+    50%{background-position:50% 50%}
+    100%{background-position:50% 0%}
+}
+
+/* Dimension information */
+div.antimatter-dimension {
+    margin: 0;
+    justify-content: space-around;
+}
+
+div.upgCol div:nth-child(even) div.antimatter-dimension {
+    background-color: #0002;
+}
+
+div.autobuyer {
+    border: 2px solid white;
+    border-radius: 4px;
+    padding: 4px;
+    margin-bottom: 8px;
+    background: #111;
+}
+
+div.dimension-title {
+    width: 150px;
+    text-align: left;
+    margin: auto 0;
+    font-size: 10pt;
+    display: flex;
+    flex-direction: column;
+}
+
+div.dimension-title.wide {
+    width: 200px;
+}
+
+div.dimension-title > span {
+    margin: 0;
+    text-align: left;
+}
+
+div.dimension-title > span:first-child {
+    font-weight: bold;
+}
+
+div.dimension-title > span:not(:first-child) {
+    color: silver;
+}
+
+div.dimension-amount {
+    font-size: 12pt;
+    margin: auto 0;
+    width: 250px;
+}
+
+
 span.g {
     color:#d676d6;
     font-size:20px;

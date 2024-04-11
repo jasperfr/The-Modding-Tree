@@ -1,11 +1,7 @@
 function isDevBuild() { return VERSION.num.endsWith('dev') }
 
 function resetPoints() {
-	if(player.infinity.unlocked) {
-		player.points = new Decimal(100);
-	} else {
-		player.points = new Decimal(10);
-	}
+	player.points = new Decimal(10);
 }
 
 let modInfo = {
@@ -15,24 +11,21 @@ let modInfo = {
 	pointsName: "antimatter",
 	modFiles: [
 		'tree.js',
-		'layers/misc/elements.js',
+		// 'layers/misc/elements.js',
 		'layers/antimatter.js',
-		'layers/booster.js',
-		'layers/galaxy.js',
-		'layers/galaxy-extended.js',
-		'layers/infinity.js',
-		'layers/chroma.js',
-		'layers/duplicanti.js',
+		'layers/boost.js',
+		// 'layers/galaxy.js',
+		// 'layers/galaxy-extended.js',
+		// 'layers/infinity.js',
+		// 'layers/chroma.js',
+		// 'layers/duplicanti.js',
 
-		'layers/challenges/true-antimatter.js',
-		'layers/challenges/2048.js',
-		'layers/challenges/decrementy.js',
-
-		'layers/misc/crunch.js',
+		// 'layers/challenges/true-antimatter.js',
+		// 'layers/challenges/2048.js',
+		// 'layers/challenges/decrementy.js',
 
 		'layers/side/achievements.js',
-		'layers/side/saves.js',
-		'layers/side/debugger.js'
+		'layers/side/autobuyers.js',
 		
 	],
 	discordName: "",
@@ -137,35 +130,17 @@ function canGenPoints(){
 // Calculate points/sec!
 function getPointGen() {
 	if(!canGenPoints())
-		return new Decimal(0)
+		return new Decimal(0);
 
-	if(inChallenge('infinity', 11)) {
-        let shiftCount = getBuyableAmount('ta', 'shiftboost').toNumber();
-		let gain = player.ta.dimensions[0]
-		.times(tmp.ta.tickspeed.multiplier)
-		.times(tmp.ta.buyables['dimension-1'].multiplier)
-		.times(2 ** shiftCount)
-		.times(1.05 ** player.ach.achievements.length)
-		.times(10);
-		return gain;
-	}
-
-	let gain = player.ad.dimensions[0]
-		.times(tmp.ad.buyables['dimension-1'].multiplier)
-		.times(tmp.ad.tickspeed.multiplier)
-		.times(2 ** player.ad.shifts)
-		.times(hasUpgrade('infinity', 'boostTimePlayed') ? upgradeEffect('infinity', 'boostTimePlayed') : 1.0)
-		.times(hasAchievement('ach', 29) ? 1.1 : 1.0)
-		.times(tmp.g.multiplier)
-		.times(inChallenge('infinity', 21) ? 1.0 : tmp.bd.power.multiplier)
-		.div(tmp.ad.matter.divider)
-		.times(tmp.d.decrementy.effectAD)
-		.times(1.05 ** player.ach.achievements.length)
-		.times(hasUpgrade('infinity', 'x1e10Boost') ? 1e10 : 1)
-		.times(tmp.infinity.buyables[6].effect)
-		.times(tmp.infinity.power.multiplier)
+	let gain = player.a.dimensions[0]
+		.times(getAntimatterDimensionMultiplier(1))
+		// .times(tmp.a.buyables['dimension-1'].multiplier)
+		// .times(tmp.a.tickspeed.multiplier)
+		// .times(2 ** player.a.shifts)
+		// .times(hasAchievement('ach', 29) ? 1.1 : 1.0)
+		// .times(1.05 ** player.ach.achievements.length)
 	
-	return gain
+	return gain;
 }
 
 // You can add non-layer related variables that should to into "player" and be saved here, along with default values
@@ -180,10 +155,8 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.infinity.points.gte(4096);
+	return false;
 }
-
-
 
 // Less important things beyond this point!
 
